@@ -1,6 +1,7 @@
 package io.fire.core.common.events.objects;
 
 import io.fire.core.common.events.interfaces.EventPayload;
+
 import lombok.Getter;
 
 public class Event {

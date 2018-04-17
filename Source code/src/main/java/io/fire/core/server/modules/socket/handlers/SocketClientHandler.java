@@ -11,6 +11,7 @@ import io.fire.core.common.packets.UpdateByteArraySize;
 import io.fire.core.server.FireIoServer;
 import io.fire.core.server.modules.client.objects.ClientInfo;
 import io.fire.core.server.modules.socket.interfaces.SocketEvents;
+
 import lombok.Getter;
 
 import java.io.IOException;
@@ -35,7 +36,7 @@ public class SocketClientHandler extends SerialReader implements SocketEvents {
     @Getter private boolean open = true;
     @Getter private Date initiated = new Date();
 
-    public SocketClientHandler(FireIoServer server, Socket socket, SocketChannel channel) {
+    SocketClientHandler(FireIoServer server, Socket socket, SocketChannel channel) {
         this.server = server;
         this.socket = socket;
         this.channel = channel;

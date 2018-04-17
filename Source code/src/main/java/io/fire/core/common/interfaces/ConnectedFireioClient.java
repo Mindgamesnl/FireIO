@@ -4,8 +4,8 @@ import java.util.UUID;
 
 public interface ConnectedFireioClient {
 
-    public void send(String channel, String message);
-    public void send(String channel, Packet packet);
-    public UUID getId();
+    void send(String channel, String message);
+    void send(String channel, Packet packet);
+    UUID getId();
 
 }

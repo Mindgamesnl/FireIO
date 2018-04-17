@@ -26,8 +26,6 @@ public class AsyncConnectionHandler extends SerialReader implements SocketEvents
 
     private UUID identifier;
     private FireIoClient client;
-    private boolean authenticated = false;
-    private boolean running = true;
     private Queue<Packet> missedPackets = new LinkedList<>();
     private boolean exptectedClosing = false;
     private IoReader ioReader;
@@ -53,7 +51,6 @@ public class AsyncConnectionHandler extends SerialReader implements SocketEvents
 
         } catch (IOException e) {
             client.getEventHandler().fireEvent(Event.CLOSED_UNEXPECTEDLY, new ReceivedText("Connection timed out! (could not initiate handshake)" ,null));
-            return;
         }
 
     }
@@ -94,7 +91,6 @@ public class AsyncConnectionHandler extends SerialReader implements SocketEvents
     public void close() {
         try {
             emit(new PrepareClosingConnection());
-            running = false;
             socketChannel.close();
             reader.stop();
         } catch (IOException e) {
@@ -105,7 +101,6 @@ public class AsyncConnectionHandler extends SerialReader implements SocketEvents
     @Override
     public void onPacket(Packet packet) {
         if (packet instanceof FinishHandshake) {
-            authenticated = true;
             client.getEventHandler().fireEvent(Event.CONNECT, null);
             while (missedPackets.size() != 0) {
                 Packet p = missedPackets.peek();
@@ -118,23 +113,19 @@ public class AsyncConnectionHandler extends SerialReader implements SocketEvents
                 missedPackets.remove(p);
             }
         }
-
         if (packet instanceof PrepareClosingConnection) {
             exptectedClosing = true;
             return;
         }
-
         if (packet instanceof UpdateByteArraySize) {
             ioReader.setBufferSize(((UpdateByteArraySize) packet).getSize());
             return;
         }
-
         if (packet instanceof ChannelPacketPacket) {
             ChannelPacketPacket packetPacket = (ChannelPacketPacket) packet;
             client.getEventHandler().fireEvent(packetPacket.getChannel(), packetPacket);
             return;
         }
-
         if (packet instanceof ChannelMessagePacket) {
             ChannelMessagePacket message = (ChannelMessagePacket) packet;
             client.getEventHandler().fireEvent(message.getChannel(), new ReceivedText(message.getText(), null));
@@ -155,7 +146,6 @@ public class AsyncConnectionHandler extends SerialReader implements SocketEvents
     @Override
     public void onOpen() {
         exptectedClosing = false;
-        authenticated = false;
     }
 
     @Override

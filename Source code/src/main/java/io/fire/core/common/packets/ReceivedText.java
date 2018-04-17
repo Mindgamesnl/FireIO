@@ -2,6 +2,7 @@ package io.fire.core.common.packets;
 
 import io.fire.core.common.events.interfaces.EventPayload;
 import io.fire.core.server.modules.client.superclasses.Client;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 

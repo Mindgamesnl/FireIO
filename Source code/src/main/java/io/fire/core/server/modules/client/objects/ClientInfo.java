@@ -1,6 +1,7 @@
 package io.fire.core.server.modules.client.objects;
 
 import io.fire.core.common.interfaces.ClientMeta;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

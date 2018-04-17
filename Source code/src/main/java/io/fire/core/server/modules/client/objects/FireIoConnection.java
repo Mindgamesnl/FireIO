@@ -1,6 +1,5 @@
 package io.fire.core.server.modules.client.objects;
 
-import io.fire.core.client.FireIoClient;
 import io.fire.core.common.interfaces.ClientMeta;
 import io.fire.core.common.interfaces.Packet;
 import io.fire.core.common.packets.ChannelMessagePacket;
@@ -10,6 +9,7 @@ import io.fire.core.server.FireIoServer;
 import io.fire.core.server.modules.client.superclasses.Client;
 import io.fire.core.common.events.enums.Event;
 import io.fire.core.server.modules.socket.handlers.SocketClientHandler;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -19,12 +19,11 @@ import java.util.UUID;
 public class FireIoConnection extends Client {
 
     @Getter private SocketClientHandler handler;
-    private UUID uuid = UUID.randomUUID();
     private FireIoServer server;
     @Setter private ClientInfo info;
 
     public FireIoConnection(FireIoServer server) {
-        setId(uuid);
+        setId(UUID.randomUUID());
         this.server = server;
     }
 
@@ -81,7 +80,6 @@ public class FireIoConnection extends Client {
         handler.onMessage(packet -> {
             if (packet instanceof ChannelMessagePacket) {
                 ChannelMessagePacket messagePacket = (ChannelMessagePacket) packet;
-                Client me = this;
                 server.getEventHandler().fireEvent(
                         messagePacket.getChannel(),
                         new ReceivedText(messagePacket.getText(),

@@ -5,6 +5,7 @@ import io.fire.core.common.interfaces.ClientMeta;
 import io.fire.core.common.interfaces.ConnectedFireioClient;
 import io.fire.core.common.interfaces.Packet;
 import io.fire.core.server.modules.client.objects.ClientInfo;
+
 import lombok.Data;
 
 import java.util.UUID;

@@ -6,18 +6,13 @@ import io.fire.core.common.events.enums.Event;
 import io.fire.core.common.interfaces.Packet;
 import io.fire.core.common.interfaces.SerialReader;
 import io.fire.core.common.packets.ReceivedText;
+
 import lombok.Getter;
 import lombok.Setter;
 
 import java.io.IOException;
-import java.net.Socket;
-import java.net.SocketAddress;
 import java.nio.ByteBuffer;
-import java.nio.channels.SelectionKey;
-import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
-import java.util.Iterator;
-import java.util.Set;
 
 public class IoReader extends SerialReader implements Runnable {
 
@@ -47,8 +42,6 @@ public class IoReader extends SerialReader implements Runnable {
                 }
 
                 if (numRead == -1) {
-                    Socket socket = channel.socket();
-                    SocketAddress remoteAddr = socket.getRemoteSocketAddress();
                     asyncConnectionHandler.onClose();
                     client.getEventHandler().fireEvent(Event.CLOSED_UNEXPECTEDLY, new ReceivedText("Connection timed out! (invalid data)" ,null));
                     channel.close();
@@ -57,7 +50,6 @@ public class IoReader extends SerialReader implements Runnable {
 
                 byte[] data = new byte[numRead];
                 System.arraycopy(buffer.array(), 0, data, 0, numRead);
-                SocketAddress remoteAddr = channel.socket().getRemoteSocketAddress();
                 Packet[] packets = fromString(new String(data));
                 for (Packet p : packets) {
                     asyncConnectionHandler.onPacket(p);

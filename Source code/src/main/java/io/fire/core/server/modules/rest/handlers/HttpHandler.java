@@ -24,7 +24,7 @@ public class HttpHandler implements com.sun.net.httpserver.HttpHandler {
         Date now = new Date();
         //clean old
         for (String h : requestHistory.keySet()) {
-            if (h != httpExchange.getRemoteAddress().getHostName()) {
+            if (!h.equals(httpExchange.getRemoteAddress().getHostName())) {
                 if (diff(requestHistory.get(httpExchange.getRemoteAddress().getHostName()), now) > 2) {
                     requestHistory.remove(h);
                 }
@@ -66,7 +66,7 @@ public class HttpHandler implements com.sun.net.httpserver.HttpHandler {
         os.close();
     }
 
-    public int diff(Date a, Date b) {
+    private int diff(Date a, Date b) {
         int optiona = (a.getSeconds() - b.getSeconds());
         int optionb = (b.getSeconds() - a.getSeconds());
 

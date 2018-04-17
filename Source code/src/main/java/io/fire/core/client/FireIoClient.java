@@ -10,6 +10,7 @@ import io.fire.core.common.interfaces.Packet;
 import io.fire.core.common.packets.ChannelMessagePacket;
 import io.fire.core.common.packets.ChannelPacketPacket;
 import io.fire.core.common.packets.ReceivedText;
+
 import lombok.Getter;
 
 import java.io.IOException;
@@ -24,20 +25,17 @@ public class FireIoClient {
 
     private String host;
     private int port;
-    private UUID id;
     private int connectAttampt = 0;
     private Timer scheduler = new Timer();
     private Map<String, String> connectionArguments = new HashMap<>();
-    private Map<String, ClientMeta> argumentsMeta;
+    private Map<String, ClientMeta> connectionMeta = new HashMap<>();
 
     public FireIoClient(String host, int port) {
         this.port = port;
         this.host = host;
-        restModule = new RestModule(this, host, (port +1));
+        restModule = new RestModule(host, (port +1));
 
-        eventHandler.on(Event.CONNECT, a-> {
-            connectAttampt = 0;
-        });
+        eventHandler.on(Event.CONNECT, a-> connectAttampt = 0);
     }
 
     public FireIoClient setPassword(String password) {
@@ -70,40 +68,31 @@ public class FireIoClient {
     }
 
     public FireIoClient setMeta(String s, ClientMeta meta) {
-        argumentsMeta.put(s, meta);
+        connectionMeta.put(s, meta);
         return this;
     }
 
     public FireIoClient connect() {
         System.out.println("[FireIO] starting client & requesting token");
-
         String a = restModule.getToken();
-
         if (a == null) {
             getEventHandler().fireEvent(Event.CLOSED_UNEXPECTEDLY, new ReceivedText("Failed to get api key" ,null));
             return this;
         }
-
         if (a.equals("ratelimit")) {
             getEventHandler().fireEvent(Event.CLOSED_UNEXPECTEDLY, new ReceivedText("Connection blocked by ratelimiter" ,null));
             return this;
         }
-
         if (a.equals("fail-auth")) {
             getEventHandler().fireEvent(Event.CLOSED_UNEXPECTEDLY, new ReceivedText("Failed to authenticate, is your password correct?" ,null));
             return this;
         }
-
         UUID b = UUID.fromString(a);
-
         if (b == null) {
             getEventHandler().fireEvent(Event.CLOSED_UNEXPECTEDLY, new ReceivedText("Failed to parse api key" ,null));
             return this;
         }
-
-        id = b;
-
-        socketModule = new SocketModule(this, host, port, id, connectionArguments, argumentsMeta);
+        socketModule = new SocketModule(this, host, port, b, connectionArguments, connectionMeta);
         return this;
     }
 

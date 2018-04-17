@@ -1,21 +1,18 @@
 package io.fire.core.client.modules.rest;
 
-import io.fire.core.client.FireIoClient;
 import lombok.Setter;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.UUID;
 
 public class RestModule {
 
-    private FireIoClient client;
     private String path;
     @Setter private String password = null;
 
-    public RestModule(FireIoClient client, String host, int port) {
+    public RestModule(String host, int port) {
         path = "http://" + host + ":" + port + "/";
     }
 

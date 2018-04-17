@@ -4,6 +4,4 @@ import io.fire.core.common.events.interfaces.EventPayload;
 
 import java.io.Serializable;
 
-public abstract class Packet implements EventPayload, Serializable {
-
-}
+public abstract class Packet implements EventPayload, Serializable {}

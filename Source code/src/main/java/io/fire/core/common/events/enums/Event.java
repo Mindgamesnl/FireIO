@@ -4,7 +4,6 @@ public enum Event {
 
     CONNECT,
     DISCONNECT,
-    CLOSED_UNEXPECTEDLY,
-    ALL
+    CLOSED_UNEXPECTEDLY
 
 }

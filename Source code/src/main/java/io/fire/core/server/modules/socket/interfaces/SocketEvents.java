@@ -4,8 +4,8 @@ import io.fire.core.common.interfaces.Packet;
 
 public interface SocketEvents {
 
-    public void onPacket(Packet packet);
-    public void onClose();
-    public void onOpen();
+    void onPacket(Packet packet);
+    void onClose();
+    void onOpen();
 
 }

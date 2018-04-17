@@ -19,8 +19,6 @@ import java.util.UUID;
 
 public class FireIoServer {
 
-    private int port;
-
     //modules
     @Getter private SocketModule socketModule;
     @Getter private RestModule restModule;
@@ -28,7 +26,6 @@ public class FireIoServer {
     @Getter private EventHandler eventHandler;
 
     public FireIoServer(int port) throws IOException {
-        this.port = port;
         eventHandler = new EventHandler();
         clientModule = new ClientModule(this);
         restModule = new RestModule(this, (port + 1));

@@ -1,6 +1,7 @@
 package io.fire.core.server.modules.rest;
 
 import com.sun.net.httpserver.HttpServer;
+
 import io.fire.core.server.FireIoServer;
 import io.fire.core.server.modules.rest.handlers.HttpHandler;
 

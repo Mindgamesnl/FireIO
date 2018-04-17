@@ -27,7 +27,7 @@ public class SelectorHandler extends SerialReader implements Runnable {
     public SelectorHandler(FireIoServer server, Selector selector) {
         this.server = server;
         this.selector = selector;
-        this.clientManager = new ClientManager(server);
+        this.clientManager = new ClientManager();
     }
 
     @Override
