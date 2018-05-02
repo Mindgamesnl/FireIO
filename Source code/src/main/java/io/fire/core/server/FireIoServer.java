@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class FireIoServer {
 
@@ -46,20 +47,13 @@ public class FireIoServer {
     }
 
     public Client getClientByTag(String key, String value) {
-        for (FireIoConnection client : clientModule.getAll()) {
-            if (client.getInfo().getArguments().containsKey(key)
-                    && client.getInfo().getArguments().get(key).equals(value)) return client;
-        }
-        return null;
+        return clientModule.getAll().stream().filter(client -> client.getInfo().getArguments().containsKey(key)
+                && client.getInfo().getArguments().get(key).equals(value)).findFirst().orElse(null);
     }
 
     public List<Client> getClientsByTag(String key, String value) {
-        List<Client> clients = new ArrayList<>();
-        for (FireIoConnection client : clientModule.getAll()) {
-            if (client.getInfo().getArguments().containsKey(key)
-                    && client.getInfo().getArguments().get(key).equals(value)) clients.add(client);
-        }
-        return clients;
+        return clientModule.getAll().stream().filter(client -> client.getInfo().getArguments().containsKey(key)
+                && client.getInfo().getArguments().get(key).equals(value)).collect(Collectors.toList());
     }
 
     public FireIoServer setPassword(String password) {
@@ -68,9 +62,7 @@ public class FireIoServer {
     }
 
     public FireIoServer broadcast(String channel, Packet packet) {
-        for (Client c : clientModule.connectionMap.values()) {
-            c.send(channel, packet);
-        }
+        clientModule.connectionMap.values().forEach(c -> c.send(channel, packet));
         return this;
     }
 
@@ -80,9 +72,7 @@ public class FireIoServer {
     }
 
     public FireIoServer broadcast(String channel, String message) {
-        for (Client c : clientModule.connectionMap.values()) {
-            c.send(channel, message);
-        }
+        clientModule.connectionMap.values().forEach(c -> c.send(channel, message));
         return this;
     }
 

@@ -2,7 +2,7 @@
   <img src="http://static.craftmend.com/fireio/FIREIO.png" />
 </p>
 
-# FireIo, a simple ASYNC java socket [![](https://jitpack.io/v/Mindgamesnl/FireIO.svg)](https://jitpack.io/#Mindgamesnl/FireIO) [![Build Status](https://travis-ci.org/Mindgamesnl/FireIO.svg?branch=master)](https://travis-ci.org/Mindgamesnl/FireIO) [![GitHub version](https://d25lcipzij17d.cloudfront.net/badge.svg?id=gh&type=6&v=1.0.1&x2=0)](https://github.com/Mindgamesnl/FireIO) [![Open Source Love](https://badges.frapsoft.com/os/v3/open-source.svg?v=102)](https://github.com/ellerbrock/open-source-badge/)
+# FireIo, a simple networking framework [![](https://jitpack.io/v/Mindgamesnl/FireIO.svg)](https://jitpack.io/#Mindgamesnl/FireIO) [![Build Status](https://travis-ci.org/Mindgamesnl/FireIO.svg?branch=master)](https://travis-ci.org/Mindgamesnl/FireIO) [![GitHub version](https://d25lcipzij17d.cloudfront.net/badge.svg?id=gh&type=6&v=1.0.1&x2=0)](https://github.com/Mindgamesnl/FireIO)
 
 Fire-IO is a lightning fast and super simple socket framework to handle your connections, data, clients and requests.
 
@@ -18,12 +18,15 @@ Features include:
  - Password protection for your network
  - Easy to use event system
  - Async networking
+ - Android compatible
  
-Fire-IO is designed for server-to-server data transfer for real time updates, push notifications and promise like data requests.
+Fire-IO is designed for server-to-server data transfer for real time updates, push notifications, logging, monitoring and promise like data requests.
+
+
 
 # Example code
 
-Here is a simple example setup with a server, a custom packet, two way data comunication and a non blocking data request with callback
+Here is a simple example setup with a server, client, a custom packet, two way data comunication and a non blocking data request with callback
 
 ##### Example server
 ```java
