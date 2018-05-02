@@ -9,12 +9,10 @@ import io.fire.core.common.events.interfaces.Listener;
 import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ConcurrentMap;
 
 @NoArgsConstructor
 public class EventHandler {

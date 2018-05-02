@@ -4,10 +4,7 @@ import io.fire.core.common.events.enums.Event;
 import io.fire.core.common.events.interfaces.Listener;
 import io.fire.core.common.interfaces.Packet;
 import io.fire.core.common.interfaces.SerialReader;
-import io.fire.core.common.packets.AuthPacket;
-import io.fire.core.common.packets.FinishHandshake;
-import io.fire.core.common.packets.PrepareClosingConnection;
-import io.fire.core.common.packets.UpdateByteArraySize;
+import io.fire.core.common.packets.*;
 import io.fire.core.server.FireIoServer;
 import io.fire.core.server.modules.client.objects.ClientInfo;
 import io.fire.core.server.modules.socket.interfaces.SocketEvents;
@@ -33,8 +30,10 @@ public class SocketClientHandler extends SerialReader implements SocketEvents {
     private Queue<Packet> missedPackets = new LinkedList<>();
     private UUID connectionId;
     private boolean exptectedClosing = false;
-    @Getter private boolean open = true;
-    @Getter private Date initiated = new Date();
+    @Getter
+    private boolean open = true;
+    @Getter
+    private Date initiated = new Date();
 
     SocketClientHandler(FireIoServer server, Socket socket, SocketChannel channel) {
         this.server = server;
@@ -138,7 +137,11 @@ public class SocketClientHandler extends SerialReader implements SocketEvents {
             return;
         }
 
-
+        if (packet instanceof SubmitRequestPacket) {
+            SubmitRequestPacket submitRequestPacket = (SubmitRequestPacket) packet;
+            server.getRequestModule().trigger(submitRequestPacket.getId(), submitRequestPacket.getPayload(), server.getClient(connectionId), submitRequestPacket.getRequestId());
+            return;
+        }
 
         if (listener != null) listener.call(packet);
     }

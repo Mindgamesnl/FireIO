@@ -1,5 +1,6 @@
 import io.fire.core.client.FireIoClient;
 import io.fire.core.common.events.enums.Event;
+import io.fire.core.common.objects.RequestString;
 import io.fire.core.common.packets.ReceivedText;
 
 public class testclient {
@@ -14,6 +15,13 @@ public class testclient {
 
         client.on(Event.CONNECT, a -> {
             System.out.println("Connected with the server!");
+
+            //submit a non-blocking request for data
+            client.request("whoami", null, response -> {
+                String result = ((RequestString) response).getString();
+                System.out.println("The server told me that i am: " + result);
+            });
+
         })
 
                 .on(Event.DISCONNECT, a -> {
@@ -31,6 +39,8 @@ public class testclient {
                 .on("thanks", eventPayload -> {
                     System.out.println("The server thanked you for your cookies");
                 });
+
+
 
         //debug;
         client.getEventHandler().on(gl -> {

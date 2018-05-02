@@ -1,3 +1,4 @@
+import io.fire.core.common.objects.RequestString;
 import io.fire.core.common.packets.ChannelPacketPacket;
 import io.fire.core.common.events.enums.Event;
 import io.fire.core.server.FireIoServer;
@@ -43,6 +44,14 @@ public class testserver {
                         //thank the client for the cookies
                         receivedPacket.getSender().send("thanks", "thanks");
                     });
+
+
+            //simple request based endpoint
+            server.onRequest("whoami", (client, request, response) -> {
+                System.out.println(client.getId().toString() + " asked who it is! sending ip back");
+                response.complete(new RequestString("You are: " + client.getInfo().getHostname()));
+            });
+
 
             //debug;
             server.getEventHandler().on(gl -> {

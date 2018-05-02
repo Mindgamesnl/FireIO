@@ -113,19 +113,29 @@ public class AsyncConnectionHandler extends SerialReader implements SocketEvents
                 missedPackets.remove(p);
             }
         }
+
         if (packet instanceof PrepareClosingConnection) {
             exptectedClosing = true;
             return;
         }
+
+        if (packet instanceof CompleteRequestPacket) {
+            CompleteRequestPacket cpr = (CompleteRequestPacket) packet;
+            client.getClientRequestModule().handleRequestResponse(cpr.getRequestId(), cpr.getResult());
+            return;
+        }
+
         if (packet instanceof UpdateByteArraySize) {
             ioReader.setBufferSize(((UpdateByteArraySize) packet).getSize());
             return;
         }
+
         if (packet instanceof ChannelPacketPacket) {
             ChannelPacketPacket packetPacket = (ChannelPacketPacket) packet;
             client.getEventHandler().fireEvent(packetPacket.getChannel(), packetPacket);
             return;
         }
+
         if (packet instanceof ChannelMessagePacket) {
             ChannelMessagePacket message = (ChannelMessagePacket) packet;
             client.getEventHandler().fireEvent(message.getChannel(), new ReceivedText(message.getText(), null));

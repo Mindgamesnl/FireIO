@@ -1,5 +1,7 @@
 package io.fire.core.client;
 
+import io.fire.core.client.modules.request.ClientRequestModule;
+import io.fire.core.client.modules.request.interfaces.ClientRequest;
 import io.fire.core.client.modules.rest.RestModule;
 import io.fire.core.client.modules.socket.SocketModule;
 import io.fire.core.common.events.EventHandler;
@@ -7,6 +9,7 @@ import io.fire.core.common.events.enums.Event;
 import io.fire.core.common.events.interfaces.Listener;
 import io.fire.core.common.interfaces.ClientMeta;
 import io.fire.core.common.interfaces.Packet;
+import io.fire.core.common.interfaces.RequestBody;
 import io.fire.core.common.packets.ChannelMessagePacket;
 import io.fire.core.common.packets.ChannelPacketPacket;
 import io.fire.core.common.packets.ReceivedText;
@@ -22,6 +25,7 @@ public class FireIoClient {
     @Getter private SocketModule socketModule;
     @Getter private RestModule restModule;
     @Getter private EventHandler eventHandler = new EventHandler();
+    @Getter private ClientRequestModule clientRequestModule;
 
     private String host;
     private int port;
@@ -34,6 +38,8 @@ public class FireIoClient {
         this.port = port;
         this.host = host;
         restModule = new RestModule(host, (port +1));
+
+        clientRequestModule = new ClientRequestModule(this);
 
         eventHandler.on(Event.CONNECT, a-> connectAttampt = 0);
     }
@@ -116,6 +122,11 @@ public class FireIoClient {
 
     public FireIoClient close() {
         socketModule.getConnection().close();
+        return this;
+    }
+
+    public FireIoClient request(String channel, RequestBody request, ClientRequest callback) {
+        clientRequestModule.createRequest(channel, request, callback);
         return this;
     }
 

@@ -7,6 +7,8 @@ import io.fire.core.common.interfaces.Packet;
 import io.fire.core.server.modules.client.ClientModule;
 import io.fire.core.server.modules.client.objects.FireIoConnection;
 import io.fire.core.server.modules.client.superclasses.Client;
+import io.fire.core.server.modules.request.RequestModule;
+import io.fire.core.server.modules.request.interfaces.RequestExecutor;
 import io.fire.core.server.modules.rest.RestModule;
 import io.fire.core.server.modules.socket.SocketModule;
 
@@ -24,12 +26,14 @@ public class FireIoServer {
     @Getter private RestModule restModule;
     @Getter private ClientModule clientModule;
     @Getter private EventHandler eventHandler;
+    @Getter private RequestModule requestModule;
 
     public FireIoServer(int port) throws IOException {
         eventHandler = new EventHandler();
         clientModule = new ClientModule(this);
         restModule = new RestModule(this, (port + 1));
         socketModule = new SocketModule(this, port);
+        requestModule = new RequestModule(this);
     }
 
     public FireIoServer on(Event e, Listener r) {
@@ -67,6 +71,11 @@ public class FireIoServer {
         for (Client c : clientModule.connectionMap.values()) {
             c.send(channel, packet);
         }
+        return this;
+    }
+
+    public FireIoServer onRequest(String type, RequestExecutor executor) {
+        requestModule.register(type, executor);
         return this;
     }
 

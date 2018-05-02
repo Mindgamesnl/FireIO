@@ -4,16 +4,28 @@
 
 # FireIo, a simple ASYNC java socket [![](https://jitpack.io/v/Mindgamesnl/FireIO.svg)](https://jitpack.io/#Mindgamesnl/FireIO) [![Build Status](https://travis-ci.org/Mindgamesnl/FireIO.svg?branch=master)](https://travis-ci.org/Mindgamesnl/FireIO) [![GitHub version](https://d25lcipzij17d.cloudfront.net/badge.svg?id=gh&type=6&v=1.0.1&x2=0)](https://github.com/Mindgamesnl/FireIO) [![Open Source Love](https://badges.frapsoft.com/os/v3/open-source.svg?v=102)](https://github.com/ellerbrock/open-source-badge/)
 
-FireIO is a simple java socket solution with multi client support and easy to use networking channels
+Fire-IO is a lightning fast and super simple socket framework to handle your connections, data, clients and requests.
 
-in layman’s terms, object thingy goes in, object thingy comes out
+Features include:
+ - Channel based networking
+ - Send objects or strings
+ - Non-blocking async data requests with callback
+ - Client manager
+ - Authentication
+ - REST based handshake
+ - Auto re-connect
+ - Packet-loss prevention
+ - Password protection for your network
+ - Easy to use event system
+ - Async networking
+ 
+Fire-IO is designed for server-to-server data transfer for real time updates, push notifications and promise like data requests.
 
-# Why fireio
-FireIO is a simple socket system for server-to-server communication as a stand-alone replacement for systems like redis's pub-sub.
+# Example code
 
-And i was super bored on the plane and thus made this
+Here is a simple example setup with a server, a custom packet, two way data comunication and a non blocking data request with callback
 
-# Example server
+##### Example server
 ```java
 FireIoServer server = new FireIoServer(80)
         .setPassword("testpassword1") //OPTIONAL: password
@@ -49,11 +61,18 @@ FireIoServer server = new FireIoServer(80)
 
 server.broadcast("message", "welcome everybody!");
 
+//simple request based endpoint
+server.onRequest("whoami", (client, request, response) -> {
+    System.out.println(client.getId().toString() + " asked who it is! sending ip back");
+    response.complete(new RequestString("You are: " + client.getInfo().getHostname()));
+});
+
+
 //Client client = server.getClient(UUID.fromString("067e6162-3b6f-4ae2-a171-2470b63dff00"));
 //client.send("message", "well hi there! you are the best.");
 ```
 
-# Example client
+##### Example client
 ```java
 FireIoClient client = new FireIoClient("localhost", 80) //host & port
         .setPassword("testpassword1") //OPTIONAL: password
@@ -63,6 +82,13 @@ FireIoClient client = new FireIoClient("localhost", 80) //host & port
 
 client.on(Event.CONNECT, a -> {
             System.out.println("Connected with the server!");
+
+            //submit a non-blocking request for data
+            client.request("whoami", null, response -> {
+                String result = ((RequestString) response).getString();
+                System.out.println("The server told me that i am: " + result);
+            });
+
         })
 
         .on(Event.DISCONNECT, a -> {
@@ -82,7 +108,7 @@ client.on(Event.CONNECT, a -> {
         });
 ```
 
-# Example custom packet (object)
+##### Example custom packet (object)
 ```java
 public class CookieJar extends Packet {
     private int amount = 0;
