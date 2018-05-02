@@ -114,7 +114,13 @@ public class CookieJar extends Packet {
     private int amount = 0;
     private String type;
 }
+```
 
+##### Example requst data (object)
+```java
+public class RequestString implements RequestBody {
+    private String string;
+}
 ```
 
 # Maven
