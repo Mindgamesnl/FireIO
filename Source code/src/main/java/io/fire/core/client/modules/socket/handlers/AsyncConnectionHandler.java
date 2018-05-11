@@ -2,8 +2,8 @@ package io.fire.core.client.modules.socket.handlers;
 
 import io.fire.core.client.FireIoClient;
 import io.fire.core.client.modules.socket.reader.IoReader;
-import io.fire.core.common.events.enums.Event;
-import io.fire.core.common.events.interfaces.EventPayload;
+import io.fire.core.common.eventmanager.enums.Event;
+import io.fire.core.common.eventmanager.interfaces.EventPayload;
 import io.fire.core.common.interfaces.ClientMeta;
 import io.fire.core.common.interfaces.ConnectedFireioClient;
 import io.fire.core.common.interfaces.Packet;
@@ -16,10 +16,7 @@ import java.net.InetSocketAddress;
 
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Queue;
-import java.util.UUID;
+import java.util.*;
 
 
 public class AsyncConnectionHandler extends SerialReader implements SocketEvents, EventPayload, ConnectedFireioClient {
@@ -34,6 +31,8 @@ public class AsyncConnectionHandler extends SerialReader implements SocketEvents
 
     private String host;
     private int port;
+
+    private List<Packet> bufferedPackets = new ArrayList<>();
 
     //socket stuffs
     private SocketChannel socketChannel;
@@ -58,7 +57,7 @@ public class AsyncConnectionHandler extends SerialReader implements SocketEvents
     private void connect() throws IOException {
         socketChannel = SocketChannel.open(new InetSocketAddress(host, port));
         if (reader != null && reader.isAlive()) reader.stop();
-        ioReader = new IoReader(socketChannel, 1024, this, client);
+        ioReader = new IoReader(socketChannel, 5120, this, client);
         reader = new Thread(ioReader);
         reader.start();
         emit(new AuthPacket(identifier.toString(), System.getProperty("os.name"), arguments, argumentsMeta));
@@ -71,8 +70,9 @@ public class AsyncConnectionHandler extends SerialReader implements SocketEvents
             if (ioReader.getBufferSize() < out.getBytes().length) {
                 ioReader.setBufferSize(out.getBytes().length);
                 emit(new UpdateByteArraySize(out.getBytes().length));
+                bufferedPackets.add(p);
+                return;
             }
-
 
             ByteBuffer buffer = ByteBuffer.allocate(out.getBytes().length);
             buffer.put(out.getBytes());
@@ -127,6 +127,19 @@ public class AsyncConnectionHandler extends SerialReader implements SocketEvents
 
         if (packet instanceof UpdateByteArraySize) {
             ioReader.setBufferSize(((UpdateByteArraySize) packet).getSize());
+
+            for (Packet bp : bufferedPackets) {
+                String out = toString(bp);
+                if (ioReader.getBufferSize() >= out.getBytes().length) {
+                    try {
+                        emit(bp);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    return;
+                }
+            }
+            bufferedPackets.clear();
             return;
         }
 

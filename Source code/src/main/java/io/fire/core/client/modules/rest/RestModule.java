@@ -28,6 +28,7 @@ public class RestModule {
             in.close();
             return response.toString();
         } catch (Exception e) {
+            e.printStackTrace();
             return null;
         }
     }

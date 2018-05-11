@@ -1,6 +1,6 @@
-package io.fire.core.common.events.objects;
+package io.fire.core.common.eventmanager.objects;
 
-import io.fire.core.common.events.interfaces.EventPayload;
+import io.fire.core.common.eventmanager.interfaces.EventPayload;
 
 import lombok.Getter;
 

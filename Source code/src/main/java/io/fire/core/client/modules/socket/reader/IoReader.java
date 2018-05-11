@@ -2,7 +2,7 @@ package io.fire.core.client.modules.socket.reader;
 
 import io.fire.core.client.FireIoClient;
 import io.fire.core.client.modules.socket.handlers.AsyncConnectionHandler;
-import io.fire.core.common.events.enums.Event;
+import io.fire.core.common.eventmanager.enums.Event;
 import io.fire.core.common.interfaces.Packet;
 import io.fire.core.common.interfaces.SerialReader;
 import io.fire.core.common.packets.ReceivedText;
@@ -16,7 +16,7 @@ import java.nio.channels.SocketChannel;
 
 public class IoReader extends SerialReader implements Runnable {
 
-    @Getter @Setter private int bufferSize = 1024;
+    @Getter @Setter private int bufferSize = 5120;
     private SocketChannel channel;
     private FireIoClient client;
     private AsyncConnectionHandler asyncConnectionHandler;
@@ -56,6 +56,7 @@ public class IoReader extends SerialReader implements Runnable {
                 }
             } catch (Exception e) {
                 client.getEventHandler().fireEvent(Event.CLOSED_UNEXPECTEDLY, new ReceivedText("Invalid buffer! (" + e.getMessage() + ")" ,null));
+                e.printStackTrace();
             }
 
         }

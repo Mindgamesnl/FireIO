@@ -1,4 +1,4 @@
-package io.fire.core.common.objects;
+package io.fire.core.common.body;
 
 import io.fire.core.common.interfaces.RequestBody;
 import lombok.AllArgsConstructor;

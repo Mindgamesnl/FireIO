@@ -7,7 +7,7 @@ import io.fire.core.common.packets.ChannelPacketPacket;
 import io.fire.core.common.packets.ReceivedText;
 import io.fire.core.server.FireIoServer;
 import io.fire.core.server.modules.client.superclasses.Client;
-import io.fire.core.common.events.enums.Event;
+import io.fire.core.common.eventmanager.enums.Event;
 import io.fire.core.server.modules.socket.handlers.SocketClientHandler;
 
 import lombok.Getter;
@@ -29,7 +29,7 @@ public class FireIoConnection extends Client {
 
     @Override
     public void send(String channel, Packet packet) {
-        if (handler.authenticated && handler.isOpen()) {
+        if (handler != null && handler.authenticated && handler.isOpen()) {
             try {
                 handler.emit(new ChannelPacketPacket(null, channel, packet));
             } catch (IOException e) {

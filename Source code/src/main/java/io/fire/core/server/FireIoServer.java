@@ -1,11 +1,10 @@
 package io.fire.core.server;
 
-import io.fire.core.common.events.enums.Event;
-import io.fire.core.common.events.interfaces.Listener;
-import io.fire.core.common.events.EventHandler;
+import io.fire.core.common.eventmanager.enums.Event;
+import io.fire.core.common.eventmanager.interfaces.Listener;
+import io.fire.core.common.eventmanager.EventHandler;
 import io.fire.core.common.interfaces.Packet;
 import io.fire.core.server.modules.client.ClientModule;
-import io.fire.core.server.modules.client.objects.FireIoConnection;
 import io.fire.core.server.modules.client.superclasses.Client;
 import io.fire.core.server.modules.request.RequestModule;
 import io.fire.core.server.modules.request.interfaces.RequestExecutor;
@@ -15,7 +14,6 @@ import io.fire.core.server.modules.socket.SocketModule;
 import lombok.Getter;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -62,7 +60,11 @@ public class FireIoServer {
     }
 
     public FireIoServer broadcast(String channel, Packet packet) {
-        clientModule.connectionMap.values().forEach(c -> c.send(channel, packet));
+        clientModule.connectionMap.values().forEach(c -> {
+            if (c.getHandler() != null && c.getHandler().authenticated && c.getHandler().isOpen()) {
+                c.send(channel, packet);
+            }
+        });
         return this;
     }
 
@@ -72,7 +74,11 @@ public class FireIoServer {
     }
 
     public FireIoServer broadcast(String channel, String message) {
-        clientModule.connectionMap.values().forEach(c -> c.send(channel, message));
+        clientModule.connectionMap.values().forEach(c -> {
+            if (c.getHandler() != null && c.getHandler().authenticated && c.getHandler().isOpen()) {
+                c.send(channel, message);
+            }
+        });
         return this;
     }
 

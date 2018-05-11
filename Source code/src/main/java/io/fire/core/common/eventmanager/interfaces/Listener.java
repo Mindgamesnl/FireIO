@@ -1,4 +1,4 @@
-package io.fire.core.common.events.interfaces;
+package io.fire.core.common.eventmanager.interfaces;
 
 public interface Listener {
 

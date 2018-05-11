@@ -126,7 +126,8 @@ public class RequestString implements RequestBody {
 }
 ```
 
-# Maven
+# Dependencies
+##### Maven
 ```xml
 <repositories>
     <repository>
@@ -142,18 +143,18 @@ public class RequestString implements RequestBody {
 </dependency>
 ```
 
-# Gradle (yes, it's android compatible)
+##### Gradle
 ```
-	allprojects {
-		repositories {
-			...
-			maven { url 'https://jitpack.io' }
-		}
-	}
+allprojects {
+    repositories {
+        ...
+        maven { url 'https://jitpack.io' }
+    }
+}
 ```
 
 ```
 dependencies {
-	        compile 'com.github.Mindgamesnl:FireIO:BUILD NUMBER'
-	}
+    compile 'com.github.Mindgamesnl:FireIO:BUILD NUMBER'
+}
 ```

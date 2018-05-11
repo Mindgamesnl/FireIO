@@ -1,4 +1,4 @@
-package io.fire.core.common.android;
+package io.fire.core.common.extra;
 
 /*
  * Copyright (C) 2010 The Android Open Source Project

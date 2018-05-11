@@ -1,10 +1,10 @@
-package io.fire.core.common.events;
+package io.fire.core.common.eventmanager;
 
-import io.fire.core.common.events.enums.Event;
-import io.fire.core.common.events.interfaces.CompletePayload;
-import io.fire.core.common.events.interfaces.EventPayload;
-import io.fire.core.common.events.interfaces.GlobalListener;
-import io.fire.core.common.events.interfaces.Listener;
+import io.fire.core.common.eventmanager.enums.Event;
+import io.fire.core.common.eventmanager.interfaces.CompletePayload;
+import io.fire.core.common.eventmanager.interfaces.EventPayload;
+import io.fire.core.common.eventmanager.interfaces.GlobalListener;
+import io.fire.core.common.eventmanager.interfaces.Listener;
 
 import lombok.NoArgsConstructor;
 

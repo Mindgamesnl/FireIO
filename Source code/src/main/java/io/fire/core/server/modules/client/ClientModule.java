@@ -20,7 +20,6 @@ public class ClientModule {
 
     public FireIoConnection getClient(UUID connectionId) {
         if (!connectionMap.containsKey(connectionId)) return null;
-        if (!connectionMap.containsKey(connectionId)) return null;
         return connectionMap.get(connectionId);
     }
 

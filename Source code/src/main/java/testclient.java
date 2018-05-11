@@ -1,6 +1,6 @@
 import io.fire.core.client.FireIoClient;
-import io.fire.core.common.events.enums.Event;
-import io.fire.core.common.objects.RequestString;
+import io.fire.core.common.eventmanager.enums.Event;
+import io.fire.core.common.body.RequestString;
 import io.fire.core.common.packets.ReceivedText;
 
 public class testclient {

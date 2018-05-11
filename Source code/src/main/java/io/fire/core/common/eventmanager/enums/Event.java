@@ -1,4 +1,4 @@
-package io.fire.core.common.events.enums;
+package io.fire.core.common.eventmanager.enums;
 
 public enum Event {
 

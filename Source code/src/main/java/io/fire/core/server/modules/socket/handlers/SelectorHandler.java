@@ -20,7 +20,7 @@ public class SelectorHandler extends SerialReader implements Runnable {
 
     private FireIoServer server;
     @Getter @Setter private boolean updatedBuffer = false;
-    @Getter @Setter private Integer byteArrayLength = 1024;
+    @Getter @Setter private Integer byteArrayLength = 5120;
     private Selector selector;
     private ClientManager clientManager;
 

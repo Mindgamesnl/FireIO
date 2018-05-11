@@ -1,14 +1,16 @@
 package io.fire.core.common.interfaces;
 
-import io.fire.core.common.android.Base64;
+import io.fire.core.common.extra.Base64;
 
 import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class SerialReader {
 
     protected Packet[] fromString(String s) {
-        byte index = 0;
-        Packet[] packets = new Packet[2];
+        List<Packet> packets = new ArrayList<>();
+
 
         s = s.replaceAll("\n", "").replaceAll("\r", "");
 
@@ -17,57 +19,59 @@ public class SerialReader {
             return null;
         }
 
-        //to save otherwise dropped packets
-        String nextchar = s.substring(s.indexOf("=") + 1);
+        String[] serialPackets = s.split(".end.");
 
-        if (nextchar.startsWith("=")) {
-            nextchar = s.substring(s.indexOf("=") + 2);
-        }
+        for (String i : serialPackets) {
+            i = i.replaceAll(".end.", "");
 
-        if (nextchar != null && !nextchar.equals(s)) {
-            if ((nextchar.equals("") && !nextchar.equals("=")) || nextchar.length() > 2) {
-                s = s.replaceFirst(nextchar, "");
-                if (!(s.length() < 3)) {
-                    Packet[] pa = fromString(nextchar);
-                    if (pa != null && pa.length != 0) {
-                        packets[0] = pa[0];
-                        index++;
-                    }
-                }
+            //normal packet
+            try {
+                byte[] dataBytes = Base64.decode(i, Base64.DEFAULT);
+                final ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(dataBytes);
+                final ObjectInputStream objectInputStream = new ObjectInputStream(byteArrayInputStream);
+
+                @SuppressWarnings({"unchecked"})
+                final Packet obj = (Packet) objectInputStream.readObject();
+
+                objectInputStream.close();
+                packets.add(obj);
+            } catch (IOException e) {
+                e.printStackTrace();
+                System.err.println("UNABLE TO DECODE PACKET!!!");
+                System.err.println("Error: ");
+                e.printStackTrace();
+                System.err.println("DATA: " + s);
+            } catch (ClassNotFoundException e) {
+                System.err.println("UNABLE TO DECODE PACKET!!!");
+                System.err.println("Error: ");
+                e.printStackTrace();
+                System.err.println("DATA: " + s);
             }
         }
 
-        //normal packet
-        try {
-            byte[] dataBytes = Base64.decode(s, Base64.DEFAULT);
-            final ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(dataBytes);
-            final ObjectInputStream objectInputStream = new ObjectInputStream(byteArrayInputStream);
+        Packet[] array = new Packet[packets.size()];
+        packets.toArray(array);
 
-            @SuppressWarnings({"unchecked"})
-            final Packet obj = (Packet) objectInputStream.readObject();
-
-            objectInputStream.close();
-            packets[index] = obj;
-            return packets;
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new Error(e);
-        } catch (ClassNotFoundException e) {
-            throw new Error(e);
-        }
+        return array;
     }
 
-    protected String toString(Packet o) throws IOException {
+    protected String toString(Packet o) {
         final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         final ObjectOutputStream objectOutputStream;
         try {
             objectOutputStream = new ObjectOutputStream(byteArrayOutputStream);
             objectOutputStream.writeObject(o);
             objectOutputStream.close();
-            return Base64.encodeToString(byteArrayOutputStream.toByteArray(), Base64.DEFAULT);
+            String out = Base64.encodeToString(byteArrayOutputStream.toByteArray(), Base64.DEFAULT);
+            out += ".end.";
+            return out;
         } catch (IOException e) {
-            throw new Error(e);
+            System.err.println("UNABLE TO DECODE PACKET!!!");
+            System.err.println("Error: ");
+            e.printStackTrace();
+            System.err.println("DATA: " + o);
         }
+        return null;
     }
 
 }

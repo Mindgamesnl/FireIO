@@ -16,7 +16,7 @@ public class RestModule {
         HttpServer httpServer = HttpServer.create(new InetSocketAddress(port), 0);
         httpHandler = new HttpHandler(server);
         httpServer.createContext("/fireio/register", httpHandler);
-        httpServer.setExecutor(null);
+        httpServer.setExecutor(java.util.concurrent.Executors.newCachedThreadPool());
         httpServer.start();
     }
 

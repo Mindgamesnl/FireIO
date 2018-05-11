@@ -1,6 +1,6 @@
-package io.fire.core.common.events.interfaces;
+package io.fire.core.common.eventmanager.interfaces;
 
-import io.fire.core.common.events.enums.Event;
+import io.fire.core.common.eventmanager.enums.Event;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

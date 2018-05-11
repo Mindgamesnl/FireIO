@@ -1,7 +1,7 @@
 package io.fire.core.server.modules.socket.handlers;
 
-import io.fire.core.common.events.enums.Event;
-import io.fire.core.common.events.interfaces.Listener;
+import io.fire.core.common.eventmanager.enums.Event;
+import io.fire.core.common.eventmanager.interfaces.Listener;
 import io.fire.core.common.interfaces.Packet;
 import io.fire.core.common.interfaces.SerialReader;
 import io.fire.core.common.packets.*;
@@ -56,7 +56,7 @@ public class SocketClientHandler extends SerialReader implements SocketEvents {
     }
 
     public void emit(Packet p) throws IOException {
-        if (!authenticated) {
+        if (!authenticated && !(p instanceof UpdateByteArraySize)) {
             return;
         }
         try {
@@ -81,11 +81,7 @@ public class SocketClientHandler extends SerialReader implements SocketEvents {
 
     @Override
     public void onPacket(Packet packet) {
-        if (!authenticated) {
-            if (!(packet instanceof AuthPacket)) {
-                close();
-                return;
-            }
+        if (packet instanceof AuthPacket) {
             UUID parsed = UUID.fromString(((AuthPacket) packet).getUuid());
             if (parsed == null) {
                 close();
@@ -125,10 +121,22 @@ public class SocketClientHandler extends SerialReader implements SocketEvents {
             }
         }
 
+
         if (packet instanceof UpdateByteArraySize) {
+            System.out.println("Updating array size!");
             server.getSocketModule().getAsyncNetworkService().getSelectorHandler().setUpdatedBuffer(true);
             server.getSocketModule().getAsyncNetworkService().getSelectorHandler().setByteArrayLength(((UpdateByteArraySize) packet).getSize());
             server.getSocketModule().getAsyncNetworkService().broadcast(new UpdateByteArraySize(((UpdateByteArraySize) packet).getSize()));
+            try {
+                emit(new UpdateByteArraySize(((UpdateByteArraySize) packet).getSize()));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return;
+        }
+
+        if (!authenticated) {
+            close();
             return;
         }
 
@@ -150,13 +158,13 @@ public class SocketClientHandler extends SerialReader implements SocketEvents {
     public void onClose() {
         //fire io's garbage collector will clean it up so this is not a memory leak!
         if (exptectedClosing) {
-            server.getEventHandler().fireEvent(Event.DISCONNECT, server.getClientModule().getClient(connectionId));
             authenticated = false;
-            connectionId = null;
             open = false;
+            server.getEventHandler().fireEvent(Event.DISCONNECT, server.getClientModule().getClient(connectionId));
+            connectionId = null;
         } else {
-            server.getEventHandler().fireEvent(Event.CLOSED_UNEXPECTEDLY, server.getClientModule().getClient(connectionId));
             authenticated = false;
+            server.getEventHandler().fireEvent(Event.CLOSED_UNEXPECTEDLY, server.getClientModule().getClient(connectionId));
             connectionId = null;
         }
     }

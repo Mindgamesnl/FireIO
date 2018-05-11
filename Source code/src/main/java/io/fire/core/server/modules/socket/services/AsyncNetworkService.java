@@ -42,7 +42,9 @@ public class AsyncNetworkService {
     public void broadcast(Packet p) {
         for (FireIoConnection connection : server.getClientModule().connectionMap.values()) {
             try {
-                connection.getHandler().emit(p);
+                if (connection.getHandler() != null) {
+                    connection.getHandler().emit(p);
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
