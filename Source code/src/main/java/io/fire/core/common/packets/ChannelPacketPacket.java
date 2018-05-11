@@ -15,8 +15,14 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ChannelPacketPacket extends Packet implements EventPayload {
 
+    //trigger a channel with a custom packet
+    //commonly used by client and server
+
+    //the sender value is null since the server fills it in with the object for this client for easy back and forwards communication via the event system
     private Client sender;
+    //the channel to trigger
     private String channel;
+    //the custom packet
     private Packet packet;
 
 

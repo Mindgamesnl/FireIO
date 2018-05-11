@@ -13,7 +13,12 @@ import java.io.Serializable;
 @AllArgsConstructor
 public class ChannelMessagePacket extends Packet implements Serializable {
 
+    //trigger channel with a string
+    //commonly used by server and client
+
+    //channel to trigger
     private String channel;
+    //payload
     private String text;
 
 }

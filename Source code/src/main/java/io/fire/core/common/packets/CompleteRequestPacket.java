@@ -11,7 +11,12 @@ import java.util.UUID;
 @NoArgsConstructor
 public class CompleteRequestPacket extends Packet {
 
+    //complete a pending client-side request
+    //commonly used by server and client
+
+    //request id
     private UUID requestId;
+    //request response (can be null)
     private RequestBody result;
 
 }

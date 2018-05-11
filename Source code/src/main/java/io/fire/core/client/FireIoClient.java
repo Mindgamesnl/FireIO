@@ -21,12 +21,13 @@ import java.util.*;
 
 public class FireIoClient {
 
-    //modules
+    //modules + getters
     @Getter private SocketModule socketModule;
     @Getter private RestModule restModule;
     @Getter private EventHandler eventHandler = new EventHandler();
     @Getter private ClientRequestModule clientRequestModule;
 
+    //data we need in the client + some meta and connection arguments to use mid-handshake
     private String host;
     private int port;
     private int connectAttampt = 0;
@@ -35,28 +36,43 @@ public class FireIoClient {
     private Map<String, ClientMeta> connectionMeta = new HashMap<>();
 
     public FireIoClient(String host, int port) {
+        //constructor! create the client!
+        //register variables
         this.port = port;
         this.host = host;
-        restModule = new RestModule(host, (port +1));
 
+        //register and start modules
+        restModule = new RestModule(host, (port +1));
         clientRequestModule = new ClientRequestModule(this);
 
+        //register a listener for the connect event to reset attempt count every time a connection is made
         eventHandler.on(Event.CONNECT, a-> connectAttampt = 0);
     }
 
     public FireIoClient setPassword(String password) {
+        //set password
+        //overwrites the default null value
         restModule.setPassword(password);
         return this;
     }
 
     public FireIoClient setAutoReConnect(int timeout) {
+        //enable auto reconnect!
+        //register a event to detect when the connection closed
         eventHandler.on(Event.CLOSED_UNEXPECTEDLY, a-> {
+            //parse the even payload (error message in this case)
             String message = ((ReceivedText) a).getString();
+
+            //fire disconnect event
             getEventHandler().fireEvent(Event.DISCONNECT, null);
+
+            //log information about problem
             System.err.println("[FireIo] Connection closed unexpectedly! attempting re-connect in " + timeout + "MS.");
             System.err.println(" - Error: " + message);
             connectAttampt++;
             System.err.println(" - Attempt: " + connectAttampt);
+
+            //retry after a given amount of milliseconds, if it fails this event will be triggered again creating a loop until a new connection was successful
             scheduler.schedule(new TimerTask() {
                         @Override
                         public void run() {
@@ -69,41 +85,65 @@ public class FireIoClient {
     }
 
     public FireIoClient setParameter(String s, String b) {
+        //set parameter!
+        //can be used for custom authentication, can be accessed by the server before the handshake is finished
         connectionArguments.put(s, b);
         return this;
     }
 
     public FireIoClient setMeta(String s, ClientMeta meta) {
+        //set meta!
+        //can be used to send client metadata mid handshake, can be accessed by the server before the handshake is finished
         connectionMeta.put(s, meta);
         return this;
     }
 
     public FireIoClient connect() {
+        //connect to the server!
         System.out.println("[FireIO] starting client & requesting token");
+
+        //request a new token via the rest module!
         String a = restModule.getToken();
         if (a == null) {
+            //could not get api key due to a connection problem
+            //trigger event and trigger auto reconnect if set
             getEventHandler().fireEvent(Event.CLOSED_UNEXPECTEDLY, new ReceivedText("Failed to get api key" ,null));
             return this;
         }
+
         if (a.equals("ratelimit")) {
+            //ratifier blocked our request! we might have been creating to many new identities in a too short amount of time
+            //trigger event and trigger auto reconnect if set
             getEventHandler().fireEvent(Event.CLOSED_UNEXPECTEDLY, new ReceivedText("Connection blocked by ratelimiter" ,null));
             return this;
         }
+
         if (a.equals("fail-auth")) {
+            //failed to authenticate! we wither did not give a password or did not use the correct password!
+            //trigger event and trigger auto reconnect if set
             getEventHandler().fireEvent(Event.CLOSED_UNEXPECTEDLY, new ReceivedText("Failed to authenticate, is your password correct?" ,null));
             return this;
         }
+
+        //we've got a id to use! parse it and set it as our own
         UUID b = UUID.fromString(a);
         if (b == null) {
+            //end the party here, it's an invalid id or unexpected result
+            //trigger event and trigger auto reconnect if set
             getEventHandler().fireEvent(Event.CLOSED_UNEXPECTEDLY, new ReceivedText("Failed to parse api key" ,null));
             return this;
         }
+
+        //create socket and connect!
         socketModule = new SocketModule(this, host, port, b, connectionArguments, connectionMeta);
         return this;
     }
 
     public FireIoClient send(String channel, Packet packet) {
+        //send a custom packet via a channel, this will trigger the appropriate channel on the server side with our custom packet
         try {
+            //create an internal packet object containing our channel and custom packet
+            //the sender value is null since the server fills it in with the object for this client for easy back and forwards communication via the event system
             socketModule.getConnection().emit(new ChannelPacketPacket(null, channel, packet));
         } catch (IOException e) {
             e.printStackTrace();
@@ -112,7 +152,9 @@ public class FireIoClient {
     }
 
     public FireIoClient send(String channel, String message) {
+        //send a string via a channel, this will trigger the appropriate channel on the server side with our string
         try {
+            //create an internal packet containing our channel and string and then send it via the connection manager
             socketModule.getConnection().emit(new ChannelMessagePacket(channel, message));
         } catch (IOException e) {
             e.printStackTrace();
@@ -121,25 +163,32 @@ public class FireIoClient {
     }
 
     public FireIoClient close() {
+        //prepare and then close the connection
         socketModule.getConnection().close();
         return this;
     }
 
     public FireIoClient request(String channel, RequestBody request, ClientRequest callback) {
+        //create a request!
+        //kinda like completablefutures but cross server!
+        //handle request in requestmodule
         clientRequestModule.createRequest(channel, request, callback);
         return this;
     }
 
     public FireIoClient stop() {
+        //another function for close
         return close();
     }
 
     public FireIoClient on(Event e, Listener r) {
+        //register event listener
         eventHandler.on(e, r);
         return this;
     }
 
     public FireIoClient on(String e, Listener r) {
+        //register channel listener
         eventHandler.on(e, r);
         return this;
     }

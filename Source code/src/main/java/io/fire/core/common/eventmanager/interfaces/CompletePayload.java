@@ -10,6 +10,8 @@ import lombok.Setter;
 @NoArgsConstructor
 public class CompletePayload {
 
+    //debugging event, you can ignore it
+
     private Event event;
     private Boolean isEvent;
     private EventPayload originalPayload;

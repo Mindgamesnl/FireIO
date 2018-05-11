@@ -15,6 +15,10 @@ import java.util.Map;
 @AllArgsConstructor
 public class AuthPacket extends Packet implements Serializable {
 
+    //auth packet for handshake
+    //contains client information, platform, uuid and arguments
+    //commonly used by client and server
+
     private String uuid;
     private String platform;
     private Map<String, String> arguments;
