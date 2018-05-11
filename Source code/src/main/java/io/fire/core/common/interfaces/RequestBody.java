@@ -1,3 +1,5 @@
 package io.fire.core.common.interfaces;
 
-public interface RequestBody {}
+import java.io.Serializable;
+
+public interface RequestBody extends Serializable {}
