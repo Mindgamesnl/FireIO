@@ -29,7 +29,7 @@ public class SocketClientHandler extends SerialReader implements SocketEvents {
     private SocketChannel channel;
     private Queue<Packet> missedPackets = new LinkedList<>();
     private UUID connectionId;
-    private boolean exptectedClosing = false;
+    private boolean expectedClosing = false;
     @Getter
     private boolean open = true;
     @Getter
@@ -141,7 +141,7 @@ public class SocketClientHandler extends SerialReader implements SocketEvents {
         }
 
         if (packet instanceof PrepareClosingConnection) {
-            exptectedClosing = true;
+            expectedClosing = true;
             return;
         }
 
@@ -157,7 +157,7 @@ public class SocketClientHandler extends SerialReader implements SocketEvents {
     @Override
     public void onClose() {
         //fire io's garbage collector will clean it up so this is not a memory leak!
-        if (exptectedClosing) {
+        if (expectedClosing) {
             authenticated = false;
             open = false;
             server.getEventHandler().fireEvent(Event.DISCONNECT, server.getClientModule().getClient(connectionId));
@@ -171,7 +171,7 @@ public class SocketClientHandler extends SerialReader implements SocketEvents {
 
     @Override
     public void onOpen() {
-        exptectedClosing = false;
+        expectedClosing = false;
         if (server.getSocketModule().getAsyncNetworkService().getSelectorHandler().isUpdatedBuffer()) {
             try {
                 emit(new UpdateByteArraySize(server.getSocketModule().getAsyncNetworkService().getSelectorHandler().getByteArrayLength()));

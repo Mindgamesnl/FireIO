@@ -11,6 +11,10 @@ import java.util.UUID;
 @NoArgsConstructor
 public class RequestResponse {
 
+    //request response
+    //used by the api to reply to a request and handle it
+    //containing the function and id of the request
+
     private CompletableRequest completableRequest;
     private UUID requestId;
 

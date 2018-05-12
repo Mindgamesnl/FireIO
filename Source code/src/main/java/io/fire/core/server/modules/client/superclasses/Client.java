@@ -13,6 +13,11 @@ import java.util.UUID;
 @Data
 public abstract class Client implements EventPayload, ConnectedFireioClient {
 
+    //abstract client class
+    //contains id, api functions and getters
+    //other getters and setters are provided by lombok
+    //this class can be used in the event handler and all api functions
+
     private UUID id;
     public void send(String channel, String message) {}
     public void send(String channel, Packet packet) {}
