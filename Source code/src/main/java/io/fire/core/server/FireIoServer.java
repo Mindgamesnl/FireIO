@@ -32,7 +32,7 @@ public class FireIoServer {
         clientModule = new ClientModule(this);
         restModule = new RestModule(this, (port + 1));
         socketModule = new SocketModule(this, port);
-        requestModule = new RequestModule(this);
+        requestModule = new RequestModule();
     }
 
     public FireIoServer on(Event e, Listener r) {
