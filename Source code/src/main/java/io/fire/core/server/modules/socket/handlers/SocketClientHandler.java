@@ -22,31 +22,40 @@ import java.util.UUID;
 
 public class SocketClientHandler extends SerialReader implements SocketEvents {
 
-    private Socket socket;
-    private Listener listener;
-    private FireIoServer server;
-    public boolean authenticated = false;
+    //java socket channel and socket
     private SocketChannel channel;
+    private Socket socket;
+
+    //packet listener/handler
+    private Listener listener;
+
+    //main instance
+    private FireIoServer server;
+
+    //meta and connection info
+    public boolean authenticated = false;
     private Queue<Packet> missedPackets = new LinkedList<>();
     private UUID connectionId;
     private boolean expectedClosing = false;
-    @Getter
-    private boolean open = true;
-    @Getter
-    private Date initiated = new Date();
+    @Getter private boolean open = true;
+    @Getter private Date initiated = new Date();
 
     SocketClientHandler(FireIoServer server, Socket socket, SocketChannel channel) {
+        //constructor
         this.server = server;
         this.socket = socket;
         this.channel = channel;
     }
 
     public void onMessage(Listener listener) {
+        //set message handler
         this.listener = listener;
     }
 
     public void close() {
+        //close connection
         try {
+            //let client know that we intend to close the connection
             emit(new PrepareClosingConnection());
             socket.close();
             open = false;
