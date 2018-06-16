@@ -13,6 +13,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @NoArgsConstructor
 public class EventHandler {
@@ -20,6 +22,9 @@ public class EventHandler {
     //storage of events and what to do with them
     private Map<String, ConcurrentLinkedQueue<Listener>> events = new ConcurrentHashMap();
     private Map<Event, ConcurrentLinkedQueue<Listener>> systemEvents = new ConcurrentHashMap();
+
+    //thread pool service
+    ExecutorService pool = Executors.newFixedThreadPool(1);
 
     //debug listeners
     private List<GlobalListener> globalListeners = new ArrayList<>();
@@ -38,10 +43,12 @@ public class EventHandler {
         //check if it has any api listeners
         if (events.containsKey(event)) {
             //loop for all listeners
-            for (Listener l : events.get(event)) {
-                //call listener
-                l.call(payload);
-            }
+            pool.execute(() -> {
+                for (Listener l : events.get(event)) {
+                    //call listener
+                    l.call(payload);
+                }
+            });
         }
     }
 
@@ -59,12 +66,23 @@ public class EventHandler {
 
         //check if it has any api listeners
         if (systemEvents.containsKey(event)) {
-            //loop for all listeners
-            for (Listener l : systemEvents.get(event)) {
-                //call listener
-                l.call(payload);
-            }
+            //loop for all listeners in its own pool
+            pool.execute(() -> {
+                for (Listener l : systemEvents.get(event)) {
+                    //call listener
+                    l.call(payload);
+                }
+            });
         }
+    }
+
+    public void setPoolSize(int size) {
+        pool.shutdown();
+        Executors.newFixedThreadPool(size);
+    }
+
+    public void shutdown() {
+        pool.shutdown();
     }
 
     public EventHandler on(GlobalListener globalListener) {

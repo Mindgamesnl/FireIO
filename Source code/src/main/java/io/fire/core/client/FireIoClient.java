@@ -98,6 +98,11 @@ public class FireIoClient {
         return this;
     }
 
+    public FireIoClient setThreadPoolSize(int size) {
+        eventHandler.setPoolSize(size);
+        return this;
+    }
+
     public FireIoClient connect() {
         //check for excisting connection
         if (socketModule != null) {

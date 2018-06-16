@@ -68,6 +68,11 @@ public class FireIoServer {
         return this;
     }
 
+    public FireIoServer setThreadPoolSize(int size) {
+        eventHandler.setPoolSize(size);
+        return this;
+    }
+
     public FireIoServer onRequest(String type, RequestExecutor executor) {
         requestModule.register(type, executor);
         return this;
