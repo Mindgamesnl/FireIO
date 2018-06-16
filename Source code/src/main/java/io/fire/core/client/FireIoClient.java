@@ -99,6 +99,11 @@ public class FireIoClient {
     }
 
     public FireIoClient connect() {
+        //check for excisting connection
+        if (socketModule != null) {
+            socketModule.getConnection().close();
+        }
+
         //connect to the server!
         System.out.println("[FireIO] starting client & requesting token");
 

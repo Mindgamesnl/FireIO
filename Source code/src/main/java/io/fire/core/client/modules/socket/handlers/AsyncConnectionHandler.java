@@ -39,6 +39,8 @@ public class AsyncConnectionHandler extends SerialReader implements SocketEvents
     //host information for connection
     private String host;
     private int port;
+    private Boolean isSetup = false;
+    private Boolean isDead = false;
 
     //buffers!
     //when the client failed to send a packet, it will retry at a moment to prevent packet loss.
@@ -113,12 +115,13 @@ public class AsyncConnectionHandler extends SerialReader implements SocketEvents
         }
     }
 
-
-
     public void close() {
         try {
             //let the server know we intend to close the connection, this prevents falsely labeled errors.
-            emit(new PrepareClosingConnection());
+            if (isSetup) {
+                emit(new PrepareClosingConnection());
+            }
+            isDead = true;
             //close channel
             socketChannel.close();
             //stop reader thread
@@ -131,6 +134,7 @@ public class AsyncConnectionHandler extends SerialReader implements SocketEvents
 
     @Override
     public void onPacket(Packet packet) {
+        if (isDead) return;
         //function from the SocketEvents interface
         //used to handle packets from the io reader
         //this function handles internal fireio packets and supply's custom packets to their api events
@@ -138,6 +142,7 @@ public class AsyncConnectionHandler extends SerialReader implements SocketEvents
         //server accepted client! they are now connected and authenticated
         if (packet instanceof FinishHandshake) {
             //trigger connected event
+            isSetup = true;
             client.getEventHandler().fireEvent(Event.CONNECT, null);
             //check for previously failed packets and retry them in order that they where attempted to send
             while (missedPackets.size() != 0) {
