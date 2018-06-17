@@ -16,7 +16,6 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-@NoArgsConstructor
 public class EventHandler {
 
     //storage of events and what to do with them
@@ -28,6 +27,8 @@ public class EventHandler {
 
     //debug listeners
     private List<GlobalListener> globalListeners = new ArrayList<>();
+
+    public EventHandler() {}
 
     public void fireEvent(String event, EventPayload payload) {
         //fire channel based event!
@@ -78,7 +79,7 @@ public class EventHandler {
 
     public void setPoolSize(int size) {
         pool.shutdown();
-        Executors.newFixedThreadPool(size);
+        pool = Executors.newFixedThreadPool(size);
     }
 
     public void shutdown() {
