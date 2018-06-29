@@ -4,7 +4,7 @@ import io.fire.core.client.FireIoClient;
 import io.fire.core.client.modules.socket.handlers.AsyncConnectionHandler;
 import io.fire.core.common.eventmanager.enums.Event;
 import io.fire.core.common.interfaces.Packet;
-import io.fire.core.common.interfaces.SerialReader;
+import io.fire.core.common.objects.PacketHelper;
 import io.fire.core.common.packets.ReceivedText;
 
 import lombok.Getter;
@@ -14,7 +14,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 
-public class IoReader extends SerialReader implements Runnable {
+public class IoReader implements Runnable {
 
     //the default buffer is common in everything of Fire-Io, when bigger data is getting send it will change in the whole network to what ever is needed.
     //The default is 5KB
@@ -27,11 +27,14 @@ public class IoReader extends SerialReader implements Runnable {
     //connection handler
     private AsyncConnectionHandler asyncConnectionHandler;
 
+    private PacketHelper packetHelper;
+
     public IoReader(SocketChannel channel, int buffer, AsyncConnectionHandler ins, FireIoClient client) {
         this.bufferSize = buffer;
         this.channel = channel;
         this.client = client;
         this.asyncConnectionHandler = ins;
+        this.packetHelper = new PacketHelper(client.getEventHandler());
     }
 
     @Override
@@ -69,7 +72,7 @@ public class IoReader extends SerialReader implements Runnable {
                 //parse them to packets!
                 //in semi-rare cases the system stitches multiple packets in one stream to save on load
                 //this can mean that we receive multiple packets in one go!
-                Packet[] packets = fromString(new String(data));
+                Packet[] packets = packetHelper.fromString(new String(data));
                 for (Packet p : packets) {
                     //handle all received packets, trigger onPacket function
                     asyncConnectionHandler.onPacket(p);

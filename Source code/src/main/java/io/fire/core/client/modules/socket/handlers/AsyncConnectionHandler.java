@@ -7,7 +7,7 @@ import io.fire.core.common.eventmanager.interfaces.EventPayload;
 import io.fire.core.common.interfaces.ClientMeta;
 import io.fire.core.common.interfaces.ConnectedFireioClient;
 import io.fire.core.common.interfaces.Packet;
-import io.fire.core.common.interfaces.SerialReader;
+import io.fire.core.common.objects.PacketHelper;
 import io.fire.core.common.packets.*;
 import io.fire.core.server.modules.socket.interfaces.SocketEvents;
 
@@ -18,7 +18,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.util.*;
 
-public class AsyncConnectionHandler extends SerialReader implements SocketEvents, EventPayload, ConnectedFireioClient {
+public class AsyncConnectionHandler implements SocketEvents, EventPayload, ConnectedFireioClient {
 
     //Main FireIo client!
     //contains all the functional logic, authentication, data (like meta and ID) and handlers
@@ -35,6 +35,7 @@ public class AsyncConnectionHandler extends SerialReader implements SocketEvents
     private IoReader ioReader;
     private SocketChannel socketChannel;
     private Thread reader;
+    private PacketHelper packetHelper;
 
     //host information for connection
     private String host;
@@ -56,6 +57,7 @@ public class AsyncConnectionHandler extends SerialReader implements SocketEvents
             this.port = port;
             this.arguments = arguments;
             this.argumentsMeta = argumentsMeta;
+            this.packetHelper = new PacketHelper(client.getEventHandler());
             connect();
         } catch (IOException e) {
             //trigger fatal error event for api and internal ussage
@@ -81,7 +83,7 @@ public class AsyncConnectionHandler extends SerialReader implements SocketEvents
     public void emit(Packet p) throws IOException {
         try {
             //serialize packet
-            String out = toString(p);
+            String out = packetHelper.toString(p);
             //check if the packet fits in the buffer, if it does not, then request to increase the size of the buffer and when its chaned and confirmed, then retry to send it.
             //the list "bufferedPackets" will be checked for packets every time the buffer size changes
             //the changes HAVE TO BE DONE BY THE SERVER! the client is ALWAYS slave!
@@ -184,7 +186,7 @@ public class AsyncConnectionHandler extends SerialReader implements SocketEvents
 
             //check cache for packets we can now send we previously couldn't, emit them if fount.
             for (Packet bp : bufferedPackets) {
-                String out = toString(bp);
+                String out = packetHelper.toString(bp);
                 //check if we can really send them now
                 if (ioReader.getBufferSize() >= out.getBytes().length) {
                     try {

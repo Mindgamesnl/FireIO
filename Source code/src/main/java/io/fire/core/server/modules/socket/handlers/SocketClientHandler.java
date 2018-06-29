@@ -3,7 +3,7 @@ package io.fire.core.server.modules.socket.handlers;
 import io.fire.core.common.eventmanager.enums.Event;
 import io.fire.core.common.eventmanager.interfaces.Listener;
 import io.fire.core.common.interfaces.Packet;
-import io.fire.core.common.interfaces.SerialReader;
+import io.fire.core.common.objects.PacketHelper;
 import io.fire.core.common.packets.*;
 import io.fire.core.server.FireIoServer;
 import io.fire.core.server.modules.client.objects.ClientInfo;
@@ -20,7 +20,7 @@ import java.util.LinkedList;
 import java.util.Queue;
 import java.util.UUID;
 
-public class SocketClientHandler extends SerialReader implements SocketEvents {
+public class SocketClientHandler implements SocketEvents {
 
     //java socket channel and socket
     private SocketChannel channel;
@@ -28,6 +28,7 @@ public class SocketClientHandler extends SerialReader implements SocketEvents {
 
     //packet listener/handler
     private Listener listener;
+    private PacketHelper packetHelper;
 
     //main instance
     private FireIoServer server;
@@ -45,6 +46,7 @@ public class SocketClientHandler extends SerialReader implements SocketEvents {
         this.server = server;
         this.socket = socket;
         this.channel = channel;
+        this.packetHelper = new PacketHelper(server.getEventHandler());
     }
 
     public void onMessage(Listener listener) {
@@ -69,7 +71,7 @@ public class SocketClientHandler extends SerialReader implements SocketEvents {
             return;
         }
         try {
-            String out = toString(p);
+            String out = packetHelper.toString(p);
 
             if (server.getSocketModule().getAsyncNetworkService().getSelectorHandler().getByteArrayLength() < out.getBytes().length) {
                 server.getSocketModule().getAsyncNetworkService().getSelectorHandler().setUpdatedBuffer(true);
