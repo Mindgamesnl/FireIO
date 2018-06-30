@@ -1,7 +1,8 @@
 package io.fire.core.server.modules.socket.handlers;
 
 import io.fire.core.common.interfaces.Packet;
-import io.fire.core.common.interfaces.SerialReader;
+import io.fire.core.common.objects.PacketHelper;
+import io.fire.core.common.ratelimiter.RateLimit;
 import io.fire.core.server.FireIoServer;
 import io.fire.core.server.modules.socket.managers.ClientManager;
 
@@ -16,15 +17,17 @@ import java.nio.channels.*;
 import java.util.Iterator;
 import java.util.Set;
 
-public class SelectorHandler extends SerialReader implements Runnable {
+public class SelectorHandler implements Runnable {
 
     private FireIoServer server;
     private ClientManager clientManager;
+    private PacketHelper packetHelper;
 
     //the default buffer is common in everything of Fire-Io, when bigger data is getting send it will change in the whole network to what ever is needed.
     //The default is 5KB
     @Getter @Setter private Integer byteArrayLength = 5120;
     @Getter @Setter private boolean updatedBuffer = false;
+    @Getter private RateLimit rateLimiter = new RateLimit(20, 10);
 
     //channel selector
     private Selector selector;
@@ -34,6 +37,12 @@ public class SelectorHandler extends SerialReader implements Runnable {
         this.selector = selector;
         //initialize client manager
         this.clientManager = new ClientManager();
+        this.packetHelper = new PacketHelper(server.getEventHandler());
+    }
+
+    public void setRateLimiter(int timeout, int attempts) {
+        rateLimiter.stop();
+        rateLimiter = new RateLimit(timeout, attempts);
     }
 
     @Override
@@ -90,12 +99,20 @@ public class SelectorHandler extends SerialReader implements Runnable {
         Socket socket = channel.socket();
         //get the address, used to identify it at first before it has a key
         SocketAddress remoteAddr = socket.getRemoteSocketAddress();
-        //create and register the connection
-        clientManager.references.put(remoteAddr, new SocketClientHandler(server, socket, channel));
-        //trigger the on open function in the client handler
-        clientManager.references.get(remoteAddr).onOpen();
-        //register connection
-        channel.register(this.selector, SelectionKey.OP_READ);
+
+        //check rate limiter for spamming connections
+        if (rateLimiter.allowed(socket.getInetAddress().getHostName())) {
+            //create and register the connection
+            clientManager.references.put(remoteAddr, new SocketClientHandler(server, socket, channel));
+            //trigger the on open function in the client handler
+            clientManager.references.get(remoteAddr).onOpen();
+            //register connection
+            channel.register(this.selector, SelectionKey.OP_READ);
+        } else {
+            //its not allowed
+            socket.close();
+            channel.close();
+        }
     }
 
     private void read(SelectionKey key) throws IOException {
@@ -139,7 +156,7 @@ public class SelectorHandler extends SerialReader implements Runnable {
         //get adress
         SocketAddress remoteAddr = channel.socket().getRemoteSocketAddress();
         //parse all packets
-        Packet[] packets = fromString(new String(data));
+        Packet[] packets = packetHelper.fromString(new String(data));
         //some times, packets get stitched together when they are send in quick completion of one another to save on resources
         for (Packet p : packets) {
             //get the client and trigger the packet handler

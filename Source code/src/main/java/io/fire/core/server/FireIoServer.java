@@ -92,4 +92,10 @@ public class FireIoServer {
         return this;
     }
 
+    public FireIoServer setRateLimiter(int requests, int timeout) {
+        restModule.setRateLimiter(timeout, requests);
+        socketModule.getAsyncNetworkService().getSelectorHandler().setRateLimiter(timeout, requests);
+        return this;
+    }
+
 }

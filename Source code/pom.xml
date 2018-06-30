@@ -7,7 +7,7 @@
     <groupId>FireIO</groupId>
     <artifactId>FireIO-Core</artifactId>
     <description>A simple java socket system</description>
-    <version>1.0</version>
+    <version>1.2</version>
     <build>
         <plugins>
             <plugin>

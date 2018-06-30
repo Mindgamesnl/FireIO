@@ -175,6 +175,7 @@ public class FireIoClient {
     public FireIoClient close() {
         //prepare and then close the connection
         socketModule.getConnection().close();
+        eventHandler.shutdown();
         return this;
     }
 

@@ -2,7 +2,7 @@
   <img src="http://static.craftmend.com/fireio/FIREIO.png" />
 </p>
 
-# FireIo, a simple networking framework [![](https://jitpack.io/v/Mindgamesnl/FireIO.svg)](https://jitpack.io/#Mindgamesnl/FireIO) [![Build Status](https://travis-ci.org/Mindgamesnl/FireIO.svg?branch=master)](https://travis-ci.org/Mindgamesnl/FireIO) [![GitHub version](https://d25lcipzij17d.cloudfront.net/badge.svg?id=gh&type=6&v=1.0.1&x2=0)](https://github.com/Mindgamesnl/FireIO)
+# FireIo, a simple networking framework [![](https://jitpack.io/v/Mindgamesnl/FireIO.svg)](https://jitpack.io/#Mindgamesnl/FireIO) [![Build Status](https://travis-ci.org/Mindgamesnl/FireIO.svg?branch=master)](https://travis-ci.org/Mindgamesnl/FireIO) [![GitHub version](https://d25lcipzij17d.cloudfront.net/badge.svg?id=gh&type=6&v=1.2&x2=0)](https://github.com/Mindgamesnl/FireIO)
 
 Fire-IO is a lightning fast and super simple socket framework to handle your connections, data, clients and requests.
 
@@ -20,10 +20,9 @@ Features include:
  - Async networking
  - Android compatible
  - Thread pools for event execution
+ - Custom rate limiting
  
 Fire-IO is designed for server-to-server data transfer for real time updates, push notifications, logging, monitoring and promise like data requests.
-
-
 
 # Example code
 
@@ -33,6 +32,7 @@ Here is a simple example setup with a server, client, a custom packet, two way d
 ```java
 FireIoServer server = new FireIoServer(80)
         .setPassword("testpassword1") //OPTIONAL: password
+        .setRateLimiter(10 , 20) //OPTIONAL: rate limit the endpoints, in this case, 10 requests every 20 seconds
         .setThreadPoolSize(1) //OPTIONAL: thread pool for event handling execution
 
         .on(Event.CONNECT, eventPayload -> {
