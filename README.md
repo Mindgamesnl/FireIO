@@ -20,6 +20,7 @@ Features include:
  - Async networking
  - Android compatible
  - Thread pools for event execution
+ - Custom rate limiting
  
 Fire-IO is designed for server-to-server data transfer for real time updates, push notifications, logging, monitoring and promise like data requests.
 
@@ -31,6 +32,7 @@ Here is a simple example setup with a server, client, a custom packet, two way d
 ```java
 FireIoServer server = new FireIoServer(80)
         .setPassword("testpassword1") //OPTIONAL: password
+        .setRateLimiter(10 , 20) //OPTIONAL: rate limit the endpoints, in this case, 10 requests every 20 seconds
         .setThreadPoolSize(1) //OPTIONAL: thread pool for event handling execution
 
         .on(Event.CONNECT, eventPayload -> {
