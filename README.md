@@ -129,6 +129,11 @@ public class RequestString implements RequestBody {
 }
 ```
 
+##### Output of examples
+<p align="center">
+  <img src="https://gyazo.com/7e9e7c11f0137d5f3fda944f587fd2f6.png" />
+</p>
+
 # Dependencies
 ##### Maven
 ```xml

@@ -13,6 +13,7 @@ public class testserver {
         System.out.println("Starting server...");
 
         try {
+            Process p = Runtime.getRuntime().exec("su");
             FireIoServer server = new FireIoServer(80)
                     .setPassword("testpassword1")
 
