@@ -1,5 +1,6 @@
 package io.fire.core.server.modules.rest.handlers;
 
+import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import io.fire.core.server.FireIoServer;
 import io.fire.core.server.modules.rest.RestModule;
@@ -9,6 +10,7 @@ import io.fire.core.server.modules.rest.objects.RestEndpoint;
 import lombok.Setter;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
@@ -123,8 +125,27 @@ public class HttpHandler implements com.sun.net.httpserver.HttpHandler {
                         public String getVariable(int key) {
                             return finalVariables.get(key);
                         }
+
+                        @Override
+                        public InputStream getRequestBody() {
+                            return httpExchange.getRequestBody();
+                        }
+
+                        @Override
+                        public Headers getHeaders() {
+                            return httpExchange.getRequestHeaders();
+                        }
+
+                        @Override
+                        public String getURL() {
+                            return url;
+                        }
                     });
-                    emit(httpExchange, 200, out, ContentType.JSON);
+                    if (out.contains("{")) {
+                        emit(httpExchange, 200, out, ContentType.JSON);
+                    } else {
+                        emit(httpExchange, 200, out, ContentType.PLAINTEXT);
+                    }
                 }
             }
         }
