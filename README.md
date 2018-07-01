@@ -69,6 +69,20 @@ server.onRequest("whoami", (client, request, response) -> {
     response.complete(new RequestString("You are: " + client.getInfo().getHostname()));
 });
 
+//simple http rest endpoints, one clear example and one with a variable
+//so calling http://localhost/time will return "The server time is: 2018-07-01 15:10:44"
+server.registerEndpoint("/time", req -> {
+    return "The server time is: " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
+});
+
+//one with a variable, the path is set to /hi/?
+//this will mean that ? will be a variable
+//so calling http://localhost/hi/Mats
+//will return Welcome to FireIO Mats!
+server.registerEndpoint("/hi/?", req -> {
+    return "Welcome to FireIO " + req.getVariable(0) + "!";
+});
+
 
 //Client client = server.getClient(UUID.fromString("067e6162-3b6f-4ae2-a171-2470b63dff00"));
 //client.send("message", "well hi there! you are the best.");

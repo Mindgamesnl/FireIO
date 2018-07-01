@@ -6,7 +6,7 @@ import com.sun.net.httpserver.HttpServer;
 import io.fire.core.common.ratelimiter.RateLimit;
 import io.fire.core.server.FireIoServer;
 import io.fire.core.server.modules.rest.handlers.HttpHandler;
-import io.fire.core.server.modules.rest.interfaces.RestExchange;
+import io.fire.core.server.modules.rest.objects.RestEndpoint;
 import lombok.Getter;
 
 import java.io.IOException;
@@ -26,7 +26,7 @@ public class RestModule {
         //create new request handler
         httpHandler = new HttpHandler(server, this);
         //create endpoint and assign it the handler
-        HttpContext context = httpServer.createContext("/fireio/register");
+        HttpContext context = httpServer.createContext("/");
         context.setHandler(httpHandler);
         //create thread pool for requests
         httpServer.setExecutor(Executors.newCachedThreadPool());
@@ -34,14 +34,13 @@ public class RestModule {
         httpServer.start();
     }
 
-    public void registerEndpoint(RestExchange restExchange) {
-        HttpContext context = httpServer.createContext("/fireio/register");
-        context.setHandler(httpHandler);
-    }
-
     public void setRateLimiter(int timeout, int attempts) {
         rateLimiter.stop();
         rateLimiter = new RateLimit(timeout, attempts);
+    }
+
+    public void addEndpoint(RestEndpoint exchange) {
+        httpHandler.addEndpoint(exchange);
     }
 
     public void setPassword(String password) {

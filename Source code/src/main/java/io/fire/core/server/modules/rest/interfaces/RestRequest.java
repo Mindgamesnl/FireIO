@@ -1,10 +1,10 @@
 package io.fire.core.server.modules.rest.interfaces;
 
-import java.net.InetAddress;
+import java.net.InetSocketAddress;
 
 public interface RestRequest {
 
-    InetAddress getRequester();
-    String getVariable(String key);
+    InetSocketAddress getRequester();
+    String getVariable(int index);
 
 }

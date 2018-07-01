@@ -9,6 +9,8 @@ import io.fire.core.server.modules.client.superclasses.Client;
 import io.fire.core.server.modules.request.RequestModule;
 import io.fire.core.server.modules.request.interfaces.RequestExecutor;
 import io.fire.core.server.modules.rest.RestModule;
+import io.fire.core.server.modules.rest.interfaces.RestExchange;
+import io.fire.core.server.modules.rest.objects.RestEndpoint;
 import io.fire.core.server.modules.socket.SocketModule;
 
 import lombok.Getter;
@@ -89,6 +91,11 @@ public class FireIoServer {
 
     public FireIoServer on(String e, Listener r) {
         eventHandler.on(e, r);
+        return this;
+    }
+
+    public FireIoServer registerEndpoint(String path, RestExchange exchange) {
+        getRestModule().addEndpoint(new RestEndpoint(path, exchange));
         return this;
     }
 

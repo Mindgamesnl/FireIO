@@ -5,6 +5,8 @@ import io.fire.core.server.FireIoServer;
 import io.fire.core.server.modules.client.superclasses.Client;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class testserver {
 
@@ -16,6 +18,7 @@ public class testserver {
             Process p = Runtime.getRuntime().exec("su");
             FireIoServer server = new FireIoServer(80)
                     .setPassword("testpassword1")
+                    .setRateLimiter(50, 1)
 
                     .on(Event.CONNECT, eventPayload -> {
                         Client client = (Client) eventPayload;
@@ -51,6 +54,17 @@ public class testserver {
             server.onRequest("whoami", (client, request, response) -> {
                 System.out.println(client.getId().toString() + " asked who it is! sending ip back");
                 response.complete(new RequestString("You are: " + client.getInfo().getHostname()));
+            });
+
+            //simple http rest endpoints, one clear example and one with a variable
+            server.registerEndpoint("/time", req -> {
+                return "The server time is: " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
+            });
+
+            //one with a variable, the path is set to /hi/?
+            //this will mean that ? will be a variable, example
+            server.registerEndpoint("/hi/?", req -> {
+                return "Welcome to FireIO " + req.getVariable(0) + "!";
             });
 
 
