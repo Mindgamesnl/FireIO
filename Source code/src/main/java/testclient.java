@@ -43,13 +43,13 @@ public class testclient {
 
 
         //debug;
-        client.getEventHandler().on(gl -> {
+        /*client.getEventHandler().on(gl -> {
             if (gl.getIsEvent()) {
                 System.out.println("Debug: receved event " + gl.getChannel() + " with payload " + gl.getOriginalPayload());
             } else {
                 System.out.println("Debug: receved channel " + gl.getChannel() + " with payload " + gl.getOriginalPayload());
             }
-        });
+        });*/
 
         //keep alive and dont instantly die
         new Thread(new Runnable() {

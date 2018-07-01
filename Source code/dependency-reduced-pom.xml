@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>FireIO</groupId>
   <artifactId>FireIO-Core</artifactId>
-  <version>0.0-QUICK-FIRE</version>
+  <version>1.2</version>
   <description>A simple java socket system</description>
   <build>
     <plugins>
@@ -15,22 +15,6 @@
         </configuration>
       </plugin>
       <plugin>
-        <artifactId>maven-assembly-plugin</artifactId>
-        <executions>
-          <execution>
-            <phase>package</phase>
-            <goals>
-              <goal>single</goal>
-            </goals>
-          </execution>
-        </executions>
-        <configuration>
-          <descriptorRefs>
-            <descriptorRef>jar-with-dependencies</descriptorRef>
-          </descriptorRefs>
-        </configuration>
-      </plugin>
-      <plugin>
         <artifactId>maven-shade-plugin</artifactId>
         <version>2.4.3</version>
         <executions>
@@ -39,14 +23,6 @@
             <goals>
               <goal>shade</goal>
             </goals>
-            <configuration>
-              <relocations>
-                <relocation>
-                  <pattern>android.util</pattern>
-                  <shadedPattern>io.fire.core.shade.android.util</shadedPattern>
-                </relocation>
-              </relocations>
-            </configuration>
           </execution>
         </executions>
       </plugin>

@@ -31,7 +31,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <finalName>final-${project.artifactId}-${project.version}</finalName>
+                    <finalName>FireIO</finalName>
                 </configuration>
             </plugin>
         </plugins>

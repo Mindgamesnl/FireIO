@@ -4,19 +4,16 @@
 
 # FireIo, a simple networking framework [![](https://jitpack.io/v/Mindgamesnl/FireIO.svg)](https://jitpack.io/#Mindgamesnl/FireIO) [![Build Status](https://travis-ci.org/Mindgamesnl/FireIO.svg?branch=master)](https://travis-ci.org/Mindgamesnl/FireIO) [![GitHub version](https://d25lcipzij17d.cloudfront.net/badge.svg?id=gh&type=6&v=1.2&x2=0)](https://github.com/Mindgamesnl/FireIO)
 
-Fire-IO is a lightning fast and super simple socket framework to handle your connections, data, clients and requests.
+Fire-IO is a lightning fast and super simple networking framework to handle your connections, data, clients and requests.
 
 Features include:
- - Channel based networking
+ - Super simple event driven networking
  - Send objects or strings
- - Non-blocking async data requests with callback
  - Client manager
- - Authentication
- - REST based handshake
+ - REST endpoints
  - Auto re-connect
  - Packet-loss prevention
  - Password protection for your network
- - Easy to use event system
  - Async networking
  - Android compatible
  - Thread pools for event execution

@@ -42,7 +42,7 @@ public class FireIoClient {
         this.host = host;
 
         //register and start modules
-        restModule = new RestModule(host, (port +1));
+        restModule = new RestModule(host, port);
         clientRequestModule = new ClientRequestModule(this);
 
         //register a listener for the connect event to reset attempt count every time a connection is made
@@ -145,7 +145,7 @@ public class FireIoClient {
         }
 
         //create socket and connect!
-        socketModule = new SocketModule(this, host, port, b, connectionArguments, connectionMeta);
+        socketModule = new SocketModule(this, host, (port + 1), b, connectionArguments, connectionMeta);
         return this;
     }
 

@@ -30,8 +30,8 @@ public class FireIoServer {
     public FireIoServer(int port) throws IOException {
         eventHandler = new EventHandler();
         clientModule = new ClientModule(this);
-        restModule = new RestModule(this, (port + 1));
-        socketModule = new SocketModule(this, port);
+        restModule = new RestModule(this, port);
+        socketModule = new SocketModule(this, (port + 1));
         requestModule = new RequestModule();
     }
 

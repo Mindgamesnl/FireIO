@@ -55,13 +55,13 @@ public class testserver {
 
 
             //debug;
-            server.getEventHandler().on(gl -> {
+            /*server.getEventHandler().on(gl -> {
                 if (gl.getIsEvent()) {
                     System.out.println("Debug: receved event " + gl.getChannel() + " with payload " + gl.getOriginalPayload());
                 } else {
                     System.out.println("Debug: receved channel " + gl.getChannel() + " with payload " + gl.getOriginalPayload());
                 }
-            });
+            });*/
 
             server.broadcast("message", "welcome everybody!");
 
