@@ -112,7 +112,7 @@ public class HttpHandler implements com.sun.net.httpserver.HttpHandler {
                 }
 
                 if (endpoint == null) {
-                    emit(httpExchange, 200, "{\"message\":\"FireIO has nog registered REST endpoint with this name\"}", ContentType.JSON);
+                    emit(httpExchange, 200, "{\"message\":\"FireIO doesn't have a registered REST endpoint with the given name\"}", ContentType.JSON);
                 } else {
                     List<String> finalVariables = variables;
                     String out = endpoint.getRestExchange().onRequest(new RestRequest() {
