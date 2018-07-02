@@ -2,7 +2,7 @@
   <img src="http://static.craftmend.com/fireio/FIREIO.png" />
 </p>
 
-# FireIo
+# Fire-IO
 ### The LIT java socket & rest framework
 [![](https://jitpack.io/v/Mindgamesnl/FireIO.svg)](https://jitpack.io/#Mindgamesnl/FireIO) [![Build Status](https://travis-ci.org/Mindgamesnl/FireIO.svg?branch=master)](https://travis-ci.org/Mindgamesnl/FireIO) [![GitHub version](https://d25lcipzij17d.cloudfront.net/badge.svg?id=gh&type=6&v=1.2&x2=0)](https://github.com/Mindgamesnl/FireIO)
 
