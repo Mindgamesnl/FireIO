@@ -2,10 +2,13 @@
   <img src="http://static.craftmend.com/fireio/FIREIO.png" />
 </p>
 
-# FireIo, a simple networking framework [![](https://jitpack.io/v/Mindgamesnl/FireIO.svg)](https://jitpack.io/#Mindgamesnl/FireIO) [![Build Status](https://travis-ci.org/Mindgamesnl/FireIO.svg?branch=master)](https://travis-ci.org/Mindgamesnl/FireIO) [![GitHub version](https://d25lcipzij17d.cloudfront.net/badge.svg?id=gh&type=6&v=1.2&x2=0)](https://github.com/Mindgamesnl/FireIO)
+# FireIo
+### The LIT java socket & rest framework
+[![](https://jitpack.io/v/Mindgamesnl/FireIO.svg)](https://jitpack.io/#Mindgamesnl/FireIO) [![Build Status](https://travis-ci.org/Mindgamesnl/FireIO.svg?branch=master)](https://travis-ci.org/Mindgamesnl/FireIO) [![GitHub version](https://d25lcipzij17d.cloudfront.net/badge.svg?id=gh&type=6&v=1.2&x2=0)](https://github.com/Mindgamesnl/FireIO)
 
 Fire-IO is a lightning fast and super simple networking framework to handle your connections, data, clients and requests.
 Great for building api's and comunication systems.
+
 
 Features include:
  - Super simple event driven networking
