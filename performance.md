@@ -3,12 +3,12 @@
 </p>
 
 # Fire-IO Performance
-Performance is really important to high scalable applications, FireIO is build to support as many clients as possible and as fast as possible, a few tests (including the code to run them for yourself) are avalible here
+Performance is really important for high scalable applications. FireIO is built to handle as many clients as quickly as possible. A few tests (including the code to run them for yourself) are avalible down below.
 
 The setup:
- - One Fire-IO server with rate limiting disabled and a thread pool size of `16`
- - All tests are run on localhost
- - Tests are run on a mid ragen pc (quad core intel I5 with 8GB ram) running Ubuntu
+ - One Fire-IO server with rate limiting disabled and a thread pool with the size of `16` threads
+ - All tests ran on localhost
+ - Tests are ran on a mid rage pc (quad core intel I5 with 8GB ram) running Ubuntu
  - Java 8
  - Socket testing is done with a socket test script (see below this page)
  - Restfull testing is done with siege for Ubuntu (command: `siege --time 5s http://localhost:80`)
@@ -37,7 +37,7 @@ Shortest transaction:	        0.00
 # Socket connectoins
 For this test, there is a setup of ONE password protected Fire-IO server and 1000 clients. It uses the restfull api for auth and token requesting, so besides 1000 sockets its also handeling 1000 rest requests in the background.
 
-The goals is to connect as many clients as possible in one second, testing shows that connecting, authenticating and regestering `1000` clients takes `689MS`!
+The goal is to connect as many clients as possible in one second, testing shows that connecting, authenticating and regestering `1000` clients takes `689MS`!
 
 ####Test server
 ```java
