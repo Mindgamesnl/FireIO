@@ -27,6 +27,7 @@ Fire-IO is designed for server-to-server data transfer for real time updates, pu
 
 # Information
 Some other links and information:
+ - [Technical notes](https://github.com/Mindgamesnl/FireIO/blob/master/technotes.md)
  - [Javadoc](https://cdn.rawgit.com/Mindgamesnl/FireIO/master/javadoc/)
  - [Contact](https://twitter.com/Mindgamesnl)
  - [Performance testing results](https://github.com/Mindgamesnl/FireIO/blob/master/performance.md)
