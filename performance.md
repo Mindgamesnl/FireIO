@@ -37,7 +37,7 @@ Shortest transaction:	        0.00
 # Socket connectoins
 For this test, there is a setup of ONE password protected Fire-IO server and 1000 clients. It uses the restfull api for auth and token requesting, so besides 1000 sockets its also handeling 1000 rest requests in the background.
 
-The goal is to connect as many clients as possible in one second, testing shows that connecting, authenticating and regestering `1000` clients takes `689MS`!
+The goal is to connect as many clients as possible in one second, testing shows that connecting, authenticating and regestering `1000` clients takes `470MS`!
 
 ####Test server
 ```java

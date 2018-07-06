@@ -25,9 +25,14 @@ public class SelectorHandler implements Runnable {
 
     //the default buffer is common in everything of Fire-Io, when bigger data is getting send it will change in the whole network to what ever is needed.
     //The default is 5KB
-    @Getter @Setter private Integer byteArrayLength = 5120;
-    @Getter @Setter private boolean updatedBuffer = false;
-    @Getter private RateLimit rateLimiter = new RateLimit(20, 10);
+    @Getter
+    @Setter
+    private Integer byteArrayLength = 5120;
+    @Getter
+    @Setter
+    private boolean updatedBuffer = false;
+    @Getter
+    private RateLimit rateLimiter = new RateLimit(20, 10);
 
     //channel selector
     private Selector selector;
@@ -156,11 +161,10 @@ public class SelectorHandler implements Runnable {
         //get adress
         SocketAddress remoteAddr = channel.socket().getRemoteSocketAddress();
         //parse all packets
-        Packet[] packets = packetHelper.fromString(new String(data));
+        Packet packet = packetHelper.fromString(data);
         //some times, packets get stitched together when they are send in quick completion of one another to save on resources
-        for (Packet p : packets) {
-            //get the client and trigger the packet handler
-            clientManager.references.get(remoteAddr).onPacket(p);
-        }
+        //get the client and trigger the packet handler
+        clientManager.references.get(remoteAddr).onPacket(packet);
+
     }
 }

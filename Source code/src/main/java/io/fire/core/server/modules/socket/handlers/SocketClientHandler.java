@@ -71,16 +71,16 @@ public class SocketClientHandler implements SocketEvents {
             return;
         }
         try {
-            String out = packetHelper.toString(p);
+            byte[] out = packetHelper.toString(p);
 
-            if (server.getSocketModule().getAsyncNetworkService().getSelectorHandler().getByteArrayLength() < out.getBytes().length) {
+            if (server.getSocketModule().getAsyncNetworkService().getSelectorHandler().getByteArrayLength() < out.length) {
                 server.getSocketModule().getAsyncNetworkService().getSelectorHandler().setUpdatedBuffer(true);
-                server.getSocketModule().getAsyncNetworkService().getSelectorHandler().setByteArrayLength(out.getBytes().length);
-                server.getSocketModule().getAsyncNetworkService().broadcast(new UpdateByteArraySize(out.getBytes().length));
+                server.getSocketModule().getAsyncNetworkService().getSelectorHandler().setByteArrayLength(out.length);
+                server.getSocketModule().getAsyncNetworkService().broadcast(new UpdateByteArraySize(out.length));
             }
 
-            ByteBuffer buffer = ByteBuffer.allocate(out.getBytes().length);
-            buffer.put(out.getBytes());
+            ByteBuffer buffer = ByteBuffer.allocate(out.length);
+            buffer.put(out);
             buffer.flip();
             channel.write(buffer);
             buffer.clear();

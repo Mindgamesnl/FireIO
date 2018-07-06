@@ -16,7 +16,7 @@ public class rateclient {
     public static void main(String[] args) {
         List<FireIoClient> fireIoClientList = new ArrayList<>();
         ThreadPoolExecutor executor =
-                (ThreadPoolExecutor) Executors.newFixedThreadPool(30);
+                (ThreadPoolExecutor) Executors.newFixedThreadPool(45);
         final int[] connected = {0};
         System.out.print("starting");
         Instant start = Instant.now();

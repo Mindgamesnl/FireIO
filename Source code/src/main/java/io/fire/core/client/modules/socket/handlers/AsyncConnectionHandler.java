@@ -83,15 +83,15 @@ public class AsyncConnectionHandler implements SocketEvents, EventPayload, Conne
     public void emit(Packet p) throws IOException {
         try {
             //serialize packet
-            String out = packetHelper.toString(p);
+            byte[] out = packetHelper.toString(p);
             //check if the packet fits in the buffer, if it does not, then request to increase the size of the buffer and when its chaned and confirmed, then retry to send it.
             //the list "bufferedPackets" will be checked for packets every time the buffer size changes
             //the changes HAVE TO BE DONE BY THE SERVER! the client is ALWAYS slave!
-            if (ioReader.getBufferSize() < out.getBytes().length) {
+            if (ioReader.getBufferSize() < out.length) {
                 //update local
-                ioReader.setBufferSize(out.getBytes().length);
+                ioReader.setBufferSize(out.length);
                 //request server to accept it as new global and sync it to the other clients
-                emit(new UpdateByteArraySize(out.getBytes().length));
+                emit(new UpdateByteArraySize(out.length));
                 //add to cache
                 bufferedPackets.add(p);
                 //cancel sending packet, wait until the buffer size got updated
@@ -99,8 +99,8 @@ public class AsyncConnectionHandler implements SocketEvents, EventPayload, Conne
             }
 
             //create and allocate and prepare bytebyffer
-            ByteBuffer buffer = ByteBuffer.allocate(out.getBytes().length);
-            buffer.put(out.getBytes());
+            ByteBuffer buffer = ByteBuffer.allocate(out.length);
+            buffer.put(out);
             buffer.flip();
 
             //send raw bytes through the channel
@@ -186,9 +186,9 @@ public class AsyncConnectionHandler implements SocketEvents, EventPayload, Conne
 
             //check cache for packets we can now send we previously couldn't, emit them if fount.
             for (Packet bp : bufferedPackets) {
-                String out = packetHelper.toString(bp);
+                byte[] out = packetHelper.toString(bp);
                 //check if we can really send them now
-                if (ioReader.getBufferSize() >= out.getBytes().length) {
+                if (ioReader.getBufferSize() >= out.length) {
                     try {
                         //emit
                         emit(bp);
