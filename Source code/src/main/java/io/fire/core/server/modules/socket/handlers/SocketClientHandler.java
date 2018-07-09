@@ -15,7 +15,7 @@ import java.io.IOException;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
-import java.util.Date;
+import java.time.Instant;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.UUID;
@@ -39,7 +39,7 @@ public class SocketClientHandler implements SocketEvents {
     private UUID connectionId;
     private boolean expectedClosing = false;
     @Getter private boolean open = true;
-    @Getter private Date initiated = new Date();
+    @Getter private Instant initiated = Instant.now();
 
     SocketClientHandler(FireIoServer server, Socket socket, SocketChannel channel) {
         //constructor

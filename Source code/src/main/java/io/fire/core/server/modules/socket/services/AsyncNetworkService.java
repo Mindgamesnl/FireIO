@@ -36,7 +36,7 @@ public class AsyncNetworkService {
         listenerThread.start();
 
         Timer timer = new Timer();
-        timer.schedule(new IdleKick(server), 0, 5000);
+        timer.schedule(new IdleKick(server), 0, 1000);
     }
 
     public void broadcast(Packet p) {

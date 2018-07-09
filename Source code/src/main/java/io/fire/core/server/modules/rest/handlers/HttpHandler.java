@@ -14,7 +14,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class HttpHandler implements com.sun.net.httpserver.HttpHandler {
 
@@ -77,17 +79,19 @@ public class HttpHandler implements com.sun.net.httpserver.HttpHandler {
             } else {
                 String[] requestedParts = url.split("/");
                 RestEndpoint endpoint = null;
-                List<String> variables = new ArrayList<>();
+                Map<String, String> variables = new HashMap<>();
                 int score = 0;
                 for (RestEndpoint optionalPoint : endpointList) {
-                    List<String> optionalVariables = new ArrayList<>();
+                    Map<String, String> optionalVariables = new HashMap<>();
                     int optionalScore = 0;
                     if (!(requestedParts.length < optionalPoint.getParts().length)) {
                         if (optionalPoint.getHasVariable()) {
                             for (int i = 0; i < optionalPoint.getParts().length; i++) {
-                                if (optionalPoint.getParts()[i].equals("?")) {
+                                if (optionalPoint.getParts()[i].startsWith("?")) {
                                     optionalScore++;
-                                    optionalVariables.add(requestedParts[i]);
+                                    String v = optionalPoint.getParts()[i];
+                                    v = v.replace("?", "");
+                                    optionalVariables.put(v, requestedParts[i]);
                                 } else {
                                     if (requestedParts[i].equals(optionalPoint.getParts()[i])) {
                                         optionalScore++;
@@ -114,7 +118,7 @@ public class HttpHandler implements com.sun.net.httpserver.HttpHandler {
                 if (endpoint == null) {
                     emit(httpExchange, 200, "{\"message\":\"FireIO doesn't have a registered REST endpoint with the given name\"}", ContentType.JSON);
                 } else {
-                    List<String> finalVariables = variables;
+                    Map<String, String> finalVariables = variables;
                     String out = endpoint.getRestExchange().onRequest(new RestRequest() {
                         @Override
                         public InetSocketAddress getRequester() {
@@ -122,8 +126,8 @@ public class HttpHandler implements com.sun.net.httpserver.HttpHandler {
                         }
 
                         @Override
-                        public String getVariable(int key) {
-                            return finalVariables.get(key);
+                        public String getVariable(String name) {
+                            return finalVariables.get(name);
                         }
 
                         @Override

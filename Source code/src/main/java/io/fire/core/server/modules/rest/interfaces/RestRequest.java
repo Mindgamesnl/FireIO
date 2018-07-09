@@ -8,7 +8,7 @@ import java.net.InetSocketAddress;
 public interface RestRequest {
 
     InetSocketAddress getRequester();
-    String getVariable(int index);
+    String getVariable(String name);
     InputStream getRequestBody();
     Headers getHeaders();
     String getURL();

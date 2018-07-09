@@ -89,14 +89,13 @@ server.registerEndpoint("/time", req -> {
     return "The server time is: " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
 });
 
-//one with a variable, the path is set to /hi/?
-//this will mean that ? will be a variable
 //so calling http://localhost/hi/Mats
 //will return Welcome to FireIO Mats!
-server.registerEndpoint("/hi/?", req -> {
-    return "Welcome to FireIO " + req.getVariable(0) + "!";
+//one with a variable, the path is set to /hi/?name
+//this will mean that ?name will be a variable, example
+server.registerEndpoint("/hi/?name", req -> {
+    return "Welcome to FireIO " + req.getVariable("name") + "!";
 });
-
 
 //Client client = server.getClient(UUID.fromString("067e6162-3b6f-4ae2-a171-2470b63dff00"));
 //client.send("message", "well hi there! you are the best.");

@@ -15,7 +15,6 @@ public class testserver {
         System.out.println("Starting server...");
 
         try {
-            Process p = Runtime.getRuntime().exec("su");
             FireIoServer server = new FireIoServer(80)
                     .setPassword("testpassword1")
                     .setRateLimiter(50, 1)
@@ -61,10 +60,10 @@ public class testserver {
                 return "The server time is: " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
             });
 
-            //one with a variable, the path is set to /hi/?
-            //this will mean that ? will be a variable, example
-            server.registerEndpoint("/hi/?", req -> {
-                return "Welcome to FireIO " + req.getVariable(0) + "!";
+            //one with a variable, the path is set to /hi/?name
+            //this will mean that ?name will be a variable, example
+            server.registerEndpoint("/hi/?name", req -> {
+                return "Welcome to FireIO " + req.getVariable("name") + "!";
             });
 
 

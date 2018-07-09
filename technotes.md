@@ -9,7 +9,7 @@ So let's talk about the inner workings of Fire-IO, the juicy stuff, the good stu
 
 # Socket Authentication & Handshake
 The authentication process takes quite some steps to authenticate with the client token and password, before the actual socket gets opened, a REST request is made to the Fire-IO server (with the optional password).
-ONLY if this request gets accepted (rate limiting, platform and the (optional) password) the server will respond with a token, that token is used to authenticate over the socket.
+ONLY if this request gets accepted (rate limiting, platform and the (optional) password) the server will respond with a token. That token is used to authenticate over the socket.
 
 Once the socket is opened (empty) the client has to send the authentication token (received from the previous rest call) within 100MS, if the server does not receive a VALID token within that time, the connection gets terminated and the rate limiter gets called.
 
@@ -33,7 +33,7 @@ The Fire-IO client always uses one allocated thread to handle the IO listener fo
 
 #### Common
 The events and requests are handled in a thread pool.
-Ever triggered event instance is in it's own executed task in one of the threads, this makes it safe to make other API and DATABASE calls from within the socket events and requests.
+Ever triggered event instance is in it's own executed task in one of the threads. This makes it safe to make other API and DATABASE calls from within the socket events and requests.
 
 The thread pool size can be changed using `.setThreadPoolSize(size)`, it takes a few milliseconds to update the thread pool, this should only been done when starting and creating a Fire-IO instance.
 
