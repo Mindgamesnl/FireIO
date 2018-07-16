@@ -1,6 +1,7 @@
 package io.fire.core.server.modules.request;
 
 import io.fire.core.common.interfaces.RequestBody;
+import io.fire.core.common.packets.CancelRequestPacket;
 import io.fire.core.common.packets.CompleteRequestPacket;
 import io.fire.core.server.modules.client.objects.FireIoConnection;
 import io.fire.core.server.modules.client.superclasses.Client;
@@ -22,7 +23,9 @@ public class RequestModule {
         //check if we have any registered handlers for this request
         if (!requestExecutors.containsKey(channel)) return;
         //loop for all handlers
+        Boolean handled = false;
         for (RequestExecutor executor : requestExecutors.get(channel)) {
+            handled = true;
             //create new completable executor
             RequestResponse requestResponse = new RequestResponse();
             //set the request id
@@ -46,6 +49,14 @@ public class RequestModule {
             });
             //call the listener/executor with the client, body and the completable response
             executor.onRequest(client, body, requestResponse);
+        }
+        if (!handled) {
+            FireIoConnection fireIoClient = (FireIoConnection) client;
+            try {
+                fireIoClient.getHandler().emit(new CancelRequestPacket(uuid));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 

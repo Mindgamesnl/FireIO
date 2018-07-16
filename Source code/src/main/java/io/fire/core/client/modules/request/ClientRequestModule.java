@@ -2,18 +2,19 @@ package io.fire.core.client.modules.request;
 
 import io.fire.core.client.FireIoClient;
 import io.fire.core.client.modules.request.interfaces.ClientRequest;
+import io.fire.core.common.interfaces.Packet;
 import io.fire.core.common.interfaces.RequestBody;
+import io.fire.core.common.packets.CancelRequestPacket;
 import io.fire.core.common.packets.SubmitRequestPacket;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 public class ClientRequestModule {
 
     //Map to hold pending request callbacks with theire id to execute when the server responds
     private Map<UUID, ClientRequest> ongoingRequests = new HashMap<>();
+    private Queue<Packet> awaitingRequests = new LinkedList<>();
     private FireIoClient client;
 
     public ClientRequestModule(FireIoClient client) {
@@ -31,11 +32,30 @@ public class ClientRequestModule {
         //save the callback in memmory to execute when the server gives a response
         ongoingRequests.put(requestPacket.getRequestId(), callback);
 
-        //send request with body and id to the server
-        try {
-            client.getSocketModule().getConnection().emit(requestPacket);
-        } catch (IOException e) {
-            e.printStackTrace();
+        if (ongoingRequests.values().size() == 1) {
+            //send request with body and id to the server
+            try {
+                client.getSocketModule().getConnection().emit(requestPacket);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+            awaitingRequests.add(requestPacket);
+        }
+    }
+
+    //not handled by server, cancel
+    public void cancel(UUID id) {
+        //remove the callback since it wont get triggered again
+        ongoingRequests.remove(id);
+
+        Packet nextRequest = awaitingRequests.poll();
+        if (nextRequest != null) {
+            try {
+                client.getSocketModule().getConnection().emit(nextRequest);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -49,6 +69,15 @@ public class ClientRequestModule {
 
         //remove the callback since it wont get triggered again
         ongoingRequests.remove(id);
+
+        Packet nextRequest = awaitingRequests.poll();
+        if (nextRequest != null) {
+            try {
+                client.getSocketModule().getConnection().emit(nextRequest);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
 }

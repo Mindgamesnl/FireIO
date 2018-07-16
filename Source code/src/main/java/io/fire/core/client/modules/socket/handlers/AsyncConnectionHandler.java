@@ -204,6 +204,13 @@ public class AsyncConnectionHandler implements SocketEvents, EventPayload, Conne
             return;
         }
 
+        //cancel the request, server does not know how to handle it
+        if (packet instanceof CancelRequestPacket) {
+            //cast to proper packet
+            CancelRequestPacket cancellation = (CancelRequestPacket) packet;
+            client.getClientRequestModule().cancel(cancellation.getRequest());
+        }
+
         //server has triggered a custom event with a custom packet as payload
         if (packet instanceof ChannelPacketPacket) {
             //cast the correct internal packet
