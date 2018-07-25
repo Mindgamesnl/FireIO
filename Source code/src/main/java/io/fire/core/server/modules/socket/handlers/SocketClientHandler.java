@@ -1,7 +1,7 @@
 package io.fire.core.server.modules.socket.handlers;
 
 import io.fire.core.common.eventmanager.enums.Event;
-import io.fire.core.common.eventmanager.interfaces.Listener;
+import io.fire.core.common.eventmanager.interfaces.EventPayload;
 import io.fire.core.common.interfaces.Packet;
 import io.fire.core.common.objects.PacketHelper;
 import io.fire.core.common.packets.*;
@@ -19,6 +19,7 @@ import java.time.Instant;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 public class SocketClientHandler implements SocketEvents {
 
@@ -27,7 +28,7 @@ public class SocketClientHandler implements SocketEvents {
     private Socket socket;
 
     //packet listener/handler
-    private Listener listener;
+    private Consumer<EventPayload> consumer;
     private PacketHelper packetHelper;
 
     //main instance
@@ -49,9 +50,9 @@ public class SocketClientHandler implements SocketEvents {
         this.packetHelper = new PacketHelper(server.getEventHandler());
     }
 
-    public void onMessage(Listener listener) {
+    public void onMessage(Consumer<EventPayload> listener) {
         //set message handler
-        this.listener = listener;
+        this.consumer = listener;
     }
 
     public void close() {
@@ -162,7 +163,7 @@ public class SocketClientHandler implements SocketEvents {
             return;
         }
 
-        if (listener != null) listener.call(packet);
+        if (consumer != null) consumer.accept(packet);
     }
 
     @Override

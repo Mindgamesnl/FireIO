@@ -7,5 +7,5 @@ public enum Event {
     CONNECT,
     DISCONNECT,
     CLOSED_UNEXPECTEDLY
-
+    
 }

@@ -4,9 +4,6 @@ import io.fire.core.common.eventmanager.enums.Event;
 import io.fire.core.common.eventmanager.interfaces.CompletePayload;
 import io.fire.core.common.eventmanager.interfaces.EventPayload;
 import io.fire.core.common.eventmanager.interfaces.GlobalListener;
-import io.fire.core.common.eventmanager.interfaces.Listener;
-
-import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,12 +12,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.function.Consumer;
 
 public class EventHandler {
 
     //storage of events and what to do with them
-    private Map<String, ConcurrentLinkedQueue<Listener>> events = new ConcurrentHashMap();
-    private Map<Event, ConcurrentLinkedQueue<Listener>> systemEvents = new ConcurrentHashMap();
+    private Map<String, ConcurrentLinkedQueue<Consumer<EventPayload>>> events = new ConcurrentHashMap();
+    private Map<Event, ConcurrentLinkedQueue<Consumer<EventPayload>>> systemEvents = new ConcurrentHashMap();
 
     //thread pool service
     ExecutorService pool = Executors.newFixedThreadPool(1);
@@ -45,9 +43,9 @@ public class EventHandler {
         if (events.containsKey(event)) {
             //loop for all listeners
             pool.execute(() -> {
-                for (Listener l : events.get(event)) {
+                for (Consumer<EventPayload> cons : events.get(event)) {
                     //call listener
-                    l.call(payload);
+                    cons.accept(payload);
                 }
             });
         }
@@ -69,9 +67,9 @@ public class EventHandler {
         if (systemEvents.containsKey(event)) {
             //loop for all listeners in its own pool
             pool.execute(() -> {
-                for (Listener l : systemEvents.get(event)) {
+                for (Consumer<EventPayload> cons : systemEvents.get(event)) {
                     //call listener
-                    l.call(payload);
+                    cons.accept(payload);
                 }
             });
         }
@@ -91,7 +89,7 @@ public class EventHandler {
         return this;
     }
 
-    public EventHandler on(String event, Listener listener) {
+    public EventHandler on(String event, Consumer<EventPayload> listener) {
         //register channel listener
         //check if there already exists a que for this listener
         //it needs to be a que so if there are multiple listeners for one event they will all be triggered in order
@@ -111,7 +109,7 @@ public class EventHandler {
         return this;
     }
 
-    public EventHandler on(Event e, Listener listener) {
+    public EventHandler on(Event e, Consumer<EventPayload> listener) {
         //register channel listener
         //check if there already exists a que for this listener
         //it needs to be a que so if there are multiple listeners for one event they will all be triggered in order

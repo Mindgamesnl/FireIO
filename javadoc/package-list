@@ -10,7 +10,6 @@ io.fire.core.common.body
 io.fire.core.common.eventmanager
 io.fire.core.common.eventmanager.enums
 io.fire.core.common.eventmanager.interfaces
-io.fire.core.common.extra
 io.fire.core.common.interfaces
 io.fire.core.common.objects
 io.fire.core.common.packets

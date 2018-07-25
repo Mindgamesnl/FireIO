@@ -6,7 +6,7 @@ import io.fire.core.client.modules.rest.RestModule;
 import io.fire.core.client.modules.socket.SocketModule;
 import io.fire.core.common.eventmanager.EventHandler;
 import io.fire.core.common.eventmanager.enums.Event;
-import io.fire.core.common.eventmanager.interfaces.Listener;
+import io.fire.core.common.eventmanager.interfaces.EventPayload;
 import io.fire.core.common.interfaces.ClientMeta;
 import io.fire.core.common.interfaces.Packet;
 import io.fire.core.common.interfaces.RequestBody;
@@ -18,6 +18,7 @@ import lombok.Getter;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.function.Consumer;
 
 public class FireIoClient {
 
@@ -192,13 +193,13 @@ public class FireIoClient {
         return close();
     }
 
-    public FireIoClient on(Event e, Listener r) {
+    public FireIoClient on(Event e, Consumer<EventPayload> r) {
         //register event listener
         eventHandler.on(e, r);
         return this;
     }
 
-    public FireIoClient on(String e, Listener r) {
+    public FireIoClient on(String e, Consumer<EventPayload> r) {
         //register channel listener
         eventHandler.on(e, r);
         return this;

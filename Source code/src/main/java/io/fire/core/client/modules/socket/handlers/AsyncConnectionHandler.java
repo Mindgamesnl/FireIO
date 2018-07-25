@@ -18,7 +18,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.util.*;
 
-public class AsyncConnectionHandler implements SocketEvents, EventPayload, ConnectedFireioClient {
+public class AsyncConnectionHandler implements SocketEvents, EventPayload, ConnectedFireioClient  {
 
     //Main FireIo client!
     //contains all the functional logic, authentication, data (like meta and ID) and handlers
@@ -70,6 +70,7 @@ public class AsyncConnectionHandler implements SocketEvents, EventPayload, Conne
         //the default buffer is common in everything of Fire-Io, when bigger data is getting send it will change in the whole network to what ever is needed.
         //The default is 5KB
         socketChannel = SocketChannel.open(new InetSocketAddress(host, port));
+        socketChannel.configureBlocking(true);
         if (reader != null && reader.isAlive()) reader.stop();
         //create reader
         ioReader = new IoReader(socketChannel, 5120, this, client);

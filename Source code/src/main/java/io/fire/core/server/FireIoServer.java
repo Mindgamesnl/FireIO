@@ -1,8 +1,8 @@
 package io.fire.core.server;
 
 import io.fire.core.common.eventmanager.enums.Event;
-import io.fire.core.common.eventmanager.interfaces.Listener;
 import io.fire.core.common.eventmanager.EventHandler;
+import io.fire.core.common.eventmanager.interfaces.EventPayload;
 import io.fire.core.common.interfaces.Packet;
 import io.fire.core.server.modules.client.ClientModule;
 import io.fire.core.server.modules.client.superclasses.Client;
@@ -18,6 +18,7 @@ import lombok.Getter;
 import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public class FireIoServer {
@@ -37,7 +38,7 @@ public class FireIoServer {
         requestModule = new RequestModule();
     }
 
-    public FireIoServer on(Event e, Listener r) {
+    public FireIoServer on(Event e, Consumer<EventPayload> r) {
         eventHandler.on(e, r);
         return this;
     }
@@ -89,7 +90,7 @@ public class FireIoServer {
         return this;
     }
 
-    public FireIoServer on(String e, Listener r) {
+    public FireIoServer on(String e, Consumer<EventPayload> r) {
         eventHandler.on(e, r);
         return this;
     }
