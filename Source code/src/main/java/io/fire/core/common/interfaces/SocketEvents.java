@@ -1,6 +1,4 @@
-package io.fire.core.server.modules.socket.interfaces;
-
-import io.fire.core.common.interfaces.Packet;
+package io.fire.core.common.interfaces;
 
 public interface SocketEvents {
 

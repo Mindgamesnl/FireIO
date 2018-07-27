@@ -1,6 +1,7 @@
 package io.fire.core.server.modules.socket.services;
 
 import io.fire.core.common.interfaces.Packet;
+import io.fire.core.common.interfaces.ProtocolInfoHolder;
 import io.fire.core.server.FireIoServer;
 import io.fire.core.server.modules.client.objects.FireIoConnection;
 import io.fire.core.server.modules.socket.handlers.SelectorHandler;
@@ -14,7 +15,7 @@ import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.util.Timer;
 
-public class AsyncNetworkService {
+public class AsyncNetworkService implements ProtocolInfoHolder {
 
     private FireIoServer server;
 
@@ -49,5 +50,15 @@ public class AsyncNetworkService {
                 e.printStackTrace();
             }
         }
+    }
+
+    @Override
+    public int getBufferSize() {
+        return selectorHandler.getByteArrayLength();
+    }
+
+    @Override
+    public void setBufferSize(int max) {
+        selectorHandler.setByteArrayLength(max);
     }
 }

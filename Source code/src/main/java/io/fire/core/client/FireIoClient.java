@@ -9,7 +9,9 @@ import io.fire.core.common.eventmanager.enums.Event;
 import io.fire.core.common.eventmanager.interfaces.EventPayload;
 import io.fire.core.common.interfaces.ClientMeta;
 import io.fire.core.common.interfaces.Packet;
+import io.fire.core.common.interfaces.PoolHolder;
 import io.fire.core.common.interfaces.RequestBody;
+import io.fire.core.common.objects.ThreadPool;
 import io.fire.core.common.packets.ChannelMessagePacket;
 import io.fire.core.common.packets.ChannelPacketPacket;
 import io.fire.core.common.packets.ReceivedText;
@@ -20,7 +22,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.function.Consumer;
 
-public class FireIoClient {
+public class FireIoClient implements PoolHolder {
 
     //modules + getters
     @Getter private SocketModule socketModule;
@@ -35,6 +37,7 @@ public class FireIoClient {
     private Timer scheduler = new Timer();
     private Map<String, String> connectionArguments = new HashMap<>();
     private Map<String, ClientMeta> connectionMeta = new HashMap<>();
+    private ThreadPool pool = new ThreadPool();
 
     public FireIoClient(String host, int port) {
         //constructor! create the client!
@@ -100,7 +103,7 @@ public class FireIoClient {
     }
 
     public FireIoClient setThreadPoolSize(int size) {
-        eventHandler.setPoolSize(size);
+        pool.setSize(size);
         return this;
     }
 
@@ -176,7 +179,7 @@ public class FireIoClient {
     public FireIoClient close() {
         //prepare and then close the connection
         socketModule.getConnection().close();
-        eventHandler.shutdown();
+        pool.shutdown();
         return this;
     }
 
@@ -205,4 +208,8 @@ public class FireIoClient {
         return this;
     }
 
+    @Override
+    public ThreadPool getPool() {
+        return pool;
+    }
 }

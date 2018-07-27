@@ -4,6 +4,8 @@ import io.fire.core.common.eventmanager.enums.Event;
 import io.fire.core.common.eventmanager.EventHandler;
 import io.fire.core.common.eventmanager.interfaces.EventPayload;
 import io.fire.core.common.interfaces.Packet;
+import io.fire.core.common.interfaces.PoolHolder;
+import io.fire.core.common.objects.ThreadPool;
 import io.fire.core.server.modules.client.ClientModule;
 import io.fire.core.server.modules.client.superclasses.Client;
 import io.fire.core.server.modules.request.RequestModule;
@@ -21,7 +23,7 @@ import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-public class FireIoServer {
+public class FireIoServer implements PoolHolder {
 
     //modules
     @Getter private SocketModule socketModule;
@@ -29,6 +31,7 @@ public class FireIoServer {
     @Getter private ClientModule clientModule;
     @Getter private EventHandler eventHandler;
     @Getter private RequestModule requestModule;
+    private ThreadPool threadPool = new ThreadPool();
 
     public FireIoServer(int port) throws IOException {
         eventHandler = new EventHandler();
@@ -72,7 +75,7 @@ public class FireIoServer {
     }
 
     public FireIoServer setThreadPoolSize(int size) {
-        eventHandler.setPoolSize(size);
+        threadPool.setSize(size);
         return this;
     }
 
@@ -106,4 +109,8 @@ public class FireIoServer {
         return this;
     }
 
+    @Override
+    public ThreadPool getPool() {
+        return threadPool;
+    }
 }

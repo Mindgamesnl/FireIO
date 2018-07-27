@@ -10,8 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
 public class EventHandler {
@@ -20,13 +18,11 @@ public class EventHandler {
     private Map<String, ConcurrentLinkedQueue<Consumer<EventPayload>>> events = new ConcurrentHashMap();
     private Map<Event, ConcurrentLinkedQueue<Consumer<EventPayload>>> systemEvents = new ConcurrentHashMap();
 
-    //thread pool service
-    ExecutorService pool = Executors.newFixedThreadPool(1);
-
     //debug listeners
     private List<GlobalListener> globalListeners = new ArrayList<>();
 
-    public EventHandler() {}
+    public EventHandler() {
+    }
 
     public void fireEvent(String event, EventPayload payload) {
         //fire channel based event!
@@ -42,12 +38,10 @@ public class EventHandler {
         //check if it has any api listeners
         if (events.containsKey(event)) {
             //loop for all listeners
-            pool.execute(() -> {
-                for (Consumer<EventPayload> cons : events.get(event)) {
-                    //call listener
-                    cons.accept(payload);
-                }
-            });
+            for (Consumer<EventPayload> cons : events.get(event)) {
+                //call listener
+                cons.accept(payload);
+            }
         }
     }
 
@@ -66,22 +60,12 @@ public class EventHandler {
         //check if it has any api listeners
         if (systemEvents.containsKey(event)) {
             //loop for all listeners in its own pool
-            pool.execute(() -> {
-                for (Consumer<EventPayload> cons : systemEvents.get(event)) {
-                    //call listener
-                    cons.accept(payload);
-                }
-            });
+
+            for (Consumer<EventPayload> cons : systemEvents.get(event)) {
+                //call listener
+                cons.accept(payload);
+            }
         }
-    }
-
-    public void setPoolSize(int size) {
-        pool.shutdown();
-        pool = Executors.newFixedThreadPool(size);
-    }
-
-    public void shutdown() {
-        pool.shutdown();
     }
 
     public EventHandler on(GlobalListener globalListener) {

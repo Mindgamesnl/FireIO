@@ -29,9 +29,6 @@ public class SelectorHandler implements Runnable {
     @Setter
     private Integer byteArrayLength = 5120;
     @Getter
-    @Setter
-    private boolean updatedBuffer = false;
-    @Getter
     private RateLimit rateLimiter = new RateLimit(20, 10);
 
     //channel selector
@@ -164,7 +161,10 @@ public class SelectorHandler implements Runnable {
         Packet packet = packetHelper.fromString(data);
         //some times, packets get stitched together when they are send in quick completion of one another to save on resources
         //get the client and trigger the packet handler
+        server.getPool().run(() -> {
+
         clientManager.references.get(remoteAddr).onPacket(packet);
+        });
 
     }
 }

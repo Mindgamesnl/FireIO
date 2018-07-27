@@ -7,14 +7,14 @@ import io.fire.core.common.eventmanager.interfaces.EventPayload;
 import io.fire.core.common.interfaces.ClientMeta;
 import io.fire.core.common.interfaces.ConnectedFireioClient;
 import io.fire.core.common.interfaces.Packet;
+import io.fire.core.common.objects.ConcurrentSocketWriter;
 import io.fire.core.common.objects.PacketHelper;
 import io.fire.core.common.packets.*;
-import io.fire.core.server.modules.socket.interfaces.SocketEvents;
+import io.fire.core.common.interfaces.SocketEvents;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
 
-import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.util.*;
 
@@ -36,6 +36,7 @@ public class AsyncConnectionHandler implements SocketEvents, EventPayload, Conne
     private SocketChannel socketChannel;
     private Thread reader;
     private PacketHelper packetHelper;
+    private ConcurrentSocketWriter socketWriter;
 
     //host information for connection
     private String host;
@@ -46,18 +47,17 @@ public class AsyncConnectionHandler implements SocketEvents, EventPayload, Conne
     //buffers!
     //when the client failed to send a packet, it will retry at a moment to prevent packet loss.
     private Queue<Packet> missedPackets = new LinkedList<>();
-    private List<Packet> bufferedPackets = new ArrayList<>();
 
     //constructor, apply data and try to connect. if the connection fails, then handle it appropriately
     public AsyncConnectionHandler(FireIoClient client, String host, int port, UUID id, Map<String, String> arguments, Map<String, ClientMeta> argumentsMeta) {
         try {
+            this.packetHelper = new PacketHelper(client.getEventHandler());
             this.identifier = id;
             this.client = client;
             this.host = host;
             this.port = port;
             this.arguments = arguments;
             this.argumentsMeta = argumentsMeta;
-            this.packetHelper = new PacketHelper(client.getEventHandler());
             connect();
         } catch (IOException e) {
             //trigger fatal error event for api and internal ussage
@@ -73,7 +73,9 @@ public class AsyncConnectionHandler implements SocketEvents, EventPayload, Conne
         socketChannel.configureBlocking(true);
         if (reader != null && reader.isAlive()) reader.stop();
         //create reader
-        ioReader = new IoReader(socketChannel, 5120, this, client);
+        this.ioReader = new IoReader(socketChannel, 5120, this, client);
+        this.socketWriter = new ConcurrentSocketWriter(socketChannel, this, packetHelper, ioReader);
+        socketChannel.configureBlocking(true);
         reader = new Thread(ioReader);
         //start reader
         reader.start();
@@ -82,40 +84,7 @@ public class AsyncConnectionHandler implements SocketEvents, EventPayload, Conne
     }
 
     public void emit(Packet p) throws IOException {
-        try {
-            //serialize packet
-            byte[] out = packetHelper.toString(p);
-            //check if the packet fits in the buffer, if it does not, then request to increase the size of the buffer and when its chaned and confirmed, then retry to send it.
-            //the list "bufferedPackets" will be checked for packets every time the buffer size changes
-            //the changes HAVE TO BE DONE BY THE SERVER! the client is ALWAYS slave!
-            if (ioReader.getBufferSize() < out.length) {
-                //update local
-                ioReader.setBufferSize(out.length);
-                //request server to accept it as new global and sync it to the other clients
-                emit(new UpdateByteArraySize(out.length));
-                //add to cache
-                bufferedPackets.add(p);
-                //cancel sending packet, wait until the buffer size got updated
-                return;
-            }
-
-            //create and allocate and prepare bytebyffer
-            ByteBuffer buffer = ByteBuffer.allocate(out.length);
-            buffer.put(out);
-            buffer.flip();
-
-            //send raw bytes through the channel
-            socketChannel.write(buffer);
-            //clear the buffer
-            buffer.clear();
-        } catch (Exception e) {
-            //failed to send! (io exception, socket may be closed or busy)
-            //add the packet to a list so it can retry to emit once a new connection is open
-            missedPackets.add(p);
-            e.printStackTrace();
-            //throw exception
-            throw new IOException("Failed to send! saving to retry once a connection is back active.");
-        }
+        this.socketWriter.send(p);
     }
 
     public void close() {
@@ -186,22 +155,7 @@ public class AsyncConnectionHandler implements SocketEvents, EventPayload, Conne
             ioReader.setBufferSize(((UpdateByteArraySize) packet).getSize());
 
             //check cache for packets we can now send we previously couldn't, emit them if fount.
-            for (Packet bp : bufferedPackets) {
-                byte[] out = packetHelper.toString(bp);
-                //check if we can really send them now
-                if (ioReader.getBufferSize() >= out.length) {
-                    try {
-                        //emit
-                        emit(bp);
-                    } catch (IOException e) {
-                        //oi fuck no error
-                        e.printStackTrace();
-                    }
-                    return;
-                }
-            }
-            //clear buffer
-            bufferedPackets.clear();
+            socketWriter.flushWaiting();
             return;
         }
 

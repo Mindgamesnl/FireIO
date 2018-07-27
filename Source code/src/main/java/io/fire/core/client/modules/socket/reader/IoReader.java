@@ -4,6 +4,7 @@ import io.fire.core.client.FireIoClient;
 import io.fire.core.client.modules.socket.handlers.AsyncConnectionHandler;
 import io.fire.core.common.eventmanager.enums.Event;
 import io.fire.core.common.interfaces.Packet;
+import io.fire.core.common.interfaces.ProtocolInfoHolder;
 import io.fire.core.common.objects.PacketHelper;
 import io.fire.core.common.packets.ReceivedText;
 
@@ -14,7 +15,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 
-public class IoReader implements Runnable {
+public class IoReader implements Runnable, ProtocolInfoHolder {
 
     //the default buffer is common in everything of Fire-Io, when bigger data is getting send it will change in the whole network to what ever is needed.
     //The default is 5KB
@@ -74,7 +75,9 @@ public class IoReader implements Runnable {
                 //this can mean that we receive multiple packets in one go!
                 Packet packets = packetHelper.fromString(data);
                 //handle all received packets, trigger onPacket function
-                asyncConnectionHandler.onPacket(packets);
+                client.getPool().run(() -> {
+                    asyncConnectionHandler.onPacket(packets);
+                });
             } catch (Exception e) {
                 //invalid buffer! oh no...
                 client.getEventHandler().fireEvent(Event.CLOSED_UNEXPECTEDLY, new ReceivedText("Invalid buffer! (" + e.getMessage() + ")" ,null));

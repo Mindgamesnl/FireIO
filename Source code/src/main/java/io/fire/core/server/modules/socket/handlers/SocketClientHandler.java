@@ -3,21 +3,19 @@ package io.fire.core.server.modules.socket.handlers;
 import io.fire.core.common.eventmanager.enums.Event;
 import io.fire.core.common.eventmanager.interfaces.EventPayload;
 import io.fire.core.common.interfaces.Packet;
+import io.fire.core.common.objects.ConcurrentSocketWriter;
 import io.fire.core.common.objects.PacketHelper;
 import io.fire.core.common.packets.*;
 import io.fire.core.server.FireIoServer;
 import io.fire.core.server.modules.client.objects.ClientInfo;
-import io.fire.core.server.modules.socket.interfaces.SocketEvents;
+import io.fire.core.common.interfaces.SocketEvents;
 
 import lombok.Getter;
 
 import java.io.IOException;
 import java.net.Socket;
-import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.time.Instant;
-import java.util.LinkedList;
-import java.util.Queue;
 import java.util.UUID;
 import java.util.function.Consumer;
 
@@ -30,13 +28,13 @@ public class SocketClientHandler implements SocketEvents {
     //packet listener/handler
     private Consumer<EventPayload> consumer;
     private PacketHelper packetHelper;
+    private ConcurrentSocketWriter concurrentSocketWriter;
 
     //main instance
     private FireIoServer server;
 
     //meta and connection info
     public boolean authenticated = false;
-    private Queue<Packet> missedPackets = new LinkedList<>();
     private UUID connectionId;
     private boolean expectedClosing = false;
     @Getter private boolean open = true;
@@ -48,6 +46,7 @@ public class SocketClientHandler implements SocketEvents {
         this.socket = socket;
         this.channel = channel;
         this.packetHelper = new PacketHelper(server.getEventHandler());
+        this.concurrentSocketWriter = new ConcurrentSocketWriter(channel, this, this.packetHelper, server.getSocketModule().getAsyncNetworkService());
     }
 
     public void onMessage(Consumer<EventPayload> listener) {
@@ -71,24 +70,7 @@ public class SocketClientHandler implements SocketEvents {
         if (!authenticated && !(p instanceof UpdateByteArraySize)) {
             return;
         }
-        try {
-            byte[] out = packetHelper.toString(p);
-
-            if (server.getSocketModule().getAsyncNetworkService().getSelectorHandler().getByteArrayLength() < out.length) {
-                server.getSocketModule().getAsyncNetworkService().getSelectorHandler().setUpdatedBuffer(true);
-                server.getSocketModule().getAsyncNetworkService().getSelectorHandler().setByteArrayLength(out.length);
-                server.getSocketModule().getAsyncNetworkService().broadcast(new UpdateByteArraySize(out.length));
-            }
-
-            ByteBuffer buffer = ByteBuffer.allocate(out.length);
-            buffer.put(out);
-            buffer.flip();
-            channel.write(buffer);
-            buffer.clear();
-        } catch (Exception e) {
-            missedPackets.add(p);
-            throw new IOException("Failed to send! saving to retry once a connection is back active. reason: " + e.getMessage());
-        }
+        this.concurrentSocketWriter.send(p);
     }
 
     @Override
@@ -118,16 +100,7 @@ public class SocketClientHandler implements SocketEvents {
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-                    while (missedPackets.size() != 0) {
-                        Packet p = missedPackets.peek();
-                        try {
-                            emit(p);
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                            return;
-                        }
-                        missedPackets.remove(p);
-                    }
+                    this.concurrentSocketWriter.flushWaiting();
                     return;
                 }
             }
@@ -136,7 +109,6 @@ public class SocketClientHandler implements SocketEvents {
 
         if (packet instanceof UpdateByteArraySize) {
             System.out.println("Updating array size!");
-            server.getSocketModule().getAsyncNetworkService().getSelectorHandler().setUpdatedBuffer(true);
             server.getSocketModule().getAsyncNetworkService().getSelectorHandler().setByteArrayLength(((UpdateByteArraySize) packet).getSize());
             server.getSocketModule().getAsyncNetworkService().broadcast(new UpdateByteArraySize(((UpdateByteArraySize) packet).getSize()));
             try {
@@ -184,7 +156,7 @@ public class SocketClientHandler implements SocketEvents {
     @Override
     public void onOpen() {
         expectedClosing = false;
-        if (server.getSocketModule().getAsyncNetworkService().getSelectorHandler().isUpdatedBuffer()) {
+        if (server.getSocketModule().getAsyncNetworkService().getSelectorHandler().getByteArrayLength() != 5120) {
             try {
                 emit(new UpdateByteArraySize(server.getSocketModule().getAsyncNetworkService().getSelectorHandler().getByteArrayLength()));
             } catch (IOException e) {
