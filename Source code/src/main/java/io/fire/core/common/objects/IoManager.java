@@ -45,32 +45,15 @@ public class IoManager {
                     Iterator<Byte> iterator = byteBuffer.iterator();
                     for (int i = 0; i < ret.length; i++) ret[i] = iterator.next();
                     byteBuffer.clear();
-
                     ByteArrayInputStream bis = new ByteArrayInputStream(ret);
-                    ObjectInput in = null;
                     Packet finalOut = null;
-                    try {
-                        in = new ObjectInputStream(bis);
+                    try (ObjectInput in = new ObjectInputStream(bis)) {
                         finalOut = (Packet) in.readObject();
-
-                    } catch (IOException e) {
+                    } catch (IOException | ClassNotFoundException e) {
                         System.err.println("UNABLE TO DECODE PACKET!!!");
                         System.err.println("Error: ");
                         e.printStackTrace();
-                    } catch (ClassNotFoundException e) {
-                        System.err.println("UNABLE TO DECODE PACKET!!!");
-                        System.err.println("Error: ");
-                        e.printStackTrace();
-                    } finally {
-                        try {
-                            if (in != null) {
-                                in.close();
-                            }
-                        } catch (IOException ex) {
-                            // ignore close exception
-                        }
                     }
-
                     onInput.accept(finalOut);
                     break;
                 case ',':
@@ -137,9 +120,8 @@ public class IoManager {
     //makes it ex, but don't forget to close the buffer!
     private ByteBuffer prepare(Packet packet) {
         //create buffer and output streams
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
         byte[] outBytes = new byte[0];
-        try {
+        try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
             ObjectOutput out = new ObjectOutputStream(bos);
             out.writeObject(packet);
             out.flush();
@@ -148,12 +130,6 @@ public class IoManager {
             System.err.println("UNABLE TO DECODE PACKET!!!");
             System.err.println("Error: ");
             e.printStackTrace();
-        } finally {
-            try {
-                bos.close();
-            } catch (IOException ex) {
-                // ignore close exception
-            }
         }
         ByteBuffer buffer = ByteBuffer.allocate(outBytes.length);
         buffer.put(outBytes);
