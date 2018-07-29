@@ -4,7 +4,6 @@ import io.fire.core.common.eventmanager.enums.Event;
 import io.fire.core.common.eventmanager.interfaces.EventPayload;
 import io.fire.core.common.interfaces.Packet;
 import io.fire.core.common.objects.IoManager;
-import io.fire.core.common.objects.PacketHelper;
 import io.fire.core.common.packets.*;
 import io.fire.core.server.FireIoServer;
 import io.fire.core.server.modules.client.objects.ClientInfo;
@@ -26,7 +25,6 @@ public class SocketClientHandler implements SocketEvents {
 
     //packet listener/handler
     private Consumer<EventPayload> consumer;
-    private PacketHelper packetHelper;
     private IoManager ioManager;
 
     //main instance
@@ -43,13 +41,9 @@ public class SocketClientHandler implements SocketEvents {
         //constructor
         this.server = server;
         this.socket = socket;
-        this.packetHelper = new PacketHelper(server.getEventHandler());
-        this.ioManager = new IoManager(channel, this.packetHelper);
+        this.ioManager = new IoManager(channel);
 
-        this.ioManager.setOnInput(input -> {
-            Packet packet = packetHelper.fromString(input);
-            onPacket(packet);
-        });
+        this.ioManager.setOnInput(input -> onPacket(input));
     }
 
     public void onMessage(Consumer<EventPayload> listener) {

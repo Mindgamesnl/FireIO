@@ -3,7 +3,7 @@ package io.fire.core.common.objects;
 import io.fire.core.common.interfaces.Packet;
 import lombok.Setter;
 
-import java.io.IOException;
+import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.util.Iterator;
@@ -16,7 +16,6 @@ public class IoManager {
 
     //socket
     private SocketChannel channel;
-    private PacketHelper packetHelper;
 
     //lock
     private ReentrantLock lock = new ReentrantLock();
@@ -31,11 +30,10 @@ public class IoManager {
     private boolean isNegative = false;
 
     @Setter
-    private Consumer<byte[]> onInput = (p) -> {};
+    private Consumer<Packet> onInput = (p) -> {};
 
-    public IoManager(SocketChannel channel, PacketHelper packetHelper) {
+    public IoManager(SocketChannel channel) {
         this.channel = channel;
-        this.packetHelper = packetHelper;
     }
 
     public void handleData(byte[] input) {
@@ -47,7 +45,33 @@ public class IoManager {
                     Iterator<Byte> iterator = byteBuffer.iterator();
                     for (int i = 0; i < ret.length; i++) ret[i] = iterator.next();
                     byteBuffer.clear();
-                    onInput.accept(ret);
+
+                    ByteArrayInputStream bis = new ByteArrayInputStream(ret);
+                    ObjectInput in = null;
+                    Packet finalOut = null;
+                    try {
+                        in = new ObjectInputStream(bis);
+                        finalOut = (Packet) in.readObject();
+
+                    } catch (IOException e) {
+                        System.err.println("UNABLE TO DECODE PACKET!!!");
+                        System.err.println("Error: ");
+                        e.printStackTrace();
+                    } catch (ClassNotFoundException e) {
+                        System.err.println("UNABLE TO DECODE PACKET!!!");
+                        System.err.println("Error: ");
+                        e.printStackTrace();
+                    } finally {
+                        try {
+                            if (in != null) {
+                                in.close();
+                            }
+                        } catch (IOException ex) {
+                            // ignore close exception
+                        }
+                    }
+
+                    onInput.accept(finalOut);
                     break;
                 case ',':
                     spliceBuffer();
@@ -112,9 +136,27 @@ public class IoManager {
 
     //makes it ex, but don't forget to close the buffer!
     private ByteBuffer prepare(Packet packet) {
-        byte[] out = this.packetHelper.toString(packet);
-        ByteBuffer buffer = ByteBuffer.allocate(out.length);
-        buffer.put(out);
+        //create buffer and output streams
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        byte[] outBytes = new byte[0];
+        try {
+            ObjectOutput out = new ObjectOutputStream(bos);
+            out.writeObject(packet);
+            out.flush();
+            outBytes = bos.toByteArray();
+        } catch (IOException e) {
+            System.err.println("UNABLE TO DECODE PACKET!!!");
+            System.err.println("Error: ");
+            e.printStackTrace();
+        } finally {
+            try {
+                bos.close();
+            } catch (IOException ex) {
+                // ignore close exception
+            }
+        }
+        ByteBuffer buffer = ByteBuffer.allocate(outBytes.length);
+        buffer.put(outBytes);
         buffer.flip();
         return buffer;
     }

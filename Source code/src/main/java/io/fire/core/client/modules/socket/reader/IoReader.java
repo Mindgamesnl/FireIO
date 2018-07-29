@@ -3,7 +3,6 @@ package io.fire.core.client.modules.socket.reader;
 import io.fire.core.client.FireIoClient;
 import io.fire.core.client.modules.socket.handlers.AsyncConnectionHandler;
 import io.fire.core.common.eventmanager.enums.Event;
-import io.fire.core.common.objects.PacketHelper;
 import io.fire.core.common.packets.ReceivedText;
 
 import java.io.IOException;
@@ -19,13 +18,10 @@ public class IoReader implements Runnable {
     //connection handler
     private AsyncConnectionHandler asyncConnectionHandler;
 
-    private PacketHelper packetHelper;
-
     public IoReader(SocketChannel channel, AsyncConnectionHandler ins, FireIoClient client) {
         this.channel = channel;
         this.client = client;
         this.asyncConnectionHandler = ins;
-        this.packetHelper = new PacketHelper(client.getEventHandler());
     }
 
     @Override

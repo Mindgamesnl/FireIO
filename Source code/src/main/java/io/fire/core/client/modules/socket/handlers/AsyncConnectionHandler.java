@@ -8,7 +8,6 @@ import io.fire.core.common.interfaces.ClientMeta;
 import io.fire.core.common.interfaces.ConnectedFireioClient;
 import io.fire.core.common.interfaces.Packet;
 import io.fire.core.common.objects.IoManager;
-import io.fire.core.common.objects.PacketHelper;
 import io.fire.core.common.packets.*;
 import io.fire.core.common.interfaces.SocketEvents;
 
@@ -34,7 +33,6 @@ public class AsyncConnectionHandler implements SocketEvents, EventPayload, Conne
     private FireIoClient client;
     private SocketChannel socketChannel;
     private Thread reader;
-    private PacketHelper packetHelper;
     private IoManager ioManager;
 
     //host information for connection
@@ -50,7 +48,6 @@ public class AsyncConnectionHandler implements SocketEvents, EventPayload, Conne
     //constructor, apply data and try to connect. if the connection fails, then handle it appropriately
     public AsyncConnectionHandler(FireIoClient client, String host, int port, UUID id, Map<String, String> arguments, Map<String, ClientMeta> argumentsMeta) {
         try {
-            this.packetHelper = new PacketHelper(client.getEventHandler());
             this.identifier = id;
             this.client = client;
             this.host = host;
@@ -73,11 +70,8 @@ public class AsyncConnectionHandler implements SocketEvents, EventPayload, Conne
         if (reader != null && reader.isAlive()) reader.stop();
         //create reader
         IoReader ioReader = new IoReader(socketChannel, this, client);
-        this.ioManager = new IoManager(socketChannel, packetHelper);
-        this.ioManager.setOnInput(input -> {
-            Packet packet = packetHelper.fromString(input);
-            onPacket(packet);
-        });
+        this.ioManager = new IoManager(socketChannel);
+        this.ioManager.setOnInput(input -> onPacket(input));
         socketChannel.configureBlocking(true);
         reader = new Thread(ioReader);
         //start reader

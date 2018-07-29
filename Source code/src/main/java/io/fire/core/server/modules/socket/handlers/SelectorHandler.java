@@ -1,13 +1,10 @@
 package io.fire.core.server.modules.socket.handlers;
 
-import io.fire.core.common.interfaces.Packet;
-import io.fire.core.common.objects.PacketHelper;
 import io.fire.core.common.ratelimiter.RateLimit;
 import io.fire.core.server.FireIoServer;
 import io.fire.core.server.modules.socket.managers.ClientManager;
 
 import lombok.Getter;
-import lombok.Setter;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -21,7 +18,6 @@ public class SelectorHandler implements Runnable {
 
     private FireIoServer server;
     private ClientManager clientManager;
-    private PacketHelper packetHelper;
 
     @Getter
     private RateLimit rateLimiter = new RateLimit(20, 10);
@@ -34,7 +30,6 @@ public class SelectorHandler implements Runnable {
         this.selector = selector;
         //initialize client manager
         this.clientManager = new ClientManager();
-        this.packetHelper = new PacketHelper(server.getEventHandler());
     }
 
     public void setRateLimiter(int timeout, int attempts) {
