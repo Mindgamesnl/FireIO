@@ -3,7 +3,6 @@ package io.fire.core.server.modules.socket.handlers;
 import io.fire.core.common.eventmanager.enums.Event;
 import io.fire.core.common.eventmanager.interfaces.EventPayload;
 import io.fire.core.common.interfaces.Packet;
-import io.fire.core.common.objects.BufferManager;
 import io.fire.core.common.objects.IoManager;
 import io.fire.core.common.objects.PacketHelper;
 import io.fire.core.common.packets.*;
@@ -23,14 +22,12 @@ import java.util.function.Consumer;
 public class SocketClientHandler implements SocketEvents {
 
     //java socket channel and socket
-    private SocketChannel channel;
     private Socket socket;
 
     //packet listener/handler
     private Consumer<EventPayload> consumer;
     private PacketHelper packetHelper;
     private IoManager ioManager;
-    private BufferManager bufferManager = new BufferManager();
 
     //main instance
     private FireIoServer server;
@@ -46,11 +43,10 @@ public class SocketClientHandler implements SocketEvents {
         //constructor
         this.server = server;
         this.socket = socket;
-        this.channel = channel;
         this.packetHelper = new PacketHelper(server.getEventHandler());
-        this.ioManager = new IoManager(channel, this, this.packetHelper);
+        this.ioManager = new IoManager(channel, this.packetHelper);
 
-        bufferManager.setOnInput(input -> {
+        this.ioManager.setOnInput(input -> {
             Packet packet = packetHelper.fromString(input);
             onPacket(packet);
         });
@@ -84,32 +80,27 @@ public class SocketClientHandler implements SocketEvents {
     public void onPacket(Packet packet) {
         if (packet instanceof AuthPacket) {
             UUID parsed = UUID.fromString(((AuthPacket) packet).getUuid());
-            if (parsed == null) {
+            if (server.getClientModule().getClient(parsed) == null) {
                 close();
                 return;
             } else {
-                if (server.getClientModule().getClient(parsed) == null) {
-                    close();
-                    return;
-                } else {
-                    connectionId = parsed;
-                    authenticated = true;
-                    ClientInfo clientInfo = new ClientInfo();
-                    clientInfo.setArguments(((AuthPacket) packet).getArguments());
-                    clientInfo.setArgumentsMeta(((AuthPacket) packet).getArgumentsMeta());
-                    clientInfo.setHostname(socket.getInetAddress().getHostName());
-                    clientInfo.setPlatform(((AuthPacket) packet).getPlatform());
-                    server.getClientModule().getClient(connectionId).setInfo(clientInfo);
-                    server.getClientModule().getClient(connectionId).setHandler(this);
-                    server.getEventHandler().fireEvent(Event.CONNECT, server.getClientModule().getClient(connectionId));
-                    try {
-                        emit(new FinishHandshake());
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    this.ioManager.flushWaiting();
-                    return;
+                connectionId = parsed;
+                authenticated = true;
+                ClientInfo clientInfo = new ClientInfo();
+                clientInfo.setArguments(((AuthPacket) packet).getArguments());
+                clientInfo.setArgumentsMeta(((AuthPacket) packet).getArgumentsMeta());
+                clientInfo.setHostname(socket.getInetAddress().getHostName());
+                clientInfo.setPlatform(((AuthPacket) packet).getPlatform());
+                server.getClientModule().getClient(connectionId).setInfo(clientInfo);
+                server.getClientModule().getClient(connectionId).setHandler(this);
+                server.getEventHandler().fireEvent(Event.CONNECT, server.getClientModule().getClient(connectionId));
+                try {
+                    emit(new FinishHandshake());
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
+                this.ioManager.flushWaiting();
+                return;
             }
         }
 
@@ -153,7 +144,7 @@ public class SocketClientHandler implements SocketEvents {
     }
 
     @Override
-    public BufferManager getBufferManager() {
-        return bufferManager;
+    public IoManager getIoManager() {
+        return ioManager;
     }
 }

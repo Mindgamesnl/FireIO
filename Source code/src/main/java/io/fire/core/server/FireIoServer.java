@@ -7,6 +7,7 @@ import io.fire.core.common.interfaces.Packet;
 import io.fire.core.common.interfaces.PoolHolder;
 import io.fire.core.common.objects.ThreadPool;
 import io.fire.core.server.modules.client.ClientModule;
+import io.fire.core.server.modules.client.objects.FireIoConnection;
 import io.fire.core.server.modules.client.superclasses.Client;
 import io.fire.core.server.modules.request.RequestModule;
 import io.fire.core.server.modules.request.interfaces.RequestExecutor;
@@ -18,6 +19,7 @@ import io.fire.core.server.modules.socket.SocketModule;
 import lombok.Getter;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -49,6 +51,7 @@ public class FireIoServer implements PoolHolder {
     public Client getClient(UUID id) {
         return clientModule.getClient(id);
     }
+    public Collection<FireIoConnection> getClients() {return clientModule.getAll();}
 
     public Client getClientByTag(String key, String value) {
         return clientModule.getAll().stream().filter(client -> client.getInfo().getArguments().containsKey(key)

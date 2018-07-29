@@ -156,7 +156,7 @@ public class SelectorHandler implements Runnable {
             SocketAddress remoteAddr = channel.socket().getRemoteSocketAddress();
             //parse all packets
 
-            clientManager.references.get(remoteAddr).getBufferManager().handleData(data);
+            clientManager.references.get(remoteAddr).getIoManager().handleData(data);
         });
 
     }

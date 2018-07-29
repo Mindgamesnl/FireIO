@@ -7,7 +7,6 @@ import io.fire.core.common.eventmanager.interfaces.EventPayload;
 import io.fire.core.common.interfaces.ClientMeta;
 import io.fire.core.common.interfaces.ConnectedFireioClient;
 import io.fire.core.common.interfaces.Packet;
-import io.fire.core.common.objects.BufferManager;
 import io.fire.core.common.objects.IoManager;
 import io.fire.core.common.objects.PacketHelper;
 import io.fire.core.common.packets.*;
@@ -33,12 +32,10 @@ public class AsyncConnectionHandler implements SocketEvents, EventPayload, Conne
 
     //api, connection handler/receiver, channel and reader thread
     private FireIoClient client;
-    private IoReader ioReader;
     private SocketChannel socketChannel;
     private Thread reader;
     private PacketHelper packetHelper;
-    private IoManager socketWriter;
-    private BufferManager bufferManager = new BufferManager();
+    private IoManager ioManager;
 
     //host information for connection
     private String host;
@@ -60,10 +57,6 @@ public class AsyncConnectionHandler implements SocketEvents, EventPayload, Conne
             this.port = port;
             this.arguments = arguments;
             this.argumentsMeta = argumentsMeta;
-            bufferManager.setOnInput(input -> {
-                Packet packet = packetHelper.fromString(input);
-                onPacket(packet);
-            });
             connect();
         } catch (IOException e) {
             //trigger fatal error event for api and internal ussage
@@ -79,8 +72,12 @@ public class AsyncConnectionHandler implements SocketEvents, EventPayload, Conne
         socketChannel.configureBlocking(true);
         if (reader != null && reader.isAlive()) reader.stop();
         //create reader
-        this.ioReader = new IoReader(socketChannel, this, client);
-        this.socketWriter = new IoManager(socketChannel, this, packetHelper);
+        IoReader ioReader = new IoReader(socketChannel, this, client);
+        this.ioManager = new IoManager(socketChannel, packetHelper);
+        this.ioManager.setOnInput(input -> {
+            Packet packet = packetHelper.fromString(input);
+            onPacket(packet);
+        });
         socketChannel.configureBlocking(true);
         reader = new Thread(ioReader);
         //start reader
@@ -90,7 +87,7 @@ public class AsyncConnectionHandler implements SocketEvents, EventPayload, Conne
     }
 
     public void emit(Packet p) throws IOException {
-        this.socketWriter.send(p);
+        this.ioManager.send(p);
     }
 
     public void close() {
@@ -203,8 +200,8 @@ public class AsyncConnectionHandler implements SocketEvents, EventPayload, Conne
     }
 
     @Override
-    public BufferManager getBufferManager() {
-        return bufferManager;
+    public IoManager getIoManager() {
+        return ioManager;
     }
 
     @Override
