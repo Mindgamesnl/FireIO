@@ -23,11 +23,6 @@ public class SelectorHandler implements Runnable {
     private ClientManager clientManager;
     private PacketHelper packetHelper;
 
-    //the default buffer is common in everything of Fire-Io, when bigger data is getting send it will change in the whole network to what ever is needed.
-    //The default is 5KB
-    @Getter
-    @Setter
-    private Integer byteArrayLength = 5120;
     @Getter
     private RateLimit rateLimiter = new RateLimit(20, 10);
 
@@ -121,7 +116,7 @@ public class SelectorHandler implements Runnable {
         //get socket channel that has send the data
         SocketChannel channel = (SocketChannel) key.channel();
         //create buffer with the common buffer size
-        ByteBuffer buffer = ByteBuffer.allocate(byteArrayLength);
+        ByteBuffer buffer = ByteBuffer.allocate(64);
         //set default to -1 (for when shit goes wrong)
         int numRead = -1;
         try {
@@ -150,20 +145,18 @@ public class SelectorHandler implements Runnable {
             return;
         }
 
-        //read the byte data
-        byte[] data = new byte[numRead];
-
-        //copy array with parameters
-        System.arraycopy(buffer.array(), 0, data, 0, numRead);
-        //get adress
-        SocketAddress remoteAddr = channel.socket().getRemoteSocketAddress();
-        //parse all packets
-        Packet packet = packetHelper.fromString(data);
-        //some times, packets get stitched together when they are send in quick completion of one another to save on resources
-        //get the client and trigger the packet handler
+        int finalNumRead = numRead;
         server.getPool().run(() -> {
+            //read the byte data
+            byte[] data = new byte[finalNumRead];
 
-        clientManager.references.get(remoteAddr).onPacket(packet);
+            //copy array with parameters
+            System.arraycopy(buffer.array(), 0, data, 0, finalNumRead);
+            //get adress
+            SocketAddress remoteAddr = channel.socket().getRemoteSocketAddress();
+            //parse all packets
+
+            clientManager.references.get(remoteAddr).getBufferManager().handleData(data);
         });
 
     }

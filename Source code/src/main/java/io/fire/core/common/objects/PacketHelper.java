@@ -49,7 +49,6 @@ public class PacketHelper {
             out.writeObject(o);
             out.flush();
             yourBytes = bos.toByteArray();
-
         } catch (IOException e) {
             System.err.println("UNABLE TO DECODE PACKET!!!");
             System.err.println("Error: ");

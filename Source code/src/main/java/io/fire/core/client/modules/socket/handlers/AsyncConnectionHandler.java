@@ -7,7 +7,8 @@ import io.fire.core.common.eventmanager.interfaces.EventPayload;
 import io.fire.core.common.interfaces.ClientMeta;
 import io.fire.core.common.interfaces.ConnectedFireioClient;
 import io.fire.core.common.interfaces.Packet;
-import io.fire.core.common.objects.ConcurrentSocketWriter;
+import io.fire.core.common.objects.BufferManager;
+import io.fire.core.common.objects.IoManager;
 import io.fire.core.common.objects.PacketHelper;
 import io.fire.core.common.packets.*;
 import io.fire.core.common.interfaces.SocketEvents;
@@ -36,7 +37,8 @@ public class AsyncConnectionHandler implements SocketEvents, EventPayload, Conne
     private SocketChannel socketChannel;
     private Thread reader;
     private PacketHelper packetHelper;
-    private ConcurrentSocketWriter socketWriter;
+    private IoManager socketWriter;
+    private BufferManager bufferManager = new BufferManager();
 
     //host information for connection
     private String host;
@@ -58,6 +60,10 @@ public class AsyncConnectionHandler implements SocketEvents, EventPayload, Conne
             this.port = port;
             this.arguments = arguments;
             this.argumentsMeta = argumentsMeta;
+            bufferManager.setOnInput(input -> {
+                Packet packet = packetHelper.fromString(input);
+                onPacket(packet);
+            });
             connect();
         } catch (IOException e) {
             //trigger fatal error event for api and internal ussage
@@ -73,8 +79,8 @@ public class AsyncConnectionHandler implements SocketEvents, EventPayload, Conne
         socketChannel.configureBlocking(true);
         if (reader != null && reader.isAlive()) reader.stop();
         //create reader
-        this.ioReader = new IoReader(socketChannel, 5120, this, client);
-        this.socketWriter = new ConcurrentSocketWriter(socketChannel, this, packetHelper, ioReader);
+        this.ioReader = new IoReader(socketChannel, this, client);
+        this.socketWriter = new IoManager(socketChannel, this, packetHelper);
         socketChannel.configureBlocking(true);
         reader = new Thread(ioReader);
         //start reader
@@ -146,19 +152,6 @@ public class AsyncConnectionHandler implements SocketEvents, EventPayload, Conne
             return;
         }
 
-        //server forces us to accept a new byte array buffer size as standard
-        if (packet instanceof UpdateByteArraySize) {
-            //another client wants to send bigger packets and thus we have to increase the size of our byte array
-            //all incoming and outgoing packets will now use this buffer size
-
-            //update buffer size based on what the server told in the packet (client is slave)
-            ioReader.setBufferSize(((UpdateByteArraySize) packet).getSize());
-
-            //check cache for packets we can now send we previously couldn't, emit them if fount.
-            socketWriter.flushWaiting();
-            return;
-        }
-
         //cancel the request, server does not know how to handle it
         if (packet instanceof CancelRequestPacket) {
             //cast to proper packet
@@ -207,6 +200,11 @@ public class AsyncConnectionHandler implements SocketEvents, EventPayload, Conne
         //a EMPTY & DEFAULT connection opened, reset default values
         exptectedClosing = false;
         //(dent send anything yet since we are not authenticated yet and thus the server will ignore it)
+    }
+
+    @Override
+    public BufferManager getBufferManager() {
+        return bufferManager;
     }
 
     @Override

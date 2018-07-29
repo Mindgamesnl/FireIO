@@ -1,8 +1,6 @@
 package io.fire.core.common.objects;
 
 import io.fire.core.common.interfaces.Packet;
-import io.fire.core.common.interfaces.ProtocolInfoHolder;
-import io.fire.core.common.packets.UpdateByteArraySize;
 import io.fire.core.common.interfaces.SocketEvents;
 
 import java.io.IOException;
@@ -11,13 +9,12 @@ import java.nio.channels.SocketChannel;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class ConcurrentSocketWriter {
+public class IoManager {
 
     //socket
     private SocketChannel channel;
     private SocketEvents handler;
     private PacketHelper packetHelper;
-    private ProtocolInfoHolder protocolInfo;
 
     //lock
     private ReentrantLock lock = new ReentrantLock();
@@ -25,11 +22,10 @@ public class ConcurrentSocketWriter {
     //list
     private ConcurrentLinkedDeque<Packet> waiting = new ConcurrentLinkedDeque<>();
 
-    public ConcurrentSocketWriter(SocketChannel channel, SocketEvents handler, PacketHelper packetHelper, ProtocolInfoHolder protocolInfoHolder) {
+    public IoManager(SocketChannel channel, SocketEvents handler, PacketHelper packetHelper) {
         this.channel = channel;
         this.handler = handler;
         this.packetHelper = packetHelper;
-        this.protocolInfo = protocolInfoHolder;
     }
 
     public void send(Packet packet) throws IOException {
@@ -41,14 +37,18 @@ public class ConcurrentSocketWriter {
             this.lock.lock();
             //serialize
             ByteBuffer prepared = prepare(packet);
-            if (protocolInfo.getBufferSize() < prepared.array().length) {
-                protocolInfo.setBufferSize(prepared.array().length);
-                //share
-                waiting.add(packet);
-                write(prepare(new UpdateByteArraySize(prepared.array().length)));
-                lock.unlock();
-                return;
+            String out = "";
+            int looped = 0;
+            byte[] a = prepared.array();
+            for (byte b : a) {
+                looped++;
+                if (looped == a.length) {
+                    out += b;
+                } else {
+                    out += b + ",";
+                }
             }
+            prepared = ByteBuffer.wrap((out + "s").getBytes());
             write(prepared);
             if (waiting.contains(packet)) waiting.remove(packet);
             lock.unlock();
@@ -60,7 +60,7 @@ public class ConcurrentSocketWriter {
             try {
                 send(w);
             } catch (IOException e) {
-                    e.printStackTrace();
+                e.printStackTrace();
             }
         });
     }
@@ -79,8 +79,8 @@ public class ConcurrentSocketWriter {
     }
 
     private void write(ByteBuffer[] buffers) throws IOException {
-        this.channel.write(buffers);
         for (ByteBuffer buffer : buffers) {
+            this.channel.write(buffer);
             buffer.clear();
         }
     }
