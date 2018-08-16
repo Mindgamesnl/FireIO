@@ -102,6 +102,10 @@ public class FireIoServer implements PoolHolder {
     }
 
     public FireIoServer registerEndpoint(String path, RestExchange exchange) {
+        if (path.equalsIgnoreCase("") || path.equalsIgnoreCase("/")) {
+            getRestModule().setDefault(new RestEndpoint(path, exchange));
+            return this;
+        }
         getRestModule().addEndpoint(new RestEndpoint(path, exchange));
         return this;
     }

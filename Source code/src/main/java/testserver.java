@@ -12,7 +12,7 @@ public class testserver {
 
     public static void main(String[] args) {
 
-        System.out.println("Starting server...");
+        System.out.println("Starting server... TESTSERVER.JAVA");
 
         try {
             FireIoServer server = new FireIoServer(80)

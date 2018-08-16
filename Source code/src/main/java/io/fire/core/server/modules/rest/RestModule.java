@@ -39,6 +39,10 @@ public class RestModule {
         rateLimiter = new RateLimit(timeout, attempts);
     }
 
+    public void setDefault(RestEndpoint exhange) {
+        httpHandler.setDefaultRoot(exhange);
+    }
+
     public void addEndpoint(RestEndpoint exchange) {
         httpHandler.addEndpoint(exchange);
     }

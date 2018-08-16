@@ -7,6 +7,7 @@ import io.fire.core.server.modules.rest.RestModule;
 import io.fire.core.server.modules.rest.enums.ContentType;
 import io.fire.core.server.modules.rest.interfaces.RestRequest;
 import io.fire.core.server.modules.rest.objects.RestEndpoint;
+import lombok.Getter;
 import lombok.Setter;
 
 import java.io.IOException;
@@ -24,6 +25,9 @@ public class HttpHandler implements com.sun.net.httpserver.HttpHandler {
     private RestModule module;
     private List<RestEndpoint> endpointList = new ArrayList<>();
     //password is null by default (this means it is open for everyone)2
+    @Getter
+    @Setter
+    private RestEndpoint defaultRoot = new RestEndpoint("/", req -> "{\"message\":\"FireIO java server from https://github.com/Mindgamesnl/FireIO\"}");
     @Setter
     private String password = null;
 
@@ -37,7 +41,6 @@ public class HttpHandler implements com.sun.net.httpserver.HttpHandler {
     }
 
     public void handle(HttpExchange httpExchange) throws IOException {
-
         String url = httpExchange.getRequestURI().toString();
         //check requested url
 
@@ -74,13 +77,43 @@ public class HttpHandler implements com.sun.net.httpserver.HttpHandler {
             String response = server.getClientModule().registerConnection().getId().toString();
             emit(httpExchange, 200, response, ContentType.PLAINTEXT);
         } else {
+            Map<String, String> variables = new HashMap<>();
+            RestEndpoint endpoint = null;
             if (url.equals("/")) {
-                emit(httpExchange, 200, "{\"message\":\"FireIO java server from https://github.com/Mindgamesnl/FireIO\"}", ContentType.JSON);
+                String out = defaultRoot.getRestExchange().onRequest(new RestRequest() {
+                    @Override
+                    public InetSocketAddress getRequester() {
+                        return httpExchange.getRemoteAddress();
+                    }
+
+                    @Override
+                    public String getVariable(String name) {
+                        return null;
+                    }
+
+                    @Override
+                    public InputStream getRequestBody() {
+                        return httpExchange.getRequestBody();
+                    }
+
+                    @Override
+                    public Headers getHeaders() {
+                        return httpExchange.getRequestHeaders();
+                    }
+
+                    @Override
+                    public String getURL() {
+                        return url;
+                    }
+                });
+                if (out.contains("{")) {
+                    emit(httpExchange, 200, out, ContentType.JSON);
+                } else {
+                    emit(httpExchange, 200, out, ContentType.PLAINTEXT);
+                }
                 return;
             } else {
                 String[] requestedParts = url.split("/");
-                RestEndpoint endpoint = null;
-                Map<String, String> variables = new HashMap<>();
                 int score = 0;
                 for (RestEndpoint optionalPoint : endpointList) {
                     Map<String, String> optionalVariables = new HashMap<>();
@@ -115,46 +148,78 @@ public class HttpHandler implements com.sun.net.httpserver.HttpHandler {
                         }
                     }
                 }
+            }
 
-                if (endpoint == null) {
-                    emit(httpExchange, 200, "{\"message\":\"FireIO doesn't have a registered REST endpoint with the given name\"}", ContentType.JSON);
-                } else {
-                    Map<String, String> finalVariables = variables;
-                    String out = endpoint.getRestExchange().onRequest(new RestRequest() {
-                        @Override
-                        public InetSocketAddress getRequester() {
-                            return httpExchange.getRemoteAddress();
-                        }
-
-                        @Override
-                        public String getVariable(String name) {
-                            return finalVariables.get(name);
-                        }
-
-                        @Override
-                        public InputStream getRequestBody() {
-                            return httpExchange.getRequestBody();
-                        }
-
-                        @Override
-                        public Headers getHeaders() {
-                            return httpExchange.getRequestHeaders();
-                        }
-
-                        @Override
-                        public String getURL() {
-                            return url;
-                        }
-                    });
-                    if (out.contains("{")) {
-                        emit(httpExchange, 200, out, ContentType.JSON);
-                    } else {
-                        emit(httpExchange, 200, out, ContentType.PLAINTEXT);
+            if (endpoint == null) {
+                String out = defaultRoot.getRestExchange().onRequest(new RestRequest() {
+                    @Override
+                    public InetSocketAddress getRequester() {
+                        return httpExchange.getRemoteAddress();
                     }
+
+                    @Override
+                    public String getVariable(String name) {
+                        return null;
+                    }
+
+                    @Override
+                    public InputStream getRequestBody() {
+                        return httpExchange.getRequestBody();
+                    }
+
+                    @Override
+                    public Headers getHeaders() {
+                        return httpExchange.getRequestHeaders();
+                    }
+
+                    @Override
+                    public String getURL() {
+                        return url;
+                    }
+                });
+                if (out.contains("{")) {
+                    emit(httpExchange, 200, out, ContentType.JSON);
+                } else {
+                    emit(httpExchange, 200, out, ContentType.PLAINTEXT);
+                }
+                return;
+            } else {
+                Map<String, String> finalVariables = variables;
+                String out = endpoint.getRestExchange().onRequest(new RestRequest() {
+                    @Override
+                    public InetSocketAddress getRequester() {
+                        return httpExchange.getRemoteAddress();
+                    }
+
+                    @Override
+                    public String getVariable(String name) {
+                        return finalVariables.get(name);
+                    }
+
+                    @Override
+                    public InputStream getRequestBody() {
+                        return httpExchange.getRequestBody();
+                    }
+
+                    @Override
+                    public Headers getHeaders() {
+                        return httpExchange.getRequestHeaders();
+                    }
+
+                    @Override
+                    public String getURL() {
+                        return url;
+                    }
+                });
+                if (out.contains("{")) {
+                    emit(httpExchange, 200, out, ContentType.JSON);
+                } else {
+                    emit(httpExchange, 200, out, ContentType.PLAINTEXT);
                 }
             }
         }
     }
+
 
     private void emit(HttpExchange httpExchange, int statusCode, String response, ContentType type) throws IOException {
         httpExchange.sendResponseHeaders(statusCode, response.length());
