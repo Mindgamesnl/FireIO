@@ -111,8 +111,8 @@ public class SelectorHandler implements Runnable {
         //get socket channel that has send the data
         SocketChannel channel = (SocketChannel) key.channel();
         //create buffer with the common buffer size
-        ByteBuffer buffer = ByteBuffer.allocate(64);
         //set default to -1 (for when shit goes wrong)
+        ByteBuffer buffer = ByteBuffer.allocate(64);
         int numRead = -1;
         try {
             //read from channel with buffer
@@ -141,18 +141,16 @@ public class SelectorHandler implements Runnable {
         }
 
         int finalNumRead = numRead;
-        server.getPool().run(() -> {
-            //read the byte data
-            byte[] data = new byte[finalNumRead];
+        //read the byte data
+        byte[] data = new byte[finalNumRead];
 
-            //copy array with parameters
-            System.arraycopy(buffer.array(), 0, data, 0, finalNumRead);
-            //get adress
-            SocketAddress remoteAddr = channel.socket().getRemoteSocketAddress();
-            //parse all packets
+        //copy array with parameters
+        System.arraycopy(buffer.array(), 0, data, 0, finalNumRead);
+        //get adress
+        SocketAddress remoteAddr = channel.socket().getRemoteSocketAddress();
+        //parse all packets
 
-            clientManager.references.get(remoteAddr).getIoManager().handleData(data);
-        });
+        clientManager.references.get(remoteAddr).getIoManager().handleData(data, server);
 
     }
 }

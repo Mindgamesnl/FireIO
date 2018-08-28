@@ -1,6 +1,7 @@
 package io.fire.core.common.objects;
 
 import io.fire.core.common.interfaces.Packet;
+import io.fire.core.common.interfaces.PoolHolder;
 import lombok.Setter;
 
 import java.io.*;
@@ -36,7 +37,7 @@ public class IoManager {
         this.channel = channel;
     }
 
-    public void handleData(byte[] input) {
+    public void handleData(byte[] input, PoolHolder poolHolder) {
         for (byte a : input) {
             switch (((char) a)) {
                 case 's':
@@ -54,7 +55,8 @@ public class IoManager {
                         System.err.println("Error: ");
                         e.printStackTrace();
                     }
-                    onInput.accept(finalOut);
+                    Packet finalOut1 = finalOut;
+                    poolHolder.getPool().run(()-> onInput.accept(finalOut1));
                     break;
                 case ',':
                     spliceBuffer();

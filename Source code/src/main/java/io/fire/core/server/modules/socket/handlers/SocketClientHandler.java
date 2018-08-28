@@ -5,9 +5,9 @@ import io.fire.core.common.eventmanager.interfaces.EventPayload;
 import io.fire.core.common.interfaces.Packet;
 import io.fire.core.common.objects.IoManager;
 import io.fire.core.common.packets.*;
+import io.fire.core.common.interfaces.SocketEvents;
 import io.fire.core.server.FireIoServer;
 import io.fire.core.server.modules.client.objects.ClientInfo;
-import io.fire.core.common.interfaces.SocketEvents;
 
 import lombok.Getter;
 

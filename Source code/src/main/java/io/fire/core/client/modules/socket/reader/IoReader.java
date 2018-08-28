@@ -53,16 +53,14 @@ public class IoReader implements Runnable {
                 }
 
                 int finalNumRead = numRead;
-                client.getPool().run(() -> {
-                    //read and parse byte array
-                    byte[] data = new byte[finalNumRead];
-                    System.arraycopy(buffer.array(), 0, data, 0, finalNumRead);
+                //read and parse byte array
+                byte[] data = new byte[finalNumRead];
+                System.arraycopy(buffer.array(), 0, data, 0, finalNumRead);
 
-                    //parse them to packets!
-                    //in semi-rare cases the system stitches multiple packets in one stream to save on load
-                    //this can mean that we receive multiple packets in one go!
-                    asyncConnectionHandler.getIoManager().handleData(data);
-                });
+                //parse them to packets!
+                //in semi-rare cases the system stitches multiple packets in one stream to save on load
+                //this can mean that we receive multiple packets in one go!
+                asyncConnectionHandler.getIoManager().handleData(data, client);
             } catch (Exception e) {
                 //invalid buffer! oh no...
                 client.getEventHandler().fireEvent(Event.CLOSED_UNEXPECTEDLY, new ReceivedText("Invalid buffer! (" + e.getMessage() + ")", null));
