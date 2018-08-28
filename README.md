@@ -83,6 +83,7 @@ server.registerEndpoint("/time", req -> {
 //this will mean that ?name will be a variable, example
 server.registerEndpoint("/hi/?name", req -> {
     return "Welcome to FireIO " + req.getVariable("name") + "!";
+});
 ```
 
 ##### Example client
