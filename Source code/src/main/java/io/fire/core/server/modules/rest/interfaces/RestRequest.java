@@ -1,16 +1,18 @@
 package io.fire.core.server.modules.rest.interfaces;
 
 import com.sun.net.httpserver.Headers;
+import io.fire.core.server.modules.rest.enums.RequestMethod;
+import io.fire.core.server.modules.rest.objects.RequestBody;
 
-import java.io.InputStream;
 import java.net.InetSocketAddress;
 
 public interface RestRequest {
 
     InetSocketAddress getRequester();
     String getVariable(String name);
-    InputStream getRequestBody();
+    RequestBody getRequestBody();
     Headers getHeaders();
     String getURL();
+    RequestMethod getMethod();
 
 }

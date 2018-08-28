@@ -5,7 +5,9 @@ import com.sun.net.httpserver.HttpExchange;
 import io.fire.core.server.FireIoServer;
 import io.fire.core.server.modules.rest.RestModule;
 import io.fire.core.server.modules.rest.enums.ContentType;
+import io.fire.core.server.modules.rest.enums.RequestMethod;
 import io.fire.core.server.modules.rest.interfaces.RestRequest;
+import io.fire.core.server.modules.rest.objects.RequestBody;
 import io.fire.core.server.modules.rest.objects.RestEndpoint;
 import lombok.Getter;
 import lombok.Setter;
@@ -80,32 +82,7 @@ public class HttpHandler implements com.sun.net.httpserver.HttpHandler {
             Map<String, String> variables = new HashMap<>();
             RestEndpoint endpoint = null;
             if (url.equals("/")) {
-                String out = defaultRoot.getRestExchange().onRequest(new RestRequest() {
-                    @Override
-                    public InetSocketAddress getRequester() {
-                        return httpExchange.getRemoteAddress();
-                    }
-
-                    @Override
-                    public String getVariable(String name) {
-                        return null;
-                    }
-
-                    @Override
-                    public InputStream getRequestBody() {
-                        return httpExchange.getRequestBody();
-                    }
-
-                    @Override
-                    public Headers getHeaders() {
-                        return httpExchange.getRequestHeaders();
-                    }
-
-                    @Override
-                    public String getURL() {
-                        return url;
-                    }
-                });
+                String out = handleEndpoint(defaultRoot, httpExchange, variables, url);
                 if (out.contains("{")) {
                     emit(httpExchange, 200, out, ContentType.JSON);
                 } else {
@@ -151,32 +128,7 @@ public class HttpHandler implements com.sun.net.httpserver.HttpHandler {
             }
 
             if (endpoint == null) {
-                String out = defaultRoot.getRestExchange().onRequest(new RestRequest() {
-                    @Override
-                    public InetSocketAddress getRequester() {
-                        return httpExchange.getRemoteAddress();
-                    }
-
-                    @Override
-                    public String getVariable(String name) {
-                        return null;
-                    }
-
-                    @Override
-                    public InputStream getRequestBody() {
-                        return httpExchange.getRequestBody();
-                    }
-
-                    @Override
-                    public Headers getHeaders() {
-                        return httpExchange.getRequestHeaders();
-                    }
-
-                    @Override
-                    public String getURL() {
-                        return url;
-                    }
-                });
+                String out = handleEndpoint(defaultRoot, httpExchange, variables, url);
                 if (out.contains("{")) {
                     emit(httpExchange, 200, out, ContentType.JSON);
                 } else {
@@ -184,33 +136,7 @@ public class HttpHandler implements com.sun.net.httpserver.HttpHandler {
                 }
                 return;
             } else {
-                Map<String, String> finalVariables = variables;
-                String out = endpoint.getRestExchange().onRequest(new RestRequest() {
-                    @Override
-                    public InetSocketAddress getRequester() {
-                        return httpExchange.getRemoteAddress();
-                    }
-
-                    @Override
-                    public String getVariable(String name) {
-                        return finalVariables.get(name);
-                    }
-
-                    @Override
-                    public InputStream getRequestBody() {
-                        return httpExchange.getRequestBody();
-                    }
-
-                    @Override
-                    public Headers getHeaders() {
-                        return httpExchange.getRequestHeaders();
-                    }
-
-                    @Override
-                    public String getURL() {
-                        return url;
-                    }
-                });
+                String out = handleEndpoint(endpoint, httpExchange, variables, url);
                 if (out.contains("{")) {
                     emit(httpExchange, 200, out, ContentType.JSON);
                 } else {
@@ -220,6 +146,39 @@ public class HttpHandler implements com.sun.net.httpserver.HttpHandler {
         }
     }
 
+    String handleEndpoint(RestEndpoint endpoint, HttpExchange exchange, Map<String, String> variables, String url) {
+        return endpoint.getRestExchange().onRequest(new RestRequest() {
+            @Override
+            public InetSocketAddress getRequester() {
+                return exchange.getRemoteAddress();
+            }
+
+            @Override
+            public String getVariable(String name) {
+                return variables.get(name);
+            }
+
+            @Override
+            public RequestBody getRequestBody() {
+                return new RequestBody(exchange.getRequestBody());
+            }
+
+            @Override
+            public Headers getHeaders() {
+                return exchange.getRequestHeaders();
+            }
+
+            @Override
+            public String getURL() {
+                return url;
+            }
+
+            @Override
+            public RequestMethod getMethod() {
+                return RequestMethod.valueOf(exchange.getRequestMethod());
+            }
+        });
+    }
 
     private void emit(HttpExchange httpExchange, int statusCode, String response, ContentType type) throws IOException {
         httpExchange.sendResponseHeaders(statusCode, response.length());
