@@ -13,7 +13,6 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
@@ -52,7 +51,7 @@ public class HttpHandler implements com.sun.net.httpserver.HttpHandler {
             //set response to the fail auth body
             //blocked by rate limiter!
             String response = "ratelimit";
-            emit(httpExchange, 200, response, ContentType.PLAINTEXT);
+            emit(httpExchange, response, ContentType.PLAINTEXT);
             //end request
             return;
         }
@@ -69,7 +68,7 @@ public class HttpHandler implements com.sun.net.httpserver.HttpHandler {
                 if (!requestedPassword.equals(password)) {
                     //set response to the fail auth body
                     String response = "fail-auth";
-                    emit(httpExchange, 200, response, ContentType.PLAINTEXT);
+                    emit(httpExchange, response, ContentType.PLAINTEXT);
                     //end request
                     return;
                 }
@@ -77,16 +76,16 @@ public class HttpHandler implements com.sun.net.httpserver.HttpHandler {
 
             //register a new connection and get the assigned id as string
             String response = server.getClientModule().registerConnection().getId().toString();
-            emit(httpExchange, 200, response, ContentType.PLAINTEXT);
+            emit(httpExchange, response, ContentType.PLAINTEXT);
         } else {
             Map<String, String> variables = new HashMap<>();
             RestEndpoint endpoint = null;
             if (url.equals("/")) {
                 String out = handleEndpoint(defaultRoot, httpExchange, variables, url);
                 if (out.contains("{")) {
-                    emit(httpExchange, 200, out, ContentType.JSON);
+                    emit(httpExchange, out, ContentType.JSON);
                 } else {
-                    emit(httpExchange, 200, out, ContentType.PLAINTEXT);
+                    emit(httpExchange, out, ContentType.PLAINTEXT);
                 }
                 return;
             } else {
@@ -130,23 +129,22 @@ public class HttpHandler implements com.sun.net.httpserver.HttpHandler {
             if (endpoint == null) {
                 String out = handleEndpoint(defaultRoot, httpExchange, variables, url);
                 if (out.contains("{")) {
-                    emit(httpExchange, 200, out, ContentType.JSON);
+                    emit(httpExchange, out, ContentType.JSON);
                 } else {
-                    emit(httpExchange, 200, out, ContentType.PLAINTEXT);
+                    emit(httpExchange, out, ContentType.PLAINTEXT);
                 }
-                return;
             } else {
                 String out = handleEndpoint(endpoint, httpExchange, variables, url);
                 if (out.contains("{")) {
-                    emit(httpExchange, 200, out, ContentType.JSON);
+                    emit(httpExchange, out, ContentType.JSON);
                 } else {
-                    emit(httpExchange, 200, out, ContentType.PLAINTEXT);
+                    emit(httpExchange, out, ContentType.PLAINTEXT);
                 }
             }
         }
     }
 
-    String handleEndpoint(RestEndpoint endpoint, HttpExchange exchange, Map<String, String> variables, String url) {
+    private String handleEndpoint(RestEndpoint endpoint, HttpExchange exchange, Map<String, String> variables, String url) {
         return endpoint.getRestExchange().onRequest(new RestRequest() {
             @Override
             public InetSocketAddress getRequester() {
@@ -180,8 +178,8 @@ public class HttpHandler implements com.sun.net.httpserver.HttpHandler {
         });
     }
 
-    private void emit(HttpExchange httpExchange, int statusCode, String response, ContentType type) throws IOException {
-        httpExchange.sendResponseHeaders(statusCode, response.length());
+    private void emit(HttpExchange httpExchange, String response, ContentType type) throws IOException {
+        httpExchange.sendResponseHeaders(200, response.length());
 
         if (type == ContentType.JSON) {
             httpExchange.getResponseHeaders().set("Content-Type", "application/json; charset=UTF-8");
