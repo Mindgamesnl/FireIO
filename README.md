@@ -42,40 +42,31 @@ Here is a simple example setup with a server, client, a custom packet, two way d
 ##### Example server
 ```java
 FireIoServer server = new FireIoServer(80)
-        .setPassword("testpassword1") //OPTIONAL: password
-        .setRateLimiter(10 , 20) //OPTIONAL: rate limit the endpoints, in this case, 10 requests every 20 seconds
-        .setThreadPoolSize(1) //OPTIONAL: thread pool for event handling execution
+    .setPassword("testpassword1")
+    .setRateLimiter(2, 10)
 
-        .on(Event.CONNECT, eventPayload -> {
-            Client client = (Client) eventPayload;
-            System.out.println(client.getId().toString() + " just connected!" +
-                " (ip: " + client.getInfo().getHostname() + ")" +
-                " (platform: " + client.getInfo().getPlatform() + ")" +
-                " (version: " + client.getTag("appversion") + ")");
-            client.send("MOTD", "test");
-        })
+.on(Event.CONNECT, eventPayload -> {
+    Client client = (Client) eventPayload;
+    client.send("MOTD", "test");
+})
 
-        .on(Event.CLOSED_UNEXPECTEDLY, eventPayload -> {
-            Client client = (Client) eventPayload;
-            System.out.println(client.getId() + " closed unexpectedly!");
-        })
+.on(Event.CLOSED_UNEXPECTEDLY, eventPayload -> {
+    Client client = (Client) eventPayload;
+    System.out.println(client.getId() + " closed unexpectedly!");
+})
 
-        .on(Event.DISCONNECT, eventPayload -> {
-            Client client = (Client) eventPayload;
-            System.out.println(client.getId() + " just disconnected");
-        })
+.on(Event.DISCONNECT, eventPayload -> {
+    Client client = (Client) eventPayload;
+    System.out.println(client.getId() + " just disconnected");
+})
 
-        .on("cookie_jar", eventPayload -> {
-            ChannelPacketPacket receivedPacket = (ChannelPacketPacket) eventPayload;
-            CookieJar cookieJar = (CookieJar) receivedPacket.getPacket();
-
-            System.out.println("Received a cookie jar from : " + receivedPacket.getSender().getId() + ". The jar contains " + cookieJar.getAmount() + " cookies. The cookies type is: " + cookieJar.getType());
-
-            //thank the client for the cookies
-            receivedPacket.getSender().send("thanks", "thanks");
-        });
-
-server.broadcast("message", "welcome everybody!");
+.on("cookie_jar", eventPayload -> {
+    ChannelPacketPacket receivedPacket = (ChannelPacketPacket) eventPayload;
+    CookieJar cookieJar = (CookieJar) receivedPacket.getPacket();
+    System.out.println("Received a cookie jar from : " + receivedPacket.getSender().getId() + ". The jar contains " + cookieJar.getAmount() + " cookies. The cookies type is: " + cookieJar.getType());
+    //thank the client for the cookies
+    receivedPacket.getSender().send("thanks", "thanks");
+});
 
 //simple request based endpoint
 server.onRequest("whoami", (client, request, response) -> {
@@ -84,58 +75,42 @@ server.onRequest("whoami", (client, request, response) -> {
 });
 
 //simple http rest endpoints, one clear example and one with a variable
-//so calling http://localhost/time will return "The server time is: 2018-07-01 15:10:44"
 server.registerEndpoint("/time", req -> {
     return "The server time is: " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
 });
 
-//so calling http://localhost/hi/Mats
-//will return Welcome to FireIO Mats!
 //one with a variable, the path is set to /hi/?name
 //this will mean that ?name will be a variable, example
 server.registerEndpoint("/hi/?name", req -> {
     return "Welcome to FireIO " + req.getVariable("name") + "!";
-});
-
-//Client client = server.getClient(UUID.fromString("067e6162-3b6f-4ae2-a171-2470b63dff00"));
-//client.send("message", "well hi there! you are the best.");
 ```
 
 ##### Example client
 ```java
-FireIoClient client = new FireIoClient("localhost", 80) //host & port
-        .setPassword("testpassword1") //OPTIONAL: password
-        .setAutoReConnect(2000) //OPTIONAL: auto-reconnect with timeout
-        .setParameter("appversion", "1.0-RELEASE") //throw it meta-date in handshake
-        .setThreadPoolSize(1) //OPTIONAL: thread pool for event handling execution
+FireIoClient client = new FireIoClient("localhost", 80)
+        .setPassword("testpassword1")
+        .setAutoReConnect(2000)
+        .setParameter("appversion", "1.0-RELEASE")
         .connect();
 
 client.on(Event.CONNECT, a -> {
-            System.out.println("Connected with the server!");
+    System.out.println("Connected with the server!");
+})
 
-            //submit a non-blocking request for data
-            client.request("whoami", null, response -> {
-                String result = ((RequestString) response).getString();
-                System.out.println("The server told me that i am: " + result);
-            });
+.on(Event.DISCONNECT, a -> {
+    System.out.println("Connection with the server has closed!");
+})
 
-        })
+.on("MOTD", payload -> {
+    String text = ((ReceivedText) payload).getString();
+    System.out.println("The message of the day is: " + text);
+    //send a cookie jar
+    client.send("cookie_jar", new CookieJar(5, "chocolate"));
+})
 
-        .on(Event.DISCONNECT, a -> {
-            System.out.println("Connection with the server has closed!");
-        })
-
-        .on("MOTD", payload -> {
-            String text = ((ReceivedText) payload).getString();
-            System.out.println("The message of the day is: " + text);
-
-            //send a cookie jar
-            client.send("cookie_jar", new CookieJar(5, "chocolate"));
-        })
-
-        .on("thanks", eventPayload -> {
-            System.out.println("The server thanked you for your cookies");
-        });
+.on("thanks", eventPayload -> {
+    System.out.println("The server thanked you for your cookies");
+});
 ```
 
 ##### Example custom packet (object)
