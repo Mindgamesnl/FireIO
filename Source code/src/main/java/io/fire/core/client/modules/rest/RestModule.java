@@ -21,7 +21,7 @@ public class RestModule {
     }
 
     //get token eindpoint
-    public String getToken() {
+    public String initiateHandshake() {
         try {
             //connect to path + endpoint with password parameter
             URL website = new URL(path + "fireio/register?p=" + password);

@@ -12,6 +12,7 @@ import io.fire.core.common.interfaces.Packet;
 import io.fire.core.common.interfaces.PoolHolder;
 import io.fire.core.common.interfaces.RequestBody;
 import io.fire.core.common.objects.ThreadPool;
+import io.fire.core.common.objects.VersionInfo;
 import io.fire.core.common.packets.ChannelMessagePacket;
 import io.fire.core.common.packets.ChannelPacketPacket;
 import io.fire.core.common.packets.ReceivedText;
@@ -71,7 +72,7 @@ public class FireIoClient implements PoolHolder {
             getEventHandler().fireEvent(Event.DISCONNECT, null);
 
             //log information about problem
-            System.err.println("[FireIo] Connection closed unexpectedly! attempting re-connect in " + timeout + "MS.");
+            System.err.println("[Fire-IO] Connection closed unexpectedly! attempting re-connect in " + timeout + "MS.");
             System.err.println(" - Error: " + message);
             connectAttampt++;
             System.err.println(" - Attempt: " + connectAttampt);
@@ -114,10 +115,10 @@ public class FireIoClient implements PoolHolder {
         }
 
         //connect to the server!
-        System.out.println("[FireIO] starting client & requesting token");
+        System.out.println("[Fire-IO] starting client & requesting token");
 
         //request a new token via the rest module!
-        String a = restModule.getToken();
+        String a = restModule.initiateHandshake();
         if (a == null) {
             //could not get api key due to a connection problem
             //trigger event and trigger auto reconnect if set
@@ -139,17 +140,44 @@ public class FireIoClient implements PoolHolder {
             return this;
         }
 
-        //we've got a id to use! parse it and set it as our own
-        UUID b = UUID.fromString(a);
-        if (b == null) {
-            //end the party here, it's an invalid id or unexpected result
-            //trigger event and trigger auto reconnect if set
-            getEventHandler().fireEvent(Event.CLOSED_UNEXPECTEDLY, new ReceivedText("Failed to parse api key" ,null));
-            return this;
+        //check if it is safe to use the new and updated handshake
+        UUID assignedId = null;
+        if (a.length() == 36) {
+            //yes, it is 36 chars so only a uuid, fall back to the "old" method
+            //we've got a id to use! parse it and set it as our own
+            assignedId = UUID.fromString(a);
+            if (assignedId == null) {
+                //end the party here, it's an invalid id or unexpected result
+                //trigger event and trigger auto reconnect if set
+                getEventHandler().fireEvent(Event.CLOSED_UNEXPECTEDLY, new ReceivedText("Failed to parse api key" ,null));
+                return this;
+            }
+        } else if (a.length() > 36) {
+            //no its new!
+            //split the UUID and parse the server info!
+            String[] elements = a.split("INFO:");
+            assignedId = UUID.fromString(elements[0]);
+            if (assignedId == null) {
+                //end the party here, it's an invalid id or unexpected result
+                //trigger event and trigger auto reconnect if set
+                getEventHandler().fireEvent(Event.CLOSED_UNEXPECTEDLY, new ReceivedText("Failed to parse api key" ,null));
+                return this;
+            }
+
+            VersionInfo serverVersion = new VersionInfo().fromString(elements[1]);
+            VersionInfo clientVersion = new VersionInfo();
+
+            //run critical checks!
+            if (!serverVersion.getRelease()) System.out.println("[Fire-IO] Warning: the server is running a pre-release build.");
+            if (serverVersion.getCoreVersion() > clientVersion.getCoreVersion()) System.out.println("[Fire-IO] Warning: this client is out dated! server is running:"+serverVersion.getCoreVersion() + " and the client is running:"+clientVersion.getCoreVersion());
+            if (serverVersion.getCoreVersion() < clientVersion.getCoreVersion()) System.out.println("[Fire-IO] Warning: this server is out dated! server is running:"+serverVersion.getCoreVersion() + " and the client is running:"+clientVersion.getCoreVersion());
+            if (serverVersion.getProtocolVersion() > clientVersion.getProtocolVersion()) System.out.println("[Fire-IO] Warning: there is a version miss-match between the server and the client! the server is running a newer version, Fire-IO may not work as expected or fail entirely. Please update your server to release " + clientVersion.getCoreVersion());
+            if (serverVersion.getProtocolVersion() < clientVersion.getProtocolVersion()) System.out.println("[Fire-IO] Warning: there is a version miss-match between the server and the client! the client is running a newer version, Fire-IO may not work as expected or fail entirely. Please update your client to release " + serverVersion.getCoreVersion());
+
         }
 
         //create socket and connect!
-        socketModule = new SocketModule(this, host, (port + 1), b, connectionArguments, connectionMeta);
+        socketModule = new SocketModule(this, host, (port + 1), assignedId, connectionArguments, connectionMeta);
         return this;
     }
 

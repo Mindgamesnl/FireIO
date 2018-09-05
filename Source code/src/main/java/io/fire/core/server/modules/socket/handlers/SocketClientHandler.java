@@ -43,7 +43,7 @@ public class SocketClientHandler implements SocketEvents {
         this.socket = socket;
         this.ioManager = new IoManager(channel);
 
-        this.ioManager.setOnInput(input -> onPacket(input));
+        this.ioManager.setPacketHandler(input -> onPacket(input));
     }
 
     public void onMessage(Consumer<EventPayload> listener) {
@@ -64,9 +64,7 @@ public class SocketClientHandler implements SocketEvents {
     }
 
     public void emit(Packet p) throws IOException {
-        if (!authenticated) {
-            return;
-        }
+        if (!authenticated) return;
         this.ioManager.send(p);
     }
 

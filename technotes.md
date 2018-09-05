@@ -43,6 +43,7 @@ The steps:
  7. wait for authentication validation from server
  8. request buffer size
  9. call `Event.CONNECT`
+
  
 # Threading Model
 #### Server

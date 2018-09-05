@@ -31,7 +31,7 @@ public class IoManager {
     private boolean isNegative = false;
 
     @Setter
-    private Consumer<Packet> onInput = (p) -> {};
+    private Consumer<Packet> packetHandler = (p) -> {};
 
     public IoManager(SocketChannel channel) {
         this.channel = channel;
@@ -56,7 +56,7 @@ public class IoManager {
                         e.printStackTrace();
                     }
                     Packet finalOut1 = finalOut;
-                    poolHolder.getPool().run(()-> onInput.accept(finalOut1));
+                    poolHolder.getPool().run(()-> packetHandler.accept(finalOut1));
                     break;
                 case ',':
                     spliceBuffer();
@@ -96,11 +96,10 @@ public class IoManager {
             byte[] a = prepared.array();
             for (byte b : a) {
                 looped++;
-                if (looped == a.length) {
+                if (looped == a.length)
                     out.append(b);
-                } else {
+                else
                     out.append(b).append(",");
-                }
             }
             prepared = ByteBuffer.wrap((out + "s").getBytes());
             write(prepared);

@@ -41,7 +41,7 @@ public class FireIoServer implements PoolHolder {
         restModule = new RestModule(this, port);
         socketModule = new SocketModule(this, (port + 1));
         requestModule = new RequestModule();
-        System.out.println("[FireIo] Attaching to port " + port + " and " + (port + 1));
+        System.out.println("[Fire-IO] Attaching to port " + port + " and " + (port + 1));
     }
 
     public FireIoServer on(Event e, Consumer<EventPayload> r) {

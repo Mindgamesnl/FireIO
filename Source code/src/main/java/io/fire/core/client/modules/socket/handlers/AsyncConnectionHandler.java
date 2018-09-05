@@ -10,6 +10,7 @@ import io.fire.core.common.interfaces.Packet;
 import io.fire.core.common.objects.IoManager;
 import io.fire.core.common.packets.*;
 import io.fire.core.common.interfaces.SocketEvents;
+import lombok.experimental.var;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -64,14 +65,13 @@ public class AsyncConnectionHandler implements SocketEvents, EventPayload, Conne
     private void connect() throws IOException {
         //open a socket channel, create a socket reader with a default buffer, and then try to authenticate over the newly created socket.
         //the default buffer is common in everything of Fire-Io, when bigger data is getting send it will change in the whole network to what ever is needed.
-        //The default is 5KB
         socketChannel = SocketChannel.open(new InetSocketAddress(host, port));
         socketChannel.configureBlocking(true);
         if (reader != null && reader.isAlive()) reader.stop();
         //create reader
         IoReader ioReader = new IoReader(socketChannel, this, client);
         this.ioManager = new IoManager(socketChannel);
-        this.ioManager.setOnInput(input -> onPacket(input));
+        this.ioManager.setPacketHandler(input -> onPacket(input));
         socketChannel.configureBlocking(true);
         reader = new Thread(ioReader);
         //start reader
@@ -87,9 +87,7 @@ public class AsyncConnectionHandler implements SocketEvents, EventPayload, Conne
     public void close() {
         try {
             //let the server know we intend to close the connection, this prevents falsely labeled errors.
-            if (isSetup) {
-                emit(new PrepareClosingConnection());
-            }
+            if (isSetup) emit(new PrepareClosingConnection());
             isDead = true;
             //close channel
             socketChannel.close();

@@ -2,6 +2,7 @@ package io.fire.core.server.modules.rest.handlers;
 
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
+import io.fire.core.common.objects.VersionInfo;
 import io.fire.core.server.FireIoServer;
 import io.fire.core.server.modules.rest.RestModule;
 import io.fire.core.server.modules.rest.enums.ContentType;
@@ -26,11 +27,8 @@ public class HttpHandler implements com.sun.net.httpserver.HttpHandler {
     private RestModule module;
     private List<RestEndpoint> endpointList = new ArrayList<>();
     //password is null by default (this means it is open for everyone)2
-    @Getter
-    @Setter
-    private RestEndpoint defaultRoot = new RestEndpoint("/", req -> "{\"message\":\"FireIO java server from https://github.com/Mindgamesnl/FireIO\"}");
-    @Setter
-    private String password = null;
+    @Getter @Setter private RestEndpoint defaultRoot = new RestEndpoint("/", req -> "{\"message\":\"FireIO java server from https://github.com/Mindgamesnl/FireIO\"}");
+    @Setter private String password = null;
 
     public HttpHandler(FireIoServer server, RestModule restModule) {
         this.server = server;
@@ -75,8 +73,10 @@ public class HttpHandler implements com.sun.net.httpserver.HttpHandler {
             }
 
             //register a new connection and get the assigned id as string
-            String response = server.getClientModule().registerConnection().getId().toString();
-            emit(httpExchange, response, ContentType.PLAINTEXT);
+            String generatedId = server.getClientModule().registerConnection().getId().toString();
+            //append the version info
+            generatedId += "INFO:" + new VersionInfo().toString();
+            emit(httpExchange, generatedId, ContentType.PLAINTEXT);
         } else {
             Map<String, String> variables = new HashMap<>();
             RestEndpoint endpoint = null;
