@@ -1,4 +1,4 @@
-package io.fire.core.common.objects;
+package io.fire.core.common.io;
 
 import io.fire.core.common.interfaces.Packet;
 import io.fire.core.common.interfaces.PoolHolder;
@@ -7,8 +7,7 @@ import lombok.Setter;
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
-import java.util.Iterator;
-import java.util.Queue;
+import java.util.*;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
@@ -24,11 +23,19 @@ public class IoManager {
     //list
     private ConcurrentLinkedDeque<Packet> waiting = new ConcurrentLinkedDeque<>();
 
-    //buffer
+    //buffer for the fireio protocol
     private Queue<Byte> byteBuffer = new ConcurrentLinkedDeque<Byte>() {};
     private Byte[] portion = new Byte[4];
     private int portionIndex = 0;
     private boolean isNegative = false;
+
+    //buffers for the websocket protocol
+    private List<String> dataLines = new ArrayList<>();
+    private String wsString = "";
+
+    //protocol type
+    private Boolean hasReceived = false;
+    private IoType ioType = IoType.UNKNOWN;
 
     @Setter
     private Consumer<Packet> packetHandler = (p) -> {};
@@ -38,37 +45,75 @@ public class IoManager {
     }
 
     public void handleData(byte[] input, PoolHolder poolHolder) {
-        for (byte a : input) {
-            switch (((char) a)) {
-                case 's':
-                    spliceBuffer();
-                    byte[] ret = new byte[byteBuffer.toArray().length];
-                    Iterator<Byte> iterator = byteBuffer.iterator();
-                    for (int i = 0; i < ret.length; i++) ret[i] = iterator.next();
-                    byteBuffer.clear();
-                    ByteArrayInputStream bis = new ByteArrayInputStream(ret);
-                    Packet finalOut = null;
-                    try (ObjectInput in = new ObjectInputStream(bis)) {
-                        finalOut = (Packet) in.readObject();
-                    } catch (IOException | ClassNotFoundException e) {
-                        System.err.println("UNABLE TO DECODE PACKET!!!");
-                        System.err.println("Error: ");
-                        e.printStackTrace();
-                    }
-                    Packet finalOut1 = finalOut;
-                    poolHolder.getPool().run(()-> packetHandler.accept(finalOut1));
-                    break;
-                case ',':
-                    spliceBuffer();
-                    break;
-                case '-':
-                    isNegative = true;
-                    break;
-                default:
-                    portion[portionIndex] = Byte.decode((char) a + "");
-                    portionIndex++;
-                    break;
+
+        if (!hasReceived) {
+            byte first = input[0];
+            if (((char) first) == 'G') {
+                //the first is the G from GET
+                this.ioType = IoType.WEBSOCKET;
+            } else {
+                this.ioType = IoType.FIREIO;
             }
+            hasReceived = true;
+        }
+
+        switch (this.ioType) {
+            case FIREIO:
+                //use FireIo driver
+                for (byte a : input) {
+                    switch (((char) a)) {
+                        case 's':
+                            spliceBuffer();
+                            byte[] ret = new byte[byteBuffer.toArray().length];
+                            Iterator<Byte> iterator = byteBuffer.iterator();
+                            for (int i = 0; i < ret.length; i++) ret[i] = iterator.next();
+                            byteBuffer.clear();
+                            ByteArrayInputStream bis = new ByteArrayInputStream(ret);
+                            Packet finalOut = null;
+                            try (ObjectInput in = new ObjectInputStream(bis)) {
+                                finalOut = (Packet) in.readObject();
+                            } catch (IOException | ClassNotFoundException e) {
+                                System.err.println("UNABLE TO DECODE PACKET!!!");
+                                System.err.println("Error: ");
+                                e.printStackTrace();
+                            }
+                            Packet finalOut1 = finalOut;
+                            poolHolder.getPool().run(()-> packetHandler.accept(finalOut1));
+                            break;
+                        case ',':
+                            spliceBuffer();
+                            break;
+                        case '-':
+                            isNegative = true;
+                            break;
+                        default:
+                            portion[portionIndex] = Byte.decode((char) a + "");
+                            portionIndex++;
+                            break;
+                    }
+                }
+                break;
+
+            case WEBSOCKET:
+                //use Websocket driver
+                for (byte a : input) {
+                    System.out.print(((char) a));
+                    if (((char) a) == '\n') {
+                        dataLines.add(wsString);
+                        wsString = "";
+                        if (dataLines.size() != 0 && dataLines.get(dataLines.size() - 1).length() == 1) {
+                            dataLines.remove(dataLines.size() - 1);
+                            System.out.println("ended line! all lines:");
+                            dataLines.forEach(s -> System.out.println(" - " + s.length() + " - " + s));
+                        }
+
+                    } else {
+                        wsString += ((char) a);
+                    }
+                }
+                break;
+            case UNKNOWN:
+                break;
         }
     }
 

@@ -21,6 +21,7 @@ public class ClientModule {
 
     //get client by id
     public FireIoConnection getClient(UUID connectionId) {
+        if (connectionId == null) return null;
         //check if it exists
         if (!connectionMap.containsKey(connectionId)) return null;
         //return

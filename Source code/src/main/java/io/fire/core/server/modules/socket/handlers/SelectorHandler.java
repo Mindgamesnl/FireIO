@@ -129,9 +129,11 @@ public class SelectorHandler implements Runnable {
             //get the adress
             SocketAddress remoteAddr = socket.getRemoteSocketAddress();
             //handle the close handler in the socket handler
-            clientManager.references.get(remoteAddr).onClose();
-            //remove the socket handler from memory, its a dead connection
-            clientManager.references.remove(remoteAddr);
+            if (clientManager.references.get(remoteAddr) != null) {
+                clientManager.references.get(remoteAddr).onClose();
+                //remove the socket handler from memory, its a dead connection
+                clientManager.references.remove(remoteAddr);
+            }
             //close channel
             channel.close();
             //close key

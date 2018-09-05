@@ -44,13 +44,9 @@ public class TestServer {
         });
 
 
-        server.registerEndpoint("/time", req -> {
-            return "The server time is: " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
-        });
+        server.registerEndpoint("/time", req -> "The server time is: " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
 
-        server.registerEndpoint("/hi/?name", req -> {
-            return "Welcome to FireIO " + req.getVariable("name") + "!";
-        });
+        server.registerEndpoint("/hi/?name", req -> "Welcome to FireIO " + req.getVariable("name") + "!");
 
     }
 

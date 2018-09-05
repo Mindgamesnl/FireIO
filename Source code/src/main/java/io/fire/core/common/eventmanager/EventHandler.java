@@ -63,7 +63,7 @@ public class EventHandler {
 
             for (Consumer<EventPayload> cons : systemEvents.get(event)) {
                 //call listener
-                cons.accept(payload);
+                if (cons != null) cons.accept(payload);
             }
         }
     }

@@ -3,7 +3,7 @@ package io.fire.core.server.modules.socket.handlers;
 import io.fire.core.common.eventmanager.enums.Event;
 import io.fire.core.common.eventmanager.interfaces.EventPayload;
 import io.fire.core.common.interfaces.Packet;
-import io.fire.core.common.objects.IoManager;
+import io.fire.core.common.io.IoManager;
 import io.fire.core.common.packets.*;
 import io.fire.core.common.interfaces.SocketEvents;
 import io.fire.core.server.FireIoServer;
@@ -125,7 +125,7 @@ public class SocketClientHandler implements SocketEvents {
             connectionId = null;
         } else {
             authenticated = false;
-            server.getEventHandler().fireEvent(Event.CLOSED_UNEXPECTEDLY, server.getClientModule().getClient(connectionId));
+            if (server.getClientModule().getClient(connectionId) != null) server.getEventHandler().fireEvent(Event.CLOSED_UNEXPECTEDLY, server.getClientModule().getClient(connectionId));
             connectionId = null;
         }
     }

@@ -1,6 +1,6 @@
 package io.fire.core.common.interfaces;
 
-import io.fire.core.common.objects.IoManager;
+import io.fire.core.common.io.IoManager;
 
 public interface SocketEvents {
 

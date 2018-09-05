@@ -7,10 +7,9 @@ import io.fire.core.common.eventmanager.interfaces.EventPayload;
 import io.fire.core.common.interfaces.ClientMeta;
 import io.fire.core.common.interfaces.ConnectedFireioClient;
 import io.fire.core.common.interfaces.Packet;
-import io.fire.core.common.objects.IoManager;
+import io.fire.core.common.io.IoManager;
 import io.fire.core.common.packets.*;
 import io.fire.core.common.interfaces.SocketEvents;
-import lombok.experimental.var;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
