@@ -4,17 +4,27 @@ import io.fire.core.common.eventmanager.enums.Event;
 import io.fire.core.common.eventmanager.interfaces.EventPayload;
 import io.fire.core.common.interfaces.Packet;
 import io.fire.core.common.io.IoManager;
+import io.fire.core.common.io.WebSocketStatus;
+import io.fire.core.common.io.WebSocketTransaction;
 import io.fire.core.common.packets.*;
 import io.fire.core.common.interfaces.SocketEvents;
 import io.fire.core.server.FireIoServer;
 import io.fire.core.server.modules.client.objects.ClientInfo;
 
 import lombok.Getter;
+import sun.misc.BASE64Encoder;
 
+import javax.xml.bind.DatatypeConverter;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.Socket;
+import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 import java.util.function.Consumer;
 
@@ -44,6 +54,13 @@ public class SocketClientHandler implements SocketEvents {
         this.ioManager = new IoManager(channel);
 
         this.ioManager.setPacketHandler(input -> onPacket(input));
+        this.ioManager.setWebSocketHandler(input -> {
+            try {
+                onWebsocketPacket(input);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     public void onMessage(Consumer<EventPayload> listener) {
@@ -114,6 +131,56 @@ public class SocketClientHandler implements SocketEvents {
 
         if (consumer != null) consumer.accept(packet);
     }
+
+    @Override
+    public void onWebsocketPacket(WebSocketTransaction webSocketTransaction) throws Exception {
+        //check if the connection is old, if it is, handle the startup section
+        if (webSocketTransaction.getStatus() == WebSocketStatus.IDLE_NEW) {
+            Map<String, String> details = new HashMap<>();
+            webSocketTransaction.getData().forEach(s -> {
+                String[] packet = s.split(": ");
+                if (packet.length == 2) details.put(packet[0], packet[1]);
+            });
+
+            System.out.println("hash: " + details.get("Sec-WebSocket-Key").replaceAll(" ", ""));
+            System.out.println("r: " + DatatypeConverter
+                    .printBase64Binary(
+                            MessageDigest
+                                    .getInstance("SHA-1")
+                                    .digest((details.get("Sec-WebSocket-Key"))
+                                            .getBytes("UTF-8"))));
+
+            byte[] response = ("HTTP/1.1 101 Switching Protocols\r\n"
+                    + "Connection: Upgrade\r\n"
+                    + "Upgrade: websocket\r\n"
+                    + "Sec-WebSocket-Accept: "
+                    + getKey(details.get("Sec-WebSocket-Key"))
+                    + "\r\n\r\n")
+                    .getBytes("UTF-8");
+
+            System.out.println("SenD: " + new String(response));
+
+            ByteBuffer buf = ByteBuffer.wrap(response);
+            this.ioManager.write(buf);
+            this.ioManager.setWebSocketStatus(WebSocketStatus.HANDSHAKE);
+        }
+    }
+
+    public static String getKey(String strWebSocketKey) throws
+            NoSuchAlgorithmException {
+
+        strWebSocketKey += "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
+
+        MessageDigest shaMD = MessageDigest.getInstance("SHA-1");
+        shaMD.reset();
+        shaMD.update(strWebSocketKey.getBytes());
+        byte messageDigest[] = shaMD.digest();
+        BASE64Encoder b64 = new BASE64Encoder();
+
+        return b64.encode(messageDigest);
+
+    }
+
 
     @Override
     public void onClose() {

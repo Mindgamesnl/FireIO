@@ -8,6 +8,7 @@ import io.fire.core.common.interfaces.ClientMeta;
 import io.fire.core.common.interfaces.ConnectedFireioClient;
 import io.fire.core.common.interfaces.Packet;
 import io.fire.core.common.io.IoManager;
+import io.fire.core.common.io.WebSocketTransaction;
 import io.fire.core.common.packets.*;
 import io.fire.core.common.interfaces.SocketEvents;
 
@@ -164,6 +165,11 @@ public class AsyncConnectionHandler implements SocketEvents, EventPayload, Conne
             client.getEventHandler().fireEvent(message.getChannel(), new ReceivedText(message.getText(), null));
             return;
         }
+    }
+
+    @Override
+    public void onWebsocketPacket(WebSocketTransaction webSocketTransaction) throws Exception {
+
     }
 
     @Override

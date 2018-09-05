@@ -32,20 +32,20 @@ public class IoManager {
     //buffers for the websocket protocol
     private List<String> dataLines = new ArrayList<>();
     private String wsString = "";
+    @Setter private WebSocketStatus webSocketStatus = WebSocketStatus.IDLE_NEW;
 
     //protocol type
     private Boolean hasReceived = false;
     private IoType ioType = IoType.UNKNOWN;
 
-    @Setter
-    private Consumer<Packet> packetHandler = (p) -> {};
+    @Setter private Consumer<Packet> packetHandler = (p) -> {};
+    @Setter private Consumer<WebSocketTransaction> webSocketHandler = (p) -> {};
 
     public IoManager(SocketChannel channel) {
         this.channel = channel;
     }
 
     public void handleData(byte[] input, PoolHolder poolHolder) {
-
         if (!hasReceived) {
             byte first = input[0];
             if (((char) first) == 'G') {
@@ -102,9 +102,9 @@ public class IoManager {
                         dataLines.add(wsString);
                         wsString = "";
                         if (dataLines.size() != 0 && dataLines.get(dataLines.size() - 1).length() == 1) {
+                            //finish up data
                             dataLines.remove(dataLines.size() - 1);
-                            System.out.println("ended line! all lines:");
-                            dataLines.forEach(s -> System.out.println(" - " + s.length() + " - " + s));
+                            poolHolder.getPool().run(()-> webSocketHandler.accept(new WebSocketTransaction(dataLines, webSocketStatus)));
                         }
 
                     } else {
@@ -183,7 +183,7 @@ public class IoManager {
         return buffer;
     }
 
-    private void write(ByteBuffer buffer) throws IOException {
+    public void write(ByteBuffer buffer) throws IOException {
         write(new ByteBuffer[]{buffer});
     }
 
