@@ -81,7 +81,7 @@ public class SocketClientHandler implements SocketEvents {
         if (!authenticated) return;
         if (connectionType == ConnectionType.WEBSOCKET) {
             if (p instanceof ChannelMessagePacket) {
-                this.ioManager.sendWebsocket("channelmessage:"+((ChannelMessagePacket) p).getChannel()+":"+((ChannelMessagePacket) p).getText());
+                this.ioManager.sendWebSocket("channelmessage:"+((ChannelMessagePacket) p).getChannel()+":"+((ChannelMessagePacket) p).getText());
                 return;
             }
             throw new IOException("Fire-IO websocket does not support packet type: " + p.getClass().getName());
