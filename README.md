@@ -2,13 +2,21 @@
   <img src="http://static.craftmend.com/fireio/FIREIO.png" />
 </p>
 
-# Fire-IO
-### The LIT java socket & rest framework
-[![](https://jitpack.io/v/Mindgamesnl/FireIO.svg)](https://jitpack.io/#Mindgamesnl/FireIO) [![Build Status](https://travis-ci.org/Mindgamesnl/FireIO.svg?branch=master)](https://travis-ci.org/Mindgamesnl/FireIO) [![GitHub version](https://d25lcipzij17d.cloudfront.net/badge.svg?id=gh&type=6&v=1.3.2&x2=0)](https://github.com/Mindgamesnl/FireIO)
+# Fire-IO [![](https://jitpack.io/v/Mindgamesnl/FireIO.svg)](https://jitpack.io/#Mindgamesnl/FireIO) [![Build Status](https://travis-ci.org/Mindgamesnl/FireIO.svg?branch=master)](https://travis-ci.org/Mindgamesnl/FireIO) [![GitHub version](https://d25lcipzij17d.cloudfront.net/badge.svg?id=gh&type=6&v=1.3.2&x2=0)](https://github.com/Mindgamesnl/FireIO)
+Fire-IO is a [lightning fast](https://github.com/Mindgamesnl/FireIO/blob/master/performance.md) cross platform networking solution that allows you to connect and manage data from multiple platforms with one easy to use java server. The ultimate framework for your networking needs.
 
-Fire-IO is a [lightning fast](https://github.com/Mindgamesnl/FireIO/blob/master/performance.md) and super simple networking framework to handle your connections, data, clients and requests.
-Great for building api's and communication systems.
+And all that for the sweet price of nothing.
 
+### Platforms
+ * **Java** Java server
+ * **Java** Client
+ * **JavaScript** Small web client
+ * **PHP & Other** Rest API
+
+### Features
+ * **Events** All event driven API
+ * **Content types** Send objects, strings and more with build in (de)serialisation
+ * **Web** Compatible with your web application via our REST service and automatic websocket inplementation
 
 Features include:
  - Super simple event driven networking
@@ -23,8 +31,6 @@ Features include:
  - Thread pools for event execution
  - Custom rate limiting
  
-Fire-IO is designed for server-to-server data transfer for real time updates, push notifications, logging, monitoring and promise like data requests.
-
 # Information
 Some other links and information:
  - [Technical notes](https://github.com/Mindgamesnl/FireIO/blob/master/technotes.md)
