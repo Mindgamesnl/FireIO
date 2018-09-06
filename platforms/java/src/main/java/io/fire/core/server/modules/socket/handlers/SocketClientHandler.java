@@ -182,6 +182,7 @@ public class SocketClientHandler implements SocketEvents {
             ioManager.write(ByteBuffer.wrap(response));
             open = true;
             authenticated = true;
+            server.getClientModule().getClient(connectionId).setInfo(new ClientInfo());
             server.getClientModule().getClient(connectionId).setHandler(this);
             server.getEventHandler().fireEvent(Event.CONNECT, server.getClientModule().getClient(connectionId));
             return;

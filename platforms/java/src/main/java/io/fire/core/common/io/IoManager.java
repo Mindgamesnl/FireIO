@@ -143,7 +143,6 @@ public class IoManager {
         return buffer;
     }
 
-
     private ByteBuffer parseData(FrameData framedata) {
         ByteBuffer mes = framedata.getPayloadData();
         int byteSize = mes.remaining() <= 125 ? 1 : mes.remaining() <= 65535 ? 2 : 8;
