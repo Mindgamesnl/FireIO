@@ -14,12 +14,12 @@ function FireIoClient(host, port) {
     // variables
     const _host = host;
     const _port = port;
+    const _events = {};
     let _reconnectTimer = -1;
     let _password = "";
     let _ws;
     let _token;
     let _connected = false;
-    const _events = {};
 
     // error toggle
     const err = function(err) {
