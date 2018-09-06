@@ -4,6 +4,7 @@ import io.fire.core.common.eventmanager.interfaces.EventPayload;
 import io.fire.core.common.interfaces.ClientMeta;
 import io.fire.core.common.interfaces.ConnectedFireioClient;
 import io.fire.core.common.interfaces.Packet;
+import io.fire.core.common.io.ConnectionType;
 import io.fire.core.server.modules.client.objects.ClientInfo;
 
 import lombok.Data;
@@ -25,5 +26,6 @@ public abstract class Client implements EventPayload, ConnectedFireioClient {
     public ClientMeta getMeta(String key) {return null;}
     public void close() {}
     public ClientInfo getInfo() {return null;}
+    public ConnectionType getConnectionType() {return ConnectionType.NONE;}
 
 }

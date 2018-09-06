@@ -2,6 +2,7 @@ package io.fire.core.server.modules.client.objects;
 
 import io.fire.core.common.interfaces.ClientMeta;
 import io.fire.core.common.interfaces.Packet;
+import io.fire.core.common.io.ConnectionType;
 import io.fire.core.common.packets.ChannelMessagePacket;
 import io.fire.core.common.packets.ChannelPacketPacket;
 import io.fire.core.common.packets.ReceivedText;
@@ -82,6 +83,11 @@ public class FireIoConnection extends Client {
                 e.printStackTrace();
             }
         }
+    }
+
+    @Override
+    public ConnectionType getConnectionType() {
+        return this.handler.getConnectionType();
     }
 
     @Override

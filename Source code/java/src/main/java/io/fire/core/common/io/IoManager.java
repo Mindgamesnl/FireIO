@@ -7,6 +7,7 @@ import lombok.Setter;
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
+import java.nio.charset.Charset;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.locks.ReentrantLock;
@@ -30,8 +31,7 @@ public class IoManager {
     private boolean isNegative = false;
 
     //buffers for the websocket protocol
-    private List<String> dataLines = new ArrayList<>();
-    private String wsString = "";
+    private StringBuilder wsDataStream = new StringBuilder();
     @Setter private WebSocketStatus webSocketStatus = WebSocketStatus.IDLE_NEW;
 
     //protocol type
@@ -95,26 +95,61 @@ public class IoManager {
                 break;
 
             case WEBSOCKET:
-                //use Websocket driver
-                for (byte a : input) {
-                    System.out.print(((char) a));
-                    if (((char) a) == '\n') {
-                        dataLines.add(wsString);
-                        wsString = "";
-                        if (dataLines.size() != 0 && dataLines.get(dataLines.size() - 1).length() == 1) {
-                            //finish up data
-                            dataLines.remove(dataLines.size() - 1);
-                            poolHolder.getPool().run(()-> webSocketHandler.accept(new WebSocketTransaction(dataLines, webSocketStatus)));
+                //add to data
+                if (webSocketStatus == WebSocketStatus.IDLE_NEW) {
+                    wsDataStream.append(new String(input));
+                    String data = wsDataStream.toString();
+                    //does it end here?
+                    if (data.contains("\r\n\r\n")) {
+                        //does it have other parts?
+                        if (data.split("\r\n\r\n").length == 1) {
+                            poolHolder.getPool().run(() -> webSocketHandler.accept(new WebSocketTransaction(data.split("\r\n\r\n")[0], webSocketStatus)));
+                        } else {
+                            wsDataStream = new StringBuilder();
+                            wsDataStream.append(data.split("\r\n\r\n")[1]);
                         }
-
-                    } else {
-                        wsString += ((char) a);
                     }
+                } else if (webSocketStatus == WebSocketStatus.CONNECED) {
+                    String data = new String(parseEncodedFrame(input).getPayload(), Charset.defaultCharset());
+                    poolHolder.getPool().run(() -> webSocketHandler.accept(new WebSocketTransaction(data, webSocketStatus)));
                 }
                 break;
+
             case UNKNOWN:
                 break;
         }
+    }
+
+    private WebSocketFrame parseEncodedFrame(byte[] raw) {
+        ByteBuffer buf = ByteBuffer.wrap(raw);
+        WebSocketFrame frame = new WebSocketFrame();
+        byte b = buf.get();
+        frame.setFin(((b & 0x80) != 0));
+        frame.setOpcode((byte)(b & 0x0F));
+
+        b = buf.get();
+        boolean masked = ((b & 0x80) != 0);
+        int payloadLength = (byte)(0x7F & b);
+        int byteCount = 0;
+        if (payloadLength == 0x7F) byteCount = 8;
+        else if (payloadLength == 0x7E) byteCount = 2;
+
+        while (--byteCount > 0) {
+            b = buf.get();
+            payloadLength |= (b & 0xFF) << (8 * byteCount);
+        }
+
+        byte maskingKey[] = null;
+        if (masked) {
+            maskingKey = new byte[4];
+            buf.get(maskingKey,0,4);
+        }
+
+        frame.setPayload(new byte[payloadLength]);
+        buf.get(frame.getPayload(),0,payloadLength);
+
+        if (masked) for (int i = 0; i < frame.getPayload().length; i++) frame.getPayload()[i] ^= maskingKey[i % 4];
+        return frame;
     }
 
     private void spliceBuffer() {

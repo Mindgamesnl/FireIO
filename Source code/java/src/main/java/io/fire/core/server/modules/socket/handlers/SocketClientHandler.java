@@ -3,6 +3,7 @@ package io.fire.core.server.modules.socket.handlers;
 import io.fire.core.common.eventmanager.enums.Event;
 import io.fire.core.common.eventmanager.interfaces.EventPayload;
 import io.fire.core.common.interfaces.Packet;
+import io.fire.core.common.io.ConnectionType;
 import io.fire.core.common.io.IoManager;
 import io.fire.core.common.io.WebSocketStatus;
 import io.fire.core.common.io.WebSocketTransaction;
@@ -46,6 +47,7 @@ public class SocketClientHandler implements SocketEvents {
     private boolean expectedClosing = false;
     @Getter private boolean open = true;
     @Getter private Instant initiated = Instant.now();
+    @Getter private ConnectionType connectionType = ConnectionType.NONE;
 
     SocketClientHandler(FireIoServer server, Socket socket, SocketChannel channel) {
         //constructor
@@ -87,6 +89,7 @@ public class SocketClientHandler implements SocketEvents {
 
     @Override
     public void onPacket(Packet packet) {
+        this.connectionType = ConnectionType.FIREIO;
         if (packet instanceof AuthPacket) {
             UUID parsed = UUID.fromString(((AuthPacket) packet).getUuid());
             if (server.getClientModule().getClient(parsed) == null) {
@@ -134,53 +137,35 @@ public class SocketClientHandler implements SocketEvents {
 
     @Override
     public void onWebsocketPacket(WebSocketTransaction webSocketTransaction) throws Exception {
-        //check if the connection is old, if it is, handle the startup section
+        this.connectionType = ConnectionType.WEBSOCKET;
+        //check status, is it allowed? if not, then first finish handshake
         if (webSocketTransaction.getStatus() == WebSocketStatus.IDLE_NEW) {
-            Map<String, String> details = new HashMap<>();
-            webSocketTransaction.getData().forEach(s -> {
-                String[] packet = s.split(": ");
-                if (packet.length == 2) details.put(packet[0], packet[1]);
-            });
+            //start handshake
+            //check if it contains data
+            if (!webSocketTransaction.getData().contains("Sec-WebSocket-Key: ")) return;
+            //split everything before the value
+            String key = webSocketTransaction.getData().split("Sec-WebSocket-Key: ")[1].split("\r\n")[0];
+            StringBuilder computeInput = new StringBuilder();
+            computeInput.append(key);
+            computeInput.append("258EAFA5-E914-47DA-95CA-C5AB0DC85B11");
 
-            System.out.println("hash: " + details.get("Sec-WebSocket-Key").replaceAll(" ", ""));
-            System.out.println("r: " + DatatypeConverter
-                    .printBase64Binary(
-                            MessageDigest
-                                    .getInstance("SHA-1")
-                                    .digest((details.get("Sec-WebSocket-Key"))
-                                            .getBytes("UTF-8"))));
+            //compute sha-1 and then convert to base
+            String acceptKey = DatatypeConverter.printBase64Binary(MessageDigest.getInstance("SHA-1").digest((computeInput.toString()).getBytes("UTF-8")));
 
             byte[] response = ("HTTP/1.1 101 Switching Protocols\r\n"
                     + "Connection: Upgrade\r\n"
                     + "Upgrade: websocket\r\n"
-                    + "Sec-WebSocket-Accept: "
-                    + getKey(details.get("Sec-WebSocket-Key"))
+                    + "Sec-WebSocket-Accept: " + acceptKey
                     + "\r\n\r\n")
                     .getBytes("UTF-8");
 
-            System.out.println("SenD: " + new String(response));
-
-            ByteBuffer buf = ByteBuffer.wrap(response);
-            this.ioManager.write(buf);
-            this.ioManager.setWebSocketStatus(WebSocketStatus.HANDSHAKE);
+            ioManager.setWebSocketStatus(WebSocketStatus.CONNECED);
+            ioManager.write(ByteBuffer.wrap(response));
+            System.out.println("connected!");
+            return;
         }
+        System.out.println("The data " + webSocketTransaction.getData() + " is ready to be handled");
     }
-
-    public static String getKey(String strWebSocketKey) throws
-            NoSuchAlgorithmException {
-
-        strWebSocketKey += "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
-
-        MessageDigest shaMD = MessageDigest.getInstance("SHA-1");
-        shaMD.reset();
-        shaMD.update(strWebSocketKey.getBytes());
-        byte messageDigest[] = shaMD.digest();
-        BASE64Encoder b64 = new BASE64Encoder();
-
-        return b64.encode(messageDigest);
-
-    }
-
 
     @Override
     public void onClose() {
