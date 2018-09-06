@@ -11,41 +11,35 @@ And all that for the sweet price of nothing.
  * **Java** Java server
  * **Java** Client
  * **JavaScript** Small web client
- * **PHP & Other** Rest API
+ * **PHP & Other** Can make use of socket, websocket or the Rest implementation  
 
 ### Features
  * **Events** All event driven API
  * **Content types** Send objects, strings and more with build in (de)serialisation
- * **Web** Compatible with your web application via our REST service and automatic websocket inplementation
-
-Features include:
- - Super simple event driven networking
- - Send objects or strings
- - Client manager
- - REST endpoints
- - Auto re-connect
- - Packet-loss prevention
- - Password protection for your network
- - Async networking
- - Android compatible
- - Thread pools for event execution
- - Custom rate limiting
+ * **Web** Compatible with your web application via our REST service and automatic websocket implementation
+ * **Data Loss Prevention** Automatically detect the failure of a packet and try to repair the data or resend it
+ * **Auto Reconnect** Auto reconnect for all-clients
+ * **Rate Limiter** Build in rate limiter for all your endpoints (rest, api and socket)
+ * **Async** All networking is done in async at all times and events are correctly handled via pools, so no more worrying about response times.
+ * **Requests** Handle requests from clients, assign a response to one specific piece of data
+ * **Passwords** Password protection for your network, don't allow connections without a key
  
-# Information
-Some other links and information:
+### Useful Links
  - [Technical notes](https://github.com/Mindgamesnl/FireIO/blob/master/technotes.md)
- - [Javadoc](https://cdn.rawgit.com/Mindgamesnl/FireIO/master/javadoc/)
+ - [Javadoc](https://cdn.rawgit.com/Mindgamesnl/FireIO/master/platforms/java/javadoc/)
  - [Contact](https://twitter.com/Mindgamesnl)
  - [Performance testing results](https://github.com/Mindgamesnl/FireIO/blob/master/performance.md)
+ - [Java Source Code](https://github.com/Mindgamesnl/FireIO/tree/master/platforms/java)
+ - [Web Source Code](https://github.com/Mindgamesnl/FireIO/tree/master/platforms/web)
 
-FireIO depends on:
+### FireIO depends on:
  - Java 8
 
 # Example code
 
 Here is a simple example setup with a server, client, a custom packet, two way data communication and a non blocking data request including a callback
 
-##### Example server
+### Example Jave server
 ```java
 FireIoServer server = new FireIoServer(80)
     .setPassword("testpassword1")
@@ -92,7 +86,7 @@ server.registerEndpoint("/hi/?name", req -> {
 });
 ```
 
-##### Example client
+### Example Java Client
 ```java
 FireIoClient client = new FireIoClient("localhost", 80)
         .setPassword("testpassword1")
@@ -120,7 +114,22 @@ client.on(Event.CONNECT, a -> {
 });
 ```
 
-##### Example custom packet (object)
+### Web JavaScript Client
+```javascript
+const client = new FireIoClient("localhost", 80);
+client.setPassword("testpassword1");
+client.connect();
+
+client.on("connect", function () {
+    console.log("connected!!");
+});
+
+client.on("disconnect", function () {
+    console.log("disconnected!!");
+});
+```
+
+### Example Custom Java packet (object)
 ```java
 public class CookieJar extends Packet {
     private int amount = 0;
@@ -128,17 +137,6 @@ public class CookieJar extends Packet {
 }
 ```
 
-##### Example requst data (object)
-```java
-public class RequestString implements RequestBody {
-    private String string;
-}
-```
-
-##### Output of examples
-<p align="center">
-  <img src="https://gyazo.com/7e9e7c11f0137d5f3fda944f587fd2f6.png" />
-</p>
 
 # Dependencies
 ##### Maven
