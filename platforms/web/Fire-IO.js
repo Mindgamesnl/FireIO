@@ -2,6 +2,7 @@
 function FireIoClient(host, port) {
     const _host = host;
     const _port = port;
+    let _reconnectTimer = 0;
     let _password = "";
     let _ws;
     let _token;
@@ -66,6 +67,7 @@ function FireIoClient(host, port) {
         request.send();
         return this;
     };
+    const _reconfunc = this.connect;
 
     this.isConnected = function () {
         return _connected;
@@ -85,12 +87,26 @@ function FireIoClient(host, port) {
         //check if event exists, if not, register
         if (_events[key] == null) _events[key] = [];
         _events[key].push(handler);
+    };
+
+    this.setAutoReconnect = function (timeout) {
+        client.on("disconnect", function () {
+            console.log("disconnected!!");
+            console.log("[Fire-IO] Attempting re-connect every " + timeout+"MS");
+            _reconnectTimer = setInterval(function () {
+                _reconfunc();
+            }, timeout);
+        });
+        client.on("connect", function () {
+            clearInterval(_reconnectTimer);
+        });
     }
 }
 
 //test
 const client = new FireIoClient("localhost", 80);
 client.setPassword("testpassword1");
+client.setAutoReconnect(500);
 client.connect();
 
 client.on("connect", function () {

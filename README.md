@@ -39,7 +39,7 @@ And all that for the sweet price of nothing.
 
 Here is a simple example setup with a server, client, a custom packet, two way data communication and a non blocking data request including a callback
 
-### Example Jave server
+### Example Java server
 ```java
 FireIoServer server = new FireIoServer(80)
     .setPassword("testpassword1")
@@ -86,6 +86,30 @@ server.registerEndpoint("/hi/?name", req -> {
 });
 ```
 
+### Web JavaScript Client
+```html
+<script src="Fire-IO.js></script>
+<script>
+    const client = new FireIoClient("localhost", 80);
+    client.setPassword("testpassword1");
+    client.setAutoReconnect(500);
+    client.connect();
+    
+    client.on("connect", function () {
+        console.log("connected!!");
+        client.send("channel", "Hello world!");
+    });
+    
+    client.on("channel", function (data) {
+        console.log("The server said: " + data);
+    });
+    
+    client.on("disconnect", function () {
+        console.log("disconnected!!");
+    });
+</script>
+```
+
 ### Example Java Client
 ```java
 FireIoClient client = new FireIoClient("localhost", 80)
@@ -111,21 +135,6 @@ client.on(Event.CONNECT, a -> {
 
 .on("thanks", eventPayload -> {
     System.out.println("The server thanked you for your cookies");
-});
-```
-
-### Web JavaScript Client
-```javascript
-const client = new FireIoClient("localhost", 80);
-client.setPassword("testpassword1");
-client.connect();
-
-client.on("connect", function () {
-    console.log("connected!!");
-});
-
-client.on("disconnect", function () {
-    console.log("disconnected!!");
 });
 ```
 
@@ -159,7 +168,6 @@ public class CookieJar extends Packet {
 ```
 allprojects {
     repositories {
-        ...
         maven { url 'https://jitpack.io' }
     }
 }
