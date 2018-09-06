@@ -88,7 +88,7 @@ server.registerEndpoint("/hi/?name", req -> {
 
 ### Web JavaScript Client
 ```html
-<script src="Fire-IO.js></script>
+<script src="Fire-IO.js"></script>
 <script>
     const client = new FireIoClient("localhost", 80);
     client.setPassword("testpassword1");
