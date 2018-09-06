@@ -17,7 +17,7 @@ public class TestServer {
         try {
             server = new FireIoServer(80)
                     .setPassword("testpassword1")
-                    .setRateLimiter(2, 10)
+                    .setRateLimiter(2, 5)
 
                     .on(Event.CONNECT, eventPayload -> {
                         Client client = (Client) eventPayload;

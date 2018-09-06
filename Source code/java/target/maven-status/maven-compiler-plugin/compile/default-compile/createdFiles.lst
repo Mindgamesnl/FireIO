@@ -1,5 +1,6 @@
 io/fire/core/client/modules/request/ClientRequestModule.class
 io/fire/core/common/interfaces/RequestBody.class
+io/fire/core/common/io/ConnectionType.class
 io/fire/core/server/modules/socket/SocketModule.class
 io/fire/core/server/modules/request/interfaces/CompletableRequest.class
 io/fire/core/common/io/WebSocketStatus.class

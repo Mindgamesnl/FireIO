@@ -40,6 +40,7 @@ public class HttpHandler implements com.sun.net.httpserver.HttpHandler {
     }
 
     public void handle(HttpExchange httpExchange) throws IOException {
+        httpExchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
         String url = httpExchange.getRequestURI().toString();
         //check requested url
 

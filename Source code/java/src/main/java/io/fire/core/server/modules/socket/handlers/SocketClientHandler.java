@@ -145,6 +145,23 @@ public class SocketClientHandler implements SocketEvents {
             if (!webSocketTransaction.getData().contains("Sec-WebSocket-Key: ")) return;
             //split everything before the value
             String key = webSocketTransaction.getData().split("Sec-WebSocket-Key: ")[1].split("\r\n")[0];
+            String token = webSocketTransaction.getData().split("GET /")[1].split(" ")[0];
+
+            //validate auth token
+            System.out.println(token);
+            try {
+                UUID parsed = UUID.fromString(token);
+                if (parsed == null) {
+                    close();
+                    return;
+                }
+                connectionId = parsed;
+            } catch (Exception e) {
+                e.printStackTrace();
+                close();
+                return;
+            }
+
             StringBuilder computeInput = new StringBuilder();
             computeInput.append(key);
             computeInput.append("258EAFA5-E914-47DA-95CA-C5AB0DC85B11");
@@ -162,6 +179,7 @@ public class SocketClientHandler implements SocketEvents {
             ioManager.setWebSocketStatus(WebSocketStatus.CONNECED);
             ioManager.write(ByteBuffer.wrap(response));
             System.out.println("connected!");
+            ioManager.write(ByteBuffer.wrap("FIN=1, opcode=0x2, msg=\"hello\"".getBytes()));
             return;
         }
         System.out.println("The data " + webSocketTransaction.getData() + " is ready to be handled");
