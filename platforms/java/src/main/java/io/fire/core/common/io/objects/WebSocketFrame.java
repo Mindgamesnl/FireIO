@@ -1,4 +1,4 @@
-package io.fire.core.common.io;
+package io.fire.core.common.io.objects;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;

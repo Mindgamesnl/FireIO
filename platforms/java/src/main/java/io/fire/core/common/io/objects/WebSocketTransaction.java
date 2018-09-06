@@ -1,4 +1,4 @@
-package io.fire.core.common.io;
+package io.fire.core.common.io.objects;
 
 import io.fire.core.common.io.enums.WebSocketStatus;
 import lombok.AllArgsConstructor;

@@ -6,7 +6,7 @@ import io.fire.core.common.interfaces.Packet;
 import io.fire.core.common.io.enums.ConnectionType;
 import io.fire.core.common.io.IoManager;
 import io.fire.core.common.io.enums.WebSocketStatus;
-import io.fire.core.common.io.WebSocketTransaction;
+import io.fire.core.common.io.objects.WebSocketTransaction;
 import io.fire.core.common.packets.*;
 import io.fire.core.common.interfaces.SocketEvents;
 import io.fire.core.server.FireIoServer;

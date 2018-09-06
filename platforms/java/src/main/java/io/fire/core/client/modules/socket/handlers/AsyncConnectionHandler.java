@@ -8,7 +8,7 @@ import io.fire.core.common.interfaces.ClientMeta;
 import io.fire.core.common.interfaces.ConnectedFireioClient;
 import io.fire.core.common.interfaces.Packet;
 import io.fire.core.common.io.IoManager;
-import io.fire.core.common.io.WebSocketTransaction;
+import io.fire.core.common.io.objects.WebSocketTransaction;
 import io.fire.core.common.packets.*;
 import io.fire.core.common.interfaces.SocketEvents;
 

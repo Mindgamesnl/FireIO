@@ -1,7 +1,7 @@
 package io.fire.core.common.interfaces;
 
 import io.fire.core.common.io.IoManager;
-import io.fire.core.common.io.WebSocketTransaction;
+import io.fire.core.common.io.objects.WebSocketTransaction;
 
 public interface SocketEvents {
 
