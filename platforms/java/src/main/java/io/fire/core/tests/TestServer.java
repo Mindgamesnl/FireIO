@@ -2,6 +2,8 @@ package io.fire.core.tests;
 
 import io.fire.core.common.body.RequestString;
 import io.fire.core.common.eventmanager.enums.Event;
+import io.fire.core.common.packets.ChannelMessagePacket;
+import io.fire.core.common.packets.ReceivedText;
 import io.fire.core.server.FireIoServer;
 import io.fire.core.server.modules.client.superclasses.Client;
 
@@ -21,19 +23,27 @@ public class TestServer {
 
                     .on(Event.CONNECT, eventPayload -> {
                         Client client = (Client) eventPayload;
-                        client.send("MOTD", "test");
-                        System.out.println("Client connected");
+                        System.out.println("A user connected via " + client.getConnectionType());
                     })
 
                     .on(Event.CLOSED_UNEXPECTEDLY, eventPayload -> {
                         Client client = (Client) eventPayload;
-                        System.out.println(client.getId() + " closed unexpectedly!");
+                        System.out.println(client.getId() + " closed unexpectedly! " + client.getConnectionType());
                     })
 
                     .on(Event.DISCONNECT, eventPayload -> {
                         Client client = (Client) eventPayload;
                         System.out.println(client.getId() + " just disconnected");
+                    })
+
+                    .on("channel", eventPayload -> {
+                        ReceivedText text = (ReceivedText) eventPayload;
+                        System.out.println("Channel got: " +text.getString());
+                        //send hi back
+                        text.getSender().send("channel", "well hi my love! :D");
                     });
+
+            ;
         } catch (IOException e) {
             e.printStackTrace();
         }

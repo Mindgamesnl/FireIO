@@ -4,7 +4,7 @@ import io.fire.core.common.eventmanager.interfaces.EventPayload;
 import io.fire.core.common.interfaces.ClientMeta;
 import io.fire.core.common.interfaces.ConnectedFireioClient;
 import io.fire.core.common.interfaces.Packet;
-import io.fire.core.common.io.ConnectionType;
+import io.fire.core.common.io.enums.ConnectionType;
 import io.fire.core.server.modules.client.objects.ClientInfo;
 
 import lombok.Data;

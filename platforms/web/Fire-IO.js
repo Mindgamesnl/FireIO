@@ -41,10 +41,17 @@ function FireIoClient(host, port) {
                     _triggerEvent("disconnect", null);
                 };
                 _ws.onerror = function (onclose) {
-                    console.log("err: " + onclose);
+                    console.log(onclose);
                 };
-                _ws.onmessage = function (onclose) {
-                    console.log("mess: " + onclose);
+                _ws.onmessage = function (message) {
+                    let input = message.data;
+                    if (input.startsWith("channelmessage:")) {
+                        //it is a channel message
+                        input = input.replace("channelmessage:", "");
+                        let channel = input.split(":")[0];
+                        input = input.replace(channel + ":", "");
+                        _triggerEvent(channel, input);
+                    }
                 };
                 _ws.onopen = function () {
                     _connected = true;
@@ -62,6 +69,10 @@ function FireIoClient(host, port) {
 
     this.isConnected = function () {
         return _connected;
+    };
+
+    this.send = function (channel, data) {
+        _ws.send("channelmessage:"+channel + ":" + data);
     };
 
     const _triggerEvent = function (key, data) {
@@ -84,6 +95,11 @@ client.connect();
 
 client.on("connect", function () {
     console.log("connected!!");
+    client.send("channel", "Hello world!");
+});
+
+client.on("channel", function (data) {
+    console.log("The server said: " + data);
 });
 
 client.on("disconnect", function () {

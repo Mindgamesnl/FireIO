@@ -3,9 +3,9 @@ package io.fire.core.server.modules.socket.handlers;
 import io.fire.core.common.eventmanager.enums.Event;
 import io.fire.core.common.eventmanager.interfaces.EventPayload;
 import io.fire.core.common.interfaces.Packet;
-import io.fire.core.common.io.ConnectionType;
+import io.fire.core.common.io.enums.ConnectionType;
 import io.fire.core.common.io.IoManager;
-import io.fire.core.common.io.WebSocketStatus;
+import io.fire.core.common.io.enums.WebSocketStatus;
 import io.fire.core.common.io.WebSocketTransaction;
 import io.fire.core.common.packets.*;
 import io.fire.core.common.interfaces.SocketEvents;
@@ -13,19 +13,14 @@ import io.fire.core.server.FireIoServer;
 import io.fire.core.server.modules.client.objects.ClientInfo;
 
 import lombok.Getter;
-import sun.misc.BASE64Encoder;
 
 import javax.xml.bind.DatatypeConverter;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 import java.util.function.Consumer;
 
@@ -84,7 +79,15 @@ public class SocketClientHandler implements SocketEvents {
 
     public void emit(Packet p) throws IOException {
         if (!authenticated) return;
-        this.ioManager.send(p);
+        if (connectionType == ConnectionType.WEBSOCKET) {
+            if (p instanceof ChannelMessagePacket) {
+                this.ioManager.sendWebsocket("channelmessage:"+((ChannelMessagePacket) p).getChannel()+":"+((ChannelMessagePacket) p).getText());
+                return;
+            }
+            throw new IOException("Fire-IO websocket does not support packet type: " + p.getClass().getName());
+        } else {
+            this.ioManager.send(p);
+        }
     }
 
     @Override
@@ -148,7 +151,6 @@ public class SocketClientHandler implements SocketEvents {
             String token = webSocketTransaction.getData().split("GET /")[1].split(" ")[0];
 
             //validate auth token
-            System.out.println(token);
             try {
                 UUID parsed = UUID.fromString(token);
                 if (parsed == null) {
@@ -178,11 +180,22 @@ public class SocketClientHandler implements SocketEvents {
 
             ioManager.setWebSocketStatus(WebSocketStatus.CONNECED);
             ioManager.write(ByteBuffer.wrap(response));
-            System.out.println("connected!");
-            ioManager.write(ByteBuffer.wrap("FIN=1, opcode=0x2, msg=\"hello\"".getBytes()));
+            open = true;
+            authenticated = true;
+            server.getClientModule().getClient(connectionId).setHandler(this);
+            server.getEventHandler().fireEvent(Event.CONNECT, server.getClientModule().getClient(connectionId));
             return;
         }
-        System.out.println("The data " + webSocketTransaction.getData() + " is ready to be handled");
+
+        //handle event
+        if (webSocketTransaction.getData().startsWith("channelmessage:")) {
+            //it is a simple channel string
+            String data = webSocketTransaction.getData();
+            data = data.replaceFirst("channelmessage:", "");
+            String channel = data.split(":")[0];
+            data = data.replaceFirst(channel + ":", "");
+            consumer.accept(new ChannelMessagePacket(channel, data));
+        }
     }
 
     @Override

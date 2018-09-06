@@ -2,6 +2,10 @@ package io.fire.core.common.io;
 
 import io.fire.core.common.interfaces.Packet;
 import io.fire.core.common.interfaces.PoolHolder;
+import io.fire.core.common.io.enums.IoType;
+import io.fire.core.common.io.enums.Opcode;
+import io.fire.core.common.io.enums.WebSocketStatus;
+import io.fire.core.common.io.frames.FrameData;
 import lombok.Setter;
 
 import java.io.*;
@@ -32,6 +36,7 @@ public class IoManager {
 
     //buffers for the websocket protocol
     private StringBuilder wsDataStream = new StringBuilder();
+    private Random random = new Random();
     @Setter private WebSocketStatus webSocketStatus = WebSocketStatus.IDLE_NEW;
 
     //protocol type
@@ -118,6 +123,88 @@ public class IoManager {
             case UNKNOWN:
                 break;
         }
+    }
+
+    public void sendWebsocket(String str) throws IOException {
+        List<FrameData> data = createFrames(str, false);
+        for (FrameData fd : data) this.channel.write(createByteBufferFromFramedata(fd));
+    }
+
+    private byte fromOpcode( Opcode opcode ) {
+        if( opcode == Opcode.CONTINUOUS )
+            return 0;
+        else if( opcode == Opcode.TEXT )
+            return 1;
+        else if( opcode == Opcode.BINARY )
+            return 2;
+        else if( opcode == Opcode.CLOSING )
+            return 8;
+        else if( opcode == Opcode.PING )
+            return 9;
+        else if( opcode == Opcode.PONG )
+            return 10;
+        throw new IllegalArgumentException( "Don't know how to handle " + opcode.toString() );
+    }
+
+    private byte[] toByteArray( long val, int bytecount ) {
+        byte[] buffer = new byte[bytecount];
+        int highest = 8 * bytecount - 8;
+        for( int i = 0; i < bytecount; i++ ) {
+            buffer[i] = ( byte ) ( val >>> ( highest - 8 * i ) );
+        }
+        return buffer;
+    }
+
+
+    private ByteBuffer createByteBufferFromFramedata(FrameData framedata ) {
+        ByteBuffer mes = framedata.getPayloadData();
+        boolean mask = false;
+        int sizebytes = mes.remaining() <= 125 ? 1 : mes.remaining() <= 65535 ? 2 : 8;
+        ByteBuffer buf = ByteBuffer.allocate(1 + (sizebytes > 1 ? sizebytes + 1 : sizebytes) + (mask ? 4 : 0) + mes.remaining());
+        byte optcode = fromOpcode(framedata.getOpcode());
+        byte one = (byte) (framedata.isFin() ? -128 : 0);
+        one |= optcode;
+        buf.put(one);
+        byte[] payloadlengthbytes = toByteArray(mes.remaining(), sizebytes);
+        assert (payloadlengthbytes.length == sizebytes);
+
+        if (sizebytes == 1) {
+            buf.put((byte) (payloadlengthbytes[0] | (mask ? (byte) -128 : 0)));
+        } else if (sizebytes == 2) {
+            buf.put((byte) ((byte) 126 | (mask ? (byte) -128 : 0)));
+            buf.put(payloadlengthbytes);
+        } else if (sizebytes == 8) {
+            buf.put((byte) ((byte) 127 | (mask ? (byte) -128 : 0)));
+            buf.put(payloadlengthbytes);
+        } else
+            throw new RuntimeException("Size representation not supported/specified");
+
+        if (mask) {
+            ByteBuffer maskkey = ByteBuffer.allocate(4);
+            maskkey.putInt(random.nextInt());
+            buf.put(maskkey.array());
+            for (int i = 0; mes.hasRemaining(); i++) {
+                buf.put((byte) (mes.get() ^ maskkey.get(i % 4)));
+            }
+        } else {
+            buf.put(mes);
+            //Reset the position of the bytebuffer e.g. for additional use
+            mes.flip();
+        }
+        assert (buf.remaining() == 0) : buf.remaining();
+        buf.flip();
+        return buf;
+    }
+
+    public List<FrameData> createFrames(String text, boolean mask ) {
+        FrameData curframe = new FrameData(Opcode.TEXT);
+        try {
+            curframe.setPayload(ByteBuffer.wrap(text.getBytes("UTF-8")));
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        curframe.setTransferemasked(mask);
+        return Collections.singletonList(curframe);
     }
 
     private WebSocketFrame parseEncodedFrame(byte[] raw) {
