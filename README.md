@@ -25,10 +25,10 @@ And all that for the sweet price of nothing.
  * **Passwords** Password protection for your network, don't allow connections without a key
  
 ### Useful Links
- - [Technical notes](https://github.com/Mindgamesnl/FireIO/blob/master/technotes.md)
+ - [Technical notes](https://github.com/Mindgamesnl/FireIO/blob/master/documentation/technotes.md)
  - [Javadoc](https://cdn.rawgit.com/Mindgamesnl/FireIO/master/platforms/java/javadoc/)
  - [Contact](https://twitter.com/Mindgamesnl)
- - [Performance testing results](https://github.com/Mindgamesnl/FireIO/blob/master/performance.md)
+ - [Performance testing results](https://github.com/Mindgamesnl/FireIO/blob/master/documentation/performance.md)
  - [Java Source Code](https://github.com/Mindgamesnl/FireIO/tree/master/platforms/java)
  - [Web Source Code](https://github.com/Mindgamesnl/FireIO/tree/master/platforms/web)
 

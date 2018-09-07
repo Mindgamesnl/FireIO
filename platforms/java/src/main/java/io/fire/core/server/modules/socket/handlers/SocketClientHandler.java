@@ -50,7 +50,7 @@ public class SocketClientHandler implements SocketEvents {
         this.socket = socket;
         this.ioManager = new IoManager(channel);
 
-        this.ioManager.setPacketHandler(input -> onPacket(input));
+        this.ioManager.setPacketHandler(this::onPacket);
         this.ioManager.setWebSocketHandler(input -> {
             try {
                 onWebSocketPacket(input);
