@@ -1,4 +1,3 @@
-
 io.fire.core.client
 io.fire.core.client.modules.request
 io.fire.core.client.modules.request.interfaces
@@ -11,6 +10,10 @@ io.fire.core.common.eventmanager
 io.fire.core.common.eventmanager.enums
 io.fire.core.common.eventmanager.interfaces
 io.fire.core.common.interfaces
+io.fire.core.common.io
+io.fire.core.common.io.enums
+io.fire.core.common.io.frames
+io.fire.core.common.io.objects
 io.fire.core.common.objects
 io.fire.core.common.packets
 io.fire.core.common.ratelimiter
@@ -30,7 +33,7 @@ io.fire.core.server.modules.rest.interfaces
 io.fire.core.server.modules.rest.objects
 io.fire.core.server.modules.socket
 io.fire.core.server.modules.socket.handlers
-io.fire.core.server.modules.socket.interfaces
 io.fire.core.server.modules.socket.managers
 io.fire.core.server.modules.socket.services
 io.fire.core.server.modules.socket.tasks
+io.fire.core.tests

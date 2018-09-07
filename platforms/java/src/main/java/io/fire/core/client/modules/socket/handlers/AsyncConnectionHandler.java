@@ -168,8 +168,8 @@ public class AsyncConnectionHandler implements SocketEvents, EventPayload, Conne
     }
 
     @Override
-    public void onWebsocketPacket(WebSocketTransaction webSocketTransaction) throws Exception {
-
+    public void onWebSocketPacket(WebSocketTransaction webSocketTransaction) throws Exception {
+        //not handled in this instance.
     }
 
     @Override

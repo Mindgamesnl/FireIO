@@ -6,7 +6,7 @@ import io.fire.core.common.io.objects.WebSocketTransaction;
 public interface SocketEvents {
 
     void onPacket(Packet packet);
-    void onWebsocketPacket(WebSocketTransaction webSocketTransaction) throws Exception;
+    void onWebSocketPacket(WebSocketTransaction webSocketTransaction) throws Exception;
     void onClose();
     void onOpen();
     IoManager getIoManager();

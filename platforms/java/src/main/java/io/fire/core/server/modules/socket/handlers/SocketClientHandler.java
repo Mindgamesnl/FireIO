@@ -53,7 +53,7 @@ public class SocketClientHandler implements SocketEvents {
         this.ioManager.setPacketHandler(input -> onPacket(input));
         this.ioManager.setWebSocketHandler(input -> {
             try {
-                onWebsocketPacket(input);
+                onWebSocketPacket(input);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -99,6 +99,10 @@ public class SocketClientHandler implements SocketEvents {
                 close();
                 return;
             } else {
+                if (server.getClientModule().getClient(connectionId) == null) {
+                    close();
+                    return;
+                }
                 connectionId = parsed;
                 authenticated = true;
                 ClientInfo clientInfo = new ClientInfo();
@@ -139,7 +143,7 @@ public class SocketClientHandler implements SocketEvents {
     }
 
     @Override
-    public void onWebsocketPacket(WebSocketTransaction webSocketTransaction) throws Exception {
+    public void onWebSocketPacket(WebSocketTransaction webSocketTransaction) throws Exception {
         this.connectionType = ConnectionType.WEBSOCKET;
         //check status, is it allowed? if not, then first finish handshake
         if (webSocketTransaction.getStatus() == WebSocketStatus.IDLE_NEW) {
@@ -177,6 +181,11 @@ public class SocketClientHandler implements SocketEvents {
                     + "Sec-WebSocket-Accept: " + acceptKey
                     + "\r\n\r\n")
                     .getBytes("UTF-8");
+
+            if (server.getClientModule().getClient(connectionId) == null) {
+                close();
+                return;
+            }
 
             ioManager.setWebSocketStatus(WebSocketStatus.CONNECED);
             ioManager.write(ByteBuffer.wrap(response));

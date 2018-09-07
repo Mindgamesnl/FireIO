@@ -8,6 +8,7 @@ import io.fire.core.common.io.enums.WebSocketStatus;
 import io.fire.core.common.io.frames.FrameData;
 import io.fire.core.common.io.objects.WebSocketFrame;
 import io.fire.core.common.io.objects.WebSocketTransaction;
+
 import lombok.Setter;
 
 import java.io.*;
