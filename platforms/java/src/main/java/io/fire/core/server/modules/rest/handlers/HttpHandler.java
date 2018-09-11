@@ -7,7 +7,10 @@ import io.fire.core.server.FireIoServer;
 import io.fire.core.server.modules.rest.RestModule;
 import io.fire.core.server.modules.rest.enums.ContentType;
 import io.fire.core.server.modules.rest.enums.RequestMethod;
+import io.fire.core.server.modules.rest.interfaces.RestClientRegestration;
 import io.fire.core.server.modules.rest.interfaces.RestRequest;
+import io.fire.core.server.modules.rest.objects.RegistrationEndpoint;
+import io.fire.core.server.modules.rest.objects.RegistrationResult;
 import io.fire.core.server.modules.rest.objects.RequestBody;
 import io.fire.core.server.modules.rest.objects.RestEndpoint;
 import lombok.Getter;
@@ -26,13 +29,27 @@ public class HttpHandler implements com.sun.net.httpserver.HttpHandler {
     private FireIoServer server;
     private RestModule module;
     private List<RestEndpoint> endpointList = new ArrayList<>();
-    //password is null by default (this means it is open for everyone)2
+    //password is null by default (this means it is open for everyone)
     @Getter @Setter private RestEndpoint defaultRoot = new RestEndpoint("/", req -> "{\"message\":\"FireIO java server from https://github.com/Mindgamesnl/FireIO\"}");
+    @Getter @Setter private RegistrationEndpoint restClientRegestration;
     @Setter private String password = null;
 
     public HttpHandler(FireIoServer server, RestModule restModule) {
         this.server = server;
         this.module = restModule;
+
+        //setup native endpoints
+        this.restClientRegestration = new RegistrationEndpoint(requestedPassword -> {
+            if (password != null) {
+                //check if the password in the request does not equal the local password
+                if (!requestedPassword.equals(password)) {
+                    //set response to the fail auth body
+                    return new RegistrationResult(false, "fail-auth", ContentType.PLAINTEXT);
+                }
+            }
+            //register a new connection and get the assigned id as string
+            return new RegistrationResult(true, server.getClientModule().registerConnection().getId().toString(), ContentType.PLAINTEXT);
+        });
     }
 
     public void addEndpoint(RestEndpoint restEndpoint) {
@@ -62,22 +79,14 @@ public class HttpHandler implements com.sun.net.httpserver.HttpHandler {
             String requestedPassword = httpExchange.getRequestURI().getRawQuery().split("p=")[1];
             //check if the password (on the server side) is not null
             //this means that we need to check authentication
-            if (password != null) {
-                //check if the password in the request does not equal the local password
-                if (!requestedPassword.equals(password)) {
-                    //set response to the fail auth body
-                    String response = "fail-auth";
-                    emit(httpExchange, response, ContentType.PLAINTEXT);
-                    //end request
-                    return;
-                }
-            }
 
-            //register a new connection and get the assigned id as string
-            String generatedId = server.getClientModule().registerConnection().getId().toString();
+            RegistrationResult registrationResult = this.restClientRegestration.getRestClientRegestration().onCall(requestedPassword);
+            String out = registrationResult.getResult();
+
             //append the version info
-            generatedId += "INFO:" + new VersionInfo().toString();
-            emit(httpExchange, generatedId, ContentType.PLAINTEXT);
+            out += "INFO:" + new VersionInfo().toString();
+            emit(httpExchange, out, registrationResult.getContentType());
+            return;
         } else {
             Map<String, String> variables = new HashMap<>();
             RestEndpoint endpoint = null;

@@ -13,6 +13,7 @@ public class RestModule {
     //path = path to the server, build based ont he host and port
     //password = is the optionall password, default = null when no password is set
     private String path;
+    @Setter private String optionalPath = null;
     @Setter private String password = null;
 
     //initialize and build url
@@ -20,11 +21,19 @@ public class RestModule {
         path = "http://" + host + ":" + port + "/";
     }
 
+    //force manual host
+    private String getEnd() {
+        if (optionalPath == null) {
+            return path + "fireio/register?p=" + password;
+        }
+        return path + optionalPath + "/" + password;
+    }
+
     //get token eindpoint
     public String initiateHandshake() {
         try {
             //connect to path + endpoint with password parameter
-            URL website = new URL(path + "fireio/register?p=" + password);
+            URL website = new URL(path + getEnd());
             URLConnection connection = website.openConnection();
             BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
             StringBuilder response = new StringBuilder();

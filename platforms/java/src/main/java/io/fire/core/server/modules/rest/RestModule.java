@@ -6,6 +6,7 @@ import com.sun.net.httpserver.HttpServer;
 import io.fire.core.common.ratelimiter.RateLimit;
 import io.fire.core.server.FireIoServer;
 import io.fire.core.server.modules.rest.handlers.HttpHandler;
+import io.fire.core.server.modules.rest.interfaces.IRestModule;
 import io.fire.core.server.modules.rest.objects.RestEndpoint;
 import lombok.Getter;
 
@@ -13,9 +14,9 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.concurrent.Executors;
 
-public class RestModule {
+public class RestModule implements IRestModule {
 
-    private HttpHandler httpHandler;
+    @Getter private HttpHandler httpHandler;
     private HttpServer httpServer;
     @Getter private RateLimit rateLimiter = new RateLimit(20, 10);
 

@@ -18,6 +18,7 @@ public class TestClient {
                 .setPassword("testpassword1")
                 .connect();
 
+        client.on(Event.CONNECT, eventPayload -> System.out.println("Connected!"));
     }
 
 }

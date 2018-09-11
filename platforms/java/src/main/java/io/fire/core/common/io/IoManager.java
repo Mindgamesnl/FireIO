@@ -135,7 +135,7 @@ public class IoManager {
         for (FrameData fd : out) this.channel.write(parseData(fd));
     }
 
-    private byte[] toByteArray( long val, int bytecount ) {
+    private byte[] toByteArray(long val, int bytecount ) {
         byte[] buffer = new byte[bytecount];
         int highest = 8 * bytecount - 8;
         for( int i = 0; i < bytecount; i++ ) {

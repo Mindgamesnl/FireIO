@@ -6,12 +6,14 @@ import io.fire.core.common.eventmanager.interfaces.EventPayload;
 import io.fire.core.common.interfaces.Packet;
 import io.fire.core.common.interfaces.PoolHolder;
 import io.fire.core.common.objects.ThreadPool;
+import io.fire.core.server.modules.balancingmodule.BalancingModule;
 import io.fire.core.server.modules.client.ClientModule;
 import io.fire.core.server.modules.client.objects.FireIoConnection;
 import io.fire.core.server.modules.client.superclasses.Client;
 import io.fire.core.server.modules.request.RequestModule;
 import io.fire.core.server.modules.request.interfaces.RequestExecutor;
 import io.fire.core.server.modules.rest.RestModule;
+import io.fire.core.server.modules.rest.interfaces.IRestModule;
 import io.fire.core.server.modules.rest.interfaces.RestExchange;
 import io.fire.core.server.modules.rest.objects.RestEndpoint;
 import io.fire.core.server.modules.socket.SocketModule;
@@ -29,10 +31,11 @@ public class FireIoServer implements PoolHolder {
 
     //modules
     @Getter private SocketModule socketModule;
-    @Getter private RestModule restModule;
+    @Getter private IRestModule restModule;
     @Getter private ClientModule clientModule;
     @Getter private EventHandler eventHandler;
     @Getter private RequestModule requestModule;
+    @Getter private BalancingModule balancingModule;
     private ThreadPool threadPool = new ThreadPool();
 
     public FireIoServer(int port) throws IOException {
@@ -41,7 +44,8 @@ public class FireIoServer implements PoolHolder {
         restModule = new RestModule(this, port);
         socketModule = new SocketModule(this, (port + 1));
         requestModule = new RequestModule();
-        System.out.println("[Fire-IO] Attaching to port " + port + " and " + (port + 1));
+        balancingModule = new BalancingModule(this);
+        System.out.println("[Fire-IbalancingModuleO] Attaching to port " + port + " and " + (port + 1));
     }
 
     public FireIoServer on(Event e, Consumer<EventPayload> r) {
@@ -52,6 +56,7 @@ public class FireIoServer implements PoolHolder {
     public Client getClient(UUID id) {
         return clientModule.getClient(id);
     }
+    
     public Collection<FireIoConnection> getClients() {return clientModule.getAll();}
 
     public Client getClientByTag(String key, String value) {
