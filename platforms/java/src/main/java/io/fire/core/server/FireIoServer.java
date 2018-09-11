@@ -7,6 +7,7 @@ import io.fire.core.common.interfaces.Packet;
 import io.fire.core.common.interfaces.PoolHolder;
 import io.fire.core.common.objects.ThreadPool;
 import io.fire.core.server.modules.balancingmodule.BalancingModule;
+import io.fire.core.server.modules.balancingmodule.objects.BalancerConfiguration;
 import io.fire.core.server.modules.client.ClientModule;
 import io.fire.core.server.modules.client.objects.FireIoConnection;
 import io.fire.core.server.modules.client.superclasses.Client;
@@ -36,16 +37,18 @@ public class FireIoServer implements PoolHolder {
     @Getter private EventHandler eventHandler;
     @Getter private RequestModule requestModule;
     @Getter private BalancingModule balancingModule;
+    @Getter private int port = -1;
     private ThreadPool threadPool = new ThreadPool();
 
     public FireIoServer(int port) throws IOException {
+        this.port = port;
         eventHandler = new EventHandler();
         clientModule = new ClientModule(this);
         restModule = new RestModule(this, port);
         socketModule = new SocketModule(this, (port + 1));
         requestModule = new RequestModule();
         balancingModule = new BalancingModule(this);
-        System.out.println("[Fire-IbalancingModuleO] Attaching to port " + port + " and " + (port + 1));
+        System.out.println("[Fire-IO] Attaching to port " + port + " and " + (port + 1));
     }
 
     public FireIoServer on(Event e, Consumer<EventPayload> r) {
@@ -104,6 +107,11 @@ public class FireIoServer implements PoolHolder {
 
     public FireIoServer on(String e, Consumer<EventPayload> r) {
         eventHandler.on(e, r);
+        return this;
+    }
+
+    public FireIoServer linkLoadBalancer(BalancerConfiguration configuration) {
+        balancingModule.register(configuration, this);
         return this;
     }
 

@@ -32,8 +32,8 @@ public class FireIoClient implements PoolHolder {
     @Getter private ClientRequestModule clientRequestModule;
 
     //data we need in the client + some meta and connection arguments to use mid-handshake
-    private String host;
-    private int port;
+    @Getter  private String host;
+    @Getter private int port;
     private int connectAttampt = 0;
     private Timer scheduler = new Timer();
     private Map<String, String> connectionArguments = new HashMap<>();
@@ -47,7 +47,7 @@ public class FireIoClient implements PoolHolder {
         this.host = host;
 
         //register and start modules
-        restModule = new RestModule(host, port);
+        restModule = new RestModule(this);
         clientRequestModule = new ClientRequestModule(this);
 
         //register a listener for the connect event to reset attempt count every time a connection is made
@@ -123,6 +123,18 @@ public class FireIoClient implements PoolHolder {
             //could not get api key due to a connection problem
             //trigger event and trigger auto reconnect if set
             getEventHandler().fireEvent(Event.CLOSED_UNEXPECTEDLY, new ReceivedText("Failed to get api key" ,null));
+            return this;
+        }
+
+        if (a.startsWith("redirect=")) {
+            a = a.replace("redirect=", "");
+            String[] redirected = a.split("INFO:")[0].split(":");
+            System.out.println("[Fire-IO] Loadbalancer redirected me to " + redirected[0] + ":" + redirected[1]);
+            String rehost = redirected[0];
+            int report = Integer.valueOf(redirected[1]);
+            this.host = rehost;
+            this.port = report;
+            connect();
             return this;
         }
 

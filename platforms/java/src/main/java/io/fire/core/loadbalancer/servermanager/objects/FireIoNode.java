@@ -4,6 +4,7 @@ import io.fire.core.loadbalancer.servermanager.enums.NodeState;
 import io.fire.core.server.modules.client.superclasses.Client;
 import lombok.Data;
 
+import java.time.Instant;
 import java.util.UUID;
 
 @Data
@@ -15,6 +16,7 @@ public class FireIoNode {
     private NodeState state = NodeState.WAITING;
     private String host;
     private int port;
+    private Instant setup = Instant.now();
 
     public FireIoNode(UUID id) {
         this.uuid = id;

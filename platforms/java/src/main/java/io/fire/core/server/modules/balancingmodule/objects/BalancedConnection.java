@@ -17,9 +17,17 @@ public class BalancedConnection implements EventPayload {
     public BalancedConnection(FireIoServer main, String hos, int port, String password) {
         //setup custom fireio client
         fireIoClient = new FireIoClient(hos, port);
-        fireIoClient.getRestModule().setOptionalPath("fireio/balancer/register/" + port);
+        fireIoClient.getRestModule().setOptionalPath("fireio/balancer/register/" + main.getPort());
         if (password != null) fireIoClient.setPassword(password);
         fireIoClient.setAutoReConnect(1000);
+
+        main.on(Event.DISCONNECT, eventPayload -> {
+            if (isReady) fireIoClient.send("removeuser", "");
+        });
+
+        main.on(Event.CONNECT, eventPayload -> {
+            if (isReady) fireIoClient.send("adduser", "");
+        });
 
         fireIoClient.on(Event.CONNECT, eventPayload -> {
             main.getEventHandler().fireEvent(Event.LOAD_BALANCER_LINKED, this);
@@ -35,6 +43,8 @@ public class BalancedConnection implements EventPayload {
             main.getEventHandler().fireEvent(Event.LOAD_BALANCER_UNLINKED, this);
             isReady = false;
         });
+
+        fireIoClient.connect();
     }
 
 }

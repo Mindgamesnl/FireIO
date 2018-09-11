@@ -32,13 +32,18 @@ function FireIoClient(host, port) {
         return this;
     };
 
+    //api connect
+    this.connect = function () {
+        directConnect(_host, _port);
+    };
+
     //connect
-    this.connect = function() {
+    let directConnect = function(ihost, iport) {
         // setup http client
         const request = new XMLHttpRequest();
         // request the token with optional password
         // this is the same endpoint as the java client
-        request.open('GET', 'http://' + _host + ":" + _port + "/fireio/register?p=" + _password, true);
+        request.open('GET', 'http://' + ihost + ":" + iport + "/fireio/register?p=" + _password, true);
 
         // handle the data returned
         request.onload = function(a) {
@@ -57,12 +62,22 @@ function FireIoClient(host, port) {
                 return;
             }
 
+            if (response.startsWith("redirect=")) {
+                let res = response.replace("redirect=", "");
+                let redirected = res.split("INFO:")[0].split(":");
+                let rehost = redirected[0];
+                let report = parseInt(redirected[1]);
+                err("Connected to loadbalancer. Re-directing to next avalible server in pool.");
+                _recondirfunc(rehost, report);
+                return;
+            }
+
             // check if the response is longer than 8, cuz that means it succeeded
             if (response.length > 8) {
                 //ok, try to get the token to use
                 _token = response.split("INFO:")[0];
                 //setup WebSocket
-                _ws = new WebSocket("ws://" + _host + ":" + (_port + 1) + "/" + _token);
+                _ws = new WebSocket("ws://" + ihost + ":" + (iport + 1) + "/" + _token);
 
                 // setup WebSocket events
                 // on close
@@ -108,6 +123,7 @@ function FireIoClient(host, port) {
 
     // a static refference to the connect function for internal use
     const _reconfunc = this.connect;
+    const _recondirfunc = directConnect;
 
     // a simple api check to see if the client is connected or not
     this.isConnected = function() {

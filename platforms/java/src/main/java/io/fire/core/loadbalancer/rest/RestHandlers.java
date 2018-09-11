@@ -39,12 +39,21 @@ public class RestHandlers {
         }));
 
         //auth adress for servers
+        balancer.getBalancingServer().registerEndpoint("/fireio/balancer/list",  req -> {
+            final String[] out = {""};
+            balancer.getServerManager().getNodes().values().forEach(n -> {
+                out[0] += "id="+n.getUuid().toString() + ",state="+n.getState() +",clients="+n.getConnections()+"\n";
+            });
+            return out[0];
+        });
+
+        //auth adress for servers
         balancer.getBalancingServer().registerEndpoint("/fireio/balancer/register/?port/?password",  req -> {
             if (serverPassword != null) if (!serverPassword.equals(req.getVariable("password"))) return "fail-auth";
             //do shit
             UUID id = balancer.getBalancingServer().getClientModule().registerConnection().getId();
             String out = id.toString() + "INFO:" + new VersionInfo().toString();
-            //register new expecting nodeloadbalancer
+            //register new expecting node
             FireIoNode node = balancer.getServerManager().create(id);
             node.setPort(Integer.valueOf(req.getVariable("port")));
             node.setHost(req.getRequester().getHostString());

@@ -1,5 +1,6 @@
 package io.fire.core.client.modules.rest;
 
+import io.fire.core.client.FireIoClient;
 import lombok.Setter;
 
 import java.io.BufferedReader;
@@ -12,28 +13,28 @@ public class RestModule {
     //local variables
     //path = path to the server, build based ont he host and port
     //password = is the optionall password, default = null when no password is set
-    private String path;
+    private FireIoClient client;
     @Setter private String optionalPath = null;
     @Setter private String password = null;
 
     //initialize and build url
-    public RestModule(String host, int port) {
-        path = "http://" + host + ":" + port + "/";
+    public RestModule(FireIoClient client) {
+        this.client = client;
     }
 
     //force manual host
     private String getEnd() {
         if (optionalPath == null) {
-            return path + "fireio/register?p=" + password;
+            return "fireio/register?p=" + password;
         }
-        return path + optionalPath + "/" + password;
+        return optionalPath + "/" + password;
     }
 
     //get token eindpoint
     public String initiateHandshake() {
         try {
             //connect to path + endpoint with password parameter
-            URL website = new URL(path + getEnd());
+            URL website = new URL("http://" + client.getHost() + ":" + client.getPort() + "/" + getEnd());
             URLConnection connection = website.openConnection();
             BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
             StringBuilder response = new StringBuilder();

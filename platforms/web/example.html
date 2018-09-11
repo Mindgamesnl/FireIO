@@ -8,7 +8,7 @@
     //test
     const client = new FireIoClient("localhost", 80);
     client.setPassword("testpassword1");
-    client.setAutoReconnect(500);
+    //client.setAutoReconnect(500);
     client.connect();
 
     client.on("connect", function () {
