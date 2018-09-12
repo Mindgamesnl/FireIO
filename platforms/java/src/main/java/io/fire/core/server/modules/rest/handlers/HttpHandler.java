@@ -19,6 +19,7 @@ import lombok.Setter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -189,6 +190,17 @@ public class HttpHandler implements com.sun.net.httpserver.HttpHandler {
     }
 
     private void emit(HttpExchange httpExchange, String response, ContentType type) throws IOException {
+        if (response.startsWith("http-redirect:")) {
+            response = response.replaceFirst("http-redirect:", "");
+            Headers map = httpExchange.getResponseHeaders();
+            String location = response;
+            map.set("Content-Type", "text/html");
+            map.set("Location", location);
+            httpExchange.sendResponseHeaders(302, 0);
+            httpExchange.close();
+            return;
+        }
+
         httpExchange.sendResponseHeaders(200, response.length());
 
         if (type == ContentType.JSON) {

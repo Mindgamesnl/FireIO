@@ -10,6 +10,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.BinaryOperator;
 import java.util.stream.Collectors;
 
 public class ServerManager {
@@ -28,25 +29,28 @@ public class ServerManager {
                         if (Duration.between(n.getSetup(), now).getSeconds() >= 5) {
                             nodes.remove(n.getUuid());
                         }
+                    } else {
+                        n.setRestInteractions(0);
                     }
                 });
             }
         }, 0, 1000);
     }
 
-    public FireIoNode getAvalibleServer() {
-        final int[] lowest = {-1};
-        final FireIoNode[] selected = {null};
-        nodes.values().stream()
-                .filter(n -> n.getState() == NodeState.CONNECTED)
-                .collect(Collectors.toList())
-                .forEach(n -> {
-                    if (lowest[0] == -1 || lowest[0] > n.getConnections()) {
-                        selected[0] = n;
-                        lowest[0] = n.getConnections();
-                    }
-                });
-        return selected[0];
+
+    public FireIoNode getAvailableServer() {
+        return nodes.values().stream()
+                .filter(node -> node.getState() == NodeState.CONNECTED)
+                .reduce(BinaryOperator.minBy(Comparator.comparing(FireIoNode::getConnections)))
+                .orElse(null);
+    }
+
+
+    public FireIoNode getAvailableEndpoint() {
+        return nodes.values().stream()
+                .filter(node -> node.getState() == NodeState.CONNECTED)
+                .reduce(BinaryOperator.minBy(Comparator.comparing(FireIoNode::getRestInteractions)))
+                .orElse(null);
     }
 
     public FireIoNode create(UUID uuid) {

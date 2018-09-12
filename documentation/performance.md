@@ -10,7 +10,7 @@ The setup:
  - All tests ran on localhost
  - Tests are ran on a mid rage pc (quad core intel I5 with 8GB ram) running Ubuntu
  - Java 8
- - Socket testing is done with a socket test script (see below this page)
+ - Socket testingan is done with a socket test script (see below this page)
  - Restfull testing is done with siege for Ubuntu (command: `siege --time 5s http://localhost:80`)
  
 # Rest endpoints

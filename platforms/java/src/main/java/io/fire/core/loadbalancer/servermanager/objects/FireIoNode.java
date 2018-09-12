@@ -17,6 +17,7 @@ public class FireIoNode {
     private String host;
     private int port;
     private Instant setup = Instant.now();
+    public int restInteractions = 0;
 
     public FireIoNode(UUID id) {
         this.uuid = id;

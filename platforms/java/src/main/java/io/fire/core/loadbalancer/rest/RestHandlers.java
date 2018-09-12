@@ -28,7 +28,7 @@ public class RestHandlers {
                 }
             }
 
-            FireIoNode node = balancer.getServerManager().getAvalibleServer();
+            FireIoNode node = balancer.getServerManager().getAvailableServer();
             String out = "";
             if (node == null) {
                 out = "redirect=none";
@@ -42,9 +42,18 @@ public class RestHandlers {
         balancer.getBalancingServer().registerEndpoint("/fireio/balancer/list",  req -> {
             final String[] out = {""};
             balancer.getServerManager().getNodes().values().forEach(n -> {
-                out[0] += "id="+n.getUuid().toString() + ",state="+n.getState() +",clients="+n.getConnections()+"\n";
+                out[0] += "id="+n.getUuid().toString() + ",state="+n.getState() +",clients="+n.getConnections()+",httpinteractions="+n.getRestInteractions()+"\n";
             });
             return out[0];
+        });
+
+        balancer.getBalancingServer().registerEndpoint("/", req -> {
+            FireIoNode n = balancer.getServerManager().getAvailableEndpoint();
+            if (n == null) {
+                return "no-server-available";
+            }
+            n.restInteractions++;
+            return "http-redirect:http://" + n.getHost() + ":" + n.getPort() + req.getURL();
         });
 
         //auth adress for servers
