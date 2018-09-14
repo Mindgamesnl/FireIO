@@ -28,6 +28,7 @@ And all that for the sweet price of nothing.
  
 ### Useful Links
  - [Technical notes](https://github.com/Mindgamesnl/FireIO/blob/master/documentation/technotes.md)
+ - [Load Balancer Documentation](https://github.com/Mindgamesnl/FireIO/blob/master/documentation/loadbalancer.md)
  - [Javadoc](https://cdn.rawgit.com/Mindgamesnl/FireIO/master/platforms/java/javadoc/)
  - [Contact](https://twitter.com/Mindgamesnl)
  - [Performance testing results](https://github.com/Mindgamesnl/FireIO/blob/master/documentation/performance.md)
