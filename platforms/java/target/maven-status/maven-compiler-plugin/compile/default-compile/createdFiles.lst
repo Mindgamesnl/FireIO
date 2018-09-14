@@ -1,3 +1,4 @@
+io/fire/core/common/packets/PingPacket.class
 io/fire/core/loadbalancer/servermanager/ServerManager$1.class
 io/fire/core/client/modules/request/ClientRequestModule.class
 io/fire/core/common/interfaces/RequestBody.class
@@ -75,6 +76,7 @@ io/fire/core/common/ratelimiter/objects/RateValue.class
 io/fire/core/common/objects/VersionInfo.class
 io/fire/core/server/modules/client/superclasses/Client.class
 io/fire/core/common/io/enums/WebSocketStatus.class
+io/fire/core/server/modules/socket/tasks/EmitPingTask.class
 io/fire/core/server/modules/request/RequestModule.class
 io/fire/core/common/objects/ThreadPool.class
 io/fire/core/common/io/enums/Opcode.class
@@ -83,5 +85,6 @@ io/fire/core/server/modules/balancingmodule/objects/BalancerConfiguration.class
 io/fire/core/common/ratelimiter/RateLimit.class
 io/fire/core/common/packets/ChannelPacketPacket.class
 io/fire/core/common/packets/AuthPacket.class
+io/fire/core/client/modules/socket/task/PingCheckTask.class
 io/fire/core/server/modules/rest/objects/RegistrationResult.class
 io/fire/core/server/modules/rest/enums/ContentType.class

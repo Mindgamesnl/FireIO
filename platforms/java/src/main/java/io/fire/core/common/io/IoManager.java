@@ -274,7 +274,7 @@ public class IoManager {
 
     private void write(ByteBuffer[] buffers) throws IOException {
         for (ByteBuffer buffer : buffers) {
-            this.channel.write(buffer);
+            if (this.channel.isOpen()) this.channel.write(buffer);
             buffer.clear();
         }
     }

@@ -19,6 +19,8 @@ public class TestClient {
                 .connect();
 
         client.on(Event.CONNECT, eventPayload -> System.out.println("Connected!"));
+        client.on(Event.DISCONNECT, eventPayload -> System.out.println("Disconnected!"));
+        client.on(Event.CLOSED_UNEXPECTEDLY, eventPayload -> System.out.println("Connection died!!"));
     }
 
 }

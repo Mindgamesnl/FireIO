@@ -10,6 +10,7 @@
 /home/mindgamesnl/Documents/github/FireIO/platforms/java/src/main/java/io/fire/core/server/modules/rest/interfaces/RestClientRegestration.java
 /home/mindgamesnl/Documents/github/FireIO/platforms/java/src/main/java/io/fire/core/server/modules/socket/handlers/SelectorHandler.java
 /home/mindgamesnl/Documents/github/FireIO/platforms/java/src/main/java/io/fire/core/server/modules/rest/objects/RestEndpoint.java
+/home/mindgamesnl/Documents/github/FireIO/platforms/java/src/main/java/io/fire/core/server/modules/socket/tasks/EmitPingTask.java
 /home/mindgamesnl/Documents/github/FireIO/platforms/java/src/main/java/io/fire/core/server/modules/client/objects/ClientInfo.java
 /home/mindgamesnl/Documents/github/FireIO/platforms/java/src/main/java/io/fire/core/common/interfaces/ClientMeta.java
 /home/mindgamesnl/Documents/github/FireIO/platforms/java/src/main/java/io/fire/core/common/io/objects/WebSocketFrame.java
@@ -46,11 +47,13 @@
 /home/mindgamesnl/Documents/github/FireIO/platforms/java/src/main/java/io/fire/core/common/ratelimiter/objects/RateValue.java
 /home/mindgamesnl/Documents/github/FireIO/platforms/java/src/main/java/io/fire/core/common/interfaces/Packet.java
 /home/mindgamesnl/Documents/github/FireIO/platforms/java/src/main/java/io/fire/core/tests/TestClient.java
+/home/mindgamesnl/Documents/github/FireIO/platforms/java/src/main/java/io/fire/core/client/modules/socket/task/PingCheckTask.java
 /home/mindgamesnl/Documents/github/FireIO/platforms/java/src/main/java/io/fire/core/common/interfaces/PoolHolder.java
 /home/mindgamesnl/Documents/github/FireIO/platforms/java/src/main/java/io/fire/core/server/modules/client/ClientModule.java
 /home/mindgamesnl/Documents/github/FireIO/platforms/java/src/main/java/io/fire/core/server/modules/balancingmodule/objects/BalancerConfiguration.java
 /home/mindgamesnl/Documents/github/FireIO/platforms/java/src/main/java/io/fire/core/server/modules/rest/enums/ContentType.java
 /home/mindgamesnl/Documents/github/FireIO/platforms/java/src/main/java/io/fire/core/server/modules/rest/RestModule.java
+/home/mindgamesnl/Documents/github/FireIO/platforms/java/src/main/java/io/fire/core/common/packets/PingPacket.java
 /home/mindgamesnl/Documents/github/FireIO/platforms/java/src/main/java/io/fire/core/server/modules/balancingmodule/BalancingModule.java
 /home/mindgamesnl/Documents/github/FireIO/platforms/java/src/main/java/io/fire/core/loadbalancer/startup/BalancerService.java
 /home/mindgamesnl/Documents/github/FireIO/platforms/java/src/main/java/io/fire/core/loadbalancer/servermanager/enums/NodeState.java

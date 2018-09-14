@@ -83,6 +83,9 @@ public class SocketClientHandler implements SocketEvents {
             if (p instanceof ChannelMessagePacket) {
                 this.ioManager.sendWebSocket("channelmessage:"+((ChannelMessagePacket) p).getChannel()+":"+((ChannelMessagePacket) p).getText());
                 return;
+            } else if (p instanceof PingPacket) {
+                this.ioManager.sendWebSocket("ping:"+((PingPacket) p).getSendTime().getEpochSecond());
+                return;
             }
             throw new IOException("Fire-IO websocket does not support packet type: " + p.getClass().getName());
         } else {

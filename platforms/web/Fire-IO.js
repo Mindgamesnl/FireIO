@@ -19,6 +19,7 @@ function FireIoClient(host, port) {
     let _password = "";
     let _ws;
     let _token;
+    let _lastInput = null;
     let _connected = false;
 
     // error toggle
@@ -101,6 +102,10 @@ function FireIoClient(host, port) {
                         let channel = input.split(":")[0];
                         input = input.replace(channel + ":", "");
                         _triggerEvent(channel, input);
+                    } else if (input.startsWith("ping:")) {
+                        const time = parseInt(input.replace("ping:", ""));
+                        const date = new Date(); date.setTime(time * 1000);
+                        _lastInput = date;
                     }
                 };
 

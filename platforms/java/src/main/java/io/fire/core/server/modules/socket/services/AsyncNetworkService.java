@@ -4,6 +4,7 @@ import io.fire.core.common.interfaces.Packet;
 import io.fire.core.server.FireIoServer;
 import io.fire.core.server.modules.client.objects.FireIoConnection;
 import io.fire.core.server.modules.socket.handlers.SelectorHandler;
+import io.fire.core.server.modules.socket.tasks.EmitPingTask;
 import io.fire.core.server.modules.socket.tasks.IdleKick;
 import lombok.Getter;
 
@@ -37,6 +38,7 @@ public class AsyncNetworkService {
 
         Timer timer = new Timer();
         timer.schedule(new IdleKick(server), 0, 1000);
+        timer.schedule(new EmitPingTask(server), 0, 2000);
     }
 
     public void broadcast(Packet p) {

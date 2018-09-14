@@ -2,6 +2,7 @@ package io.fire.core.client.modules.socket.handlers;
 
 import io.fire.core.client.FireIoClient;
 import io.fire.core.client.modules.socket.reader.IoReader;
+import io.fire.core.client.modules.socket.task.PingCheckTask;
 import io.fire.core.common.eventmanager.enums.Event;
 import io.fire.core.common.eventmanager.interfaces.EventPayload;
 import io.fire.core.common.interfaces.ClientMeta;
@@ -11,11 +12,14 @@ import io.fire.core.common.io.IoManager;
 import io.fire.core.common.io.objects.WebSocketTransaction;
 import io.fire.core.common.packets.*;
 import io.fire.core.common.interfaces.SocketEvents;
+import io.fire.core.server.modules.socket.tasks.IdleKick;
+import lombok.Getter;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
 
 import java.nio.channels.SocketChannel;
+import java.time.Instant;
 import java.util.*;
 
 public class AsyncConnectionHandler implements SocketEvents, EventPayload, ConnectedFireioClient  {
@@ -31,16 +35,18 @@ public class AsyncConnectionHandler implements SocketEvents, EventPayload, Conne
     private Map<String, ClientMeta> argumentsMeta;
 
     //api, connection handler/receiver, channel and reader thread
-    private FireIoClient client;
+    @Getter private FireIoClient client;
+    @Getter private Instant lastPing = Instant.now();
     private SocketChannel socketChannel;
     private Thread reader;
     private IoManager ioManager;
+    private Timer timer;
 
     //host information for connection
+    @Getter private Boolean isSetup = false;
+    @Getter private Boolean isDead = false;
     private String host;
     private int port;
-    private Boolean isSetup = false;
-    private Boolean isDead = false;
 
     //buffers!
     //when the client failed to send a packet, it will retry at a moment to prevent packet loss.
@@ -49,6 +55,8 @@ public class AsyncConnectionHandler implements SocketEvents, EventPayload, Conne
     //constructor, apply data and try to connect. if the connection fails, then handle it appropriately
     public AsyncConnectionHandler(FireIoClient client, String host, int port, UUID id, Map<String, String> arguments, Map<String, ClientMeta> argumentsMeta) {
         try {
+            this.timer = new Timer();
+            this.timer.schedule(new PingCheckTask(this), 0, 1000);
             this.identifier = id;
             this.client = client;
             this.host = host;
@@ -86,6 +94,7 @@ public class AsyncConnectionHandler implements SocketEvents, EventPayload, Conne
 
     public void close() {
         try {
+            this.timer.cancel();
             //let the server know we intend to close the connection, this prevents falsely labeled errors.
             if (isSetup) emit(new PrepareClosingConnection());
             isDead = true;
@@ -129,6 +138,12 @@ public class AsyncConnectionHandler implements SocketEvents, EventPayload, Conne
             //flag intended closure of connection, handle it as cleanly closed and dont try to re connect when the ioreader spits a timed out error
             exptectedClosing = true;
             return;
+        }
+
+        //check if the ping is received, if is, set local to it
+        if (packet instanceof PingPacket) {
+            PingPacket pingPacket = (PingPacket) packet;
+            this.lastPing = pingPacket.getSendTime();
         }
 
         //finish a pending request from the request api

@@ -7,7 +7,6 @@ import io.fire.core.server.FireIoServer;
 import io.fire.core.server.modules.rest.RestModule;
 import io.fire.core.server.modules.rest.enums.ContentType;
 import io.fire.core.server.modules.rest.enums.RequestMethod;
-import io.fire.core.server.modules.rest.interfaces.RestClientRegestration;
 import io.fire.core.server.modules.rest.interfaces.RestRequest;
 import io.fire.core.server.modules.rest.objects.RegistrationEndpoint;
 import io.fire.core.server.modules.rest.objects.RegistrationResult;
@@ -19,7 +18,6 @@ import lombok.Setter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -27,7 +25,6 @@ import java.util.Map;
 
 public class HttpHandler implements com.sun.net.httpserver.HttpHandler {
 
-    private FireIoServer server;
     private RestModule module;
     private List<RestEndpoint> endpointList = new ArrayList<>();
     //password is null by default (this means it is open for everyone)
@@ -36,7 +33,6 @@ public class HttpHandler implements com.sun.net.httpserver.HttpHandler {
     @Setter private String password = null;
 
     public HttpHandler(FireIoServer server, RestModule restModule) {
-        this.server = server;
         this.module = restModule;
 
         //setup native endpoints
@@ -87,7 +83,6 @@ public class HttpHandler implements com.sun.net.httpserver.HttpHandler {
             //append the version info
             out += "INFO:" + new VersionInfo().toString();
             emit(httpExchange, out, registrationResult.getContentType());
-            return;
         } else {
             Map<String, String> variables = new HashMap<>();
             RestEndpoint endpoint = null;
