@@ -2,7 +2,7 @@
   <img src="http://static.craftmend.com/fireio/FIREIO.png" />
 </p>
 
-# Fire-IO [![](https://jitpack.io/v/Mindgamesnl/FireIO.svg)](https://jitpack.io/#Mindgamesnl/FireIO) [![Build Status](https://travis-ci.org/Mindgamesnl/FireIO.svg?branch=master)](https://travis-ci.org/Mindgamesnl/FireIO) [![GitHub version](https://d25lcipzij17d.cloudfront.net/badge.svg?id=gh&type=6&v=1.3.3&x2=0)](https://github.com/Mindgamesnl/FireIO)
+# Fire-IO [![](https://jitpack.io/v/Mindgamesnl/FireIO.svg)](https://jitpack.io/#Mindgamesnl/FireIO) [![Build Status](https://travis-ci.org/Mindgamesnl/FireIO.svg?branch=master)](https://travis-ci.org/Mindgamesnl/FireIO) [![GitHub version](https://d25lcipzij17d.cloudfront.net/badge.svg?id=gh&type=6&v=1.3.4&x2=0)](https://github.com/Mindgamesnl/FireIO)
 Fire-IO is a [lightning fast](https://github.com/Mindgamesnl/FireIO/blob/master/performance.md) cross platform networking solution that allows you to connect and manage data from multiple platforms with one easy to use java server. The ultimate framework for your networking needs.
 
 And all that for the sweet price of nothing.
@@ -11,7 +11,8 @@ And all that for the sweet price of nothing.
  * **Java** Java server
  * **Java** Client
  * **JavaScript** Small web client
- * **PHP & Other** Can make use of socket, websocket or the Rest implementation  
+ * **PHP & Other** Can make use of socket, websocket or the Rest implementation
+ * **Load Balancer** Fire-IO comes with a real time load balancer to scale your application.  
 
 ### Features
  * **Events** All event driven API
@@ -23,6 +24,7 @@ And all that for the sweet price of nothing.
  * **Async** All networking is done in async at all times and events are correctly handled via pools, so no more worrying about response times.
  * **Requests** Handle requests from clients, assign a response to one specific piece of data
  * **Passwords** Password protection for your network, don't allow connections without a key
+ * **Load Balancer** improve the reliability and response times of your applications by setting up load balancers to evenly spread the request and connections among your servers.
  
 ### Useful Links
  - [Technical notes](https://github.com/Mindgamesnl/FireIO/blob/master/documentation/technotes.md)
