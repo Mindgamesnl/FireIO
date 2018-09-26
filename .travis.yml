@@ -1,4 +1,5 @@
 language: java
+CODECOV_TOKEN: "99157c62-8097-44a5-9fe3-e4f3ca05ad38"
 jdk:
   - oraclejdk8
 script:
