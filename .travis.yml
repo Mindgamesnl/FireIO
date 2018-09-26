@@ -5,3 +5,6 @@ jdk:
 script:
   - mvn clean package
 before_script: cd 'platforms/java/'
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
