@@ -25,6 +25,7 @@
 *.iws
 bin
 .idea/*
+.emty
 
 Source code/target*
 
