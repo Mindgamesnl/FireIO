@@ -18,6 +18,10 @@
 *.tar.gz
 *.rar
 
+# Maven
+dependency-reduced-pom.xml
+/target
+
 # Intellij project files
 .idea
 *.iml
