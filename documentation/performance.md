@@ -3,20 +3,20 @@
 </p>
 
 # Fire-IO Performance
-Performance is really important for high scalable applications. FireIO is built to handle as many clients as quickly as possible. A few tests (including the code to run them for yourself) are avalible down below.
+Performance is really important for high scalable applications. FireIO is built to handle as many clients as quickly as possible. A few tests (including the code to run them for yourself) are available down below.
 
 The setup:
  - One Fire-IO server with rate limiting disabled and a thread pool with the size of `16` threads
  - All tests ran on localhost
  - Tests are ran on a mid rage pc (quad core intel I5 with 8GB ram) running Ubuntu
  - Java 8
- - Socket testingan is done with a socket test script (see below this page)
- - Restfull testing is done with siege for Ubuntu (command: `siege --time 5s http://localhost:80`)
+ - Socket testing is done with a socket test script (see below this page)
+ - Restful testing is done with siege for Ubuntu (command: `siege --time 5s http://localhost:80`)
  
 # Rest endpoints
-Fire-IO has a build in web server to run restfull API's.
+Fire-IO has a build in web server to run restful API's.
 
-The restfull handler and service can handle up to `18940` requests per second!
+The restful handler and service can handle up to `18940` requests per second!
 
 Test results:
 ```text
@@ -34,14 +34,14 @@ Longest transaction:	        0.09
 Shortest transaction:	        0.00
 ```
 
-# Socket connectoins
-For this test, there is a setup of ONE password protected Fire-IO server and 1000 clients. It uses the restfull api for auth and token requesting, so besides 1000 sockets its also handeling 1000 rest requests in the background.
+# Socket connections
+For this test, there is a setup of ONE password protected Fire-IO server and 1000 clients. It uses the restful api for auth and token requesting, so besides 1000 sockets its also handeling 1000 rest requests in the background.
 
-The goal is to connect as many clients as possible in one second, testing shows that connecting, authenticating and regestering `1000` clients takes `470MS`!
+The goal is to connect as many clients as possible in one second, testing shows that connecting, authenticating and registering `1000` clients takes `470MS`!
 
 ####Test server
 ```java
-public class ratedserver {
+public class RatedServer {
     public static void main(String[] args) {
         try {
             final int[] clients = {0};
@@ -79,7 +79,7 @@ public class ratedserver {
 
 ####Test client
 ```java
-public class rateclient {
+public class RateClient {
     public static void main(String[] args) {
         List<FireIoClient> fireIoClientList = new ArrayList<>();
         ThreadPoolExecutor executor =
@@ -105,7 +105,7 @@ public class rateclient {
                     connected[0]++;
                     if (connected[0] == 1000) {
                         Instant end = Instant.now();
-                        System.out.println("Opened started 1000 clients in " + (Duration.between(start, end).getNano() / 1000000) + " miliseconds!");
+                        System.out.println("Opened started 1000 clients in " + (Duration.between(start, end).getNano() / 1000000) + " milliseconds!");
                     }
                 })
 
