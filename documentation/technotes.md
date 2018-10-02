@@ -11,17 +11,17 @@ So let's talk about the inner workings of Fire-IO, the juicy stuff, the good stu
 Networking can be a bit tricky, some times there is a bit of data loss, it happens to the best of us.
 
 Fire-IO has a few automatic fail safes build in to ensure the correct handling of your data amd transactions.
- - **Request Validation** Server requests can be used to request important data from the server or ask the server to do a database query, to prevent the server from getting overloaded and to ensure that all data will be handled propperly requests are handled in queues. The client can prompt multiple requests at once, but it only sends the first request. The client will send the server the follow up request when
+ - **Request Validation** Server requests can be used to request important data from the server or ask the server to do a database query, to prevent the server from getting overloaded and to ensure that all data will be handled properly requests are handled in queues. The client can prompt multiple requests at once, but it only sends the first request. The client will send the server the follow up request when
     - There are no other requests queued
     - The server finished the previous request
     - The server denied the previous request
     - The server failed to handle the previous request
    
    this is to ensure there are no "stacked" or duplicate connections/requests at once.
-   So when let's say, a database error occurs the following requests will be canceled since they will also fail due to the same proble, so the server outright cancels it.
-   The server will only re evaluate the requests (and optional queue) when the client pushes a new successful request.
+   So when let's say, a database error occurs the following requests will be canceled since they will also fail due to the same problem, so the server outright cancels it.
+   The server will only reevaluate the requests (and optional queue) when the client pushes a new successful request.
   
-   This makes it safe to do external request (like database query's or lookups) directly from the request endpoint. 
+   This makes it safe to do an external request (like database query's or lookups) directly from the request endpoint. 
  - **IOErrorHandling** In case of a critical error whilst trying to send a packet, it adds the received data to a queue to retry parsing the data when the server/client sends new instructions.
  - **Invalid REST calls** The restful server will always send data, once invalid data is received by the server it sends a error message to the client notifying about what happened, the server never responds with empty data. (unless the rate limiter kicked in)
  - **Data streams** To prevent data loss all traffic (even static packets) are separated in 64-Byte parts. Only the last part ends with a signature. Upon receiving data, FireIO saves it in an array (or adds it if there is already data). Only if the end signature is received, it links all the previous array's and parses them as one input stream. The stream cache clears when this process is finished, waiting for a new Byte stream for this process to start all over again. This allows for popper multi threading and encourages the streaming of data.
@@ -62,4 +62,4 @@ The thread pool size can be changed using `.setThreadPoolSize(size)`, it takes a
 That's it folks!
 
 This is pretty much how Fire-IO works behind the API.
-If you have any questions or concerns, feel free to contact me via [Twitter](https://twitter.com/Mindgamesnl), Lucky for you, I dont have a social life so I'll respond quickly.
+If you have any questions or concerns, feel free to contact me via [Twitter](https://twitter.com/Mindgamesnl), Lucky for you, I don't have a social life so I'll respond quickly.
