@@ -6,11 +6,13 @@ import io.fire.core.common.io.enums.IoType;
 import io.fire.core.common.io.enums.Opcode;
 import io.fire.core.common.io.enums.WebSocketStatus;
 import io.fire.core.common.io.frames.FrameData;
+import io.fire.core.common.io.http.objects.HttpHeaders;
 import io.fire.core.common.io.objects.IoFrame;
 import io.fire.core.common.io.objects.IoFrameSet;
 import io.fire.core.common.io.objects.WebSocketFrame;
 import io.fire.core.common.io.objects.WebSocketTransaction;
 
+import lombok.Getter;
 import lombok.Setter;
 
 import java.io.*;
@@ -33,8 +35,8 @@ public class IoManager {
     @Setter private WebSocketStatus webSocketStatus = WebSocketStatus.IDLE_NEW;
 
     //protocol type
+    @Getter private IoType ioType = IoType.UNKNOWN;
     private Boolean hasReceived = false;
-    private IoType ioType = IoType.UNKNOWN;
 
     @Setter private Consumer<Packet> packetHandler = (p) -> {};
     @Setter private Consumer<WebSocketTransaction> webSocketHandler = (p) -> {};
@@ -43,12 +45,12 @@ public class IoManager {
         this.channel = channel;
     }
 
-    public void handleData(byte[] input, PoolHolder poolHolder) {
+    public void handleData(byte[] input, PoolHolder poolHolder, int length) {
         if (!hasReceived) {
             byte first = input[0];
             if (((char) first) == 'G') {
                 //the first is the G from GET
-                this.ioType = IoType.WEBSOCKET;
+                this.ioType = IoType.HTTP;
             } else {
                 this.ioType = IoType.FIREIO;
             }
@@ -70,6 +72,29 @@ public class IoManager {
                 }
                 break;
 
+            case HTTP: {
+                String data = new String(input);
+                HttpHeaders headers = new HttpHeaders(data);
+
+                //handle http input
+                //is there a websocket upgrade packet? than resume as a websocket connection
+                if (headers.getHeader("Sec-WebSocket-Key") != null && headers.getHeader("Connection") != null) {
+                    //how lovely, its an upgread request, so that means, that this is a real socket! well for fucks sake...
+                    System.out.println("It is websocket");
+                    poolHolder.getPool().run(() -> webSocketHandler.accept(new WebSocketTransaction(data.split("\r\n\r\n")[0], webSocketStatus)));
+                    this.ioType = IoType.WEBSOCKET;
+                    return;
+                } else {
+                    //handle http
+                    System.out.println("Requst from " + headers.getUrl());
+                    headers.getHeaders().forEach((key, value) -> {
+                        System.out.println("Header k="+key + " v="+value);
+                    });
+                    //so handle like a http transaction
+                }
+                break;
+            }
+
             case WEBSOCKET:
                 if (webSocketStatus == WebSocketStatus.IDLE_NEW) {
                     wsDataStream.append(new String(input));
@@ -84,7 +109,8 @@ public class IoManager {
                             wsDataStream.append(data.split("\r\n\r\n")[1]);
                         }
                     }
-                } else if (webSocketStatus == WebSocketStatus.CONNECED) {
+                }
+                else if (webSocketStatus == WebSocketStatus.CONNECED) {
                     String data = new String(parseEncodedFrame(input).getPayload(), Charset.defaultCharset());
                     poolHolder.getPool().run(() -> webSocketHandler.accept(new WebSocketTransaction(data, webSocketStatus)));
                 }
@@ -100,7 +126,7 @@ public class IoManager {
         currentFrame.setPayload(ByteBuffer.wrap(str.getBytes("UTF-8")));
         currentFrame.setTransferemasked(false);
         List<FrameData> out = Collections.singletonList(currentFrame);
-        for (FrameData fd : out) this.channel.write(parseData(fd));
+        for (FrameData fd : out) this.channel.write((ByteBuffer) parseData(fd).flip());
     }
 
     private byte[] toByteArray(long val, int bytecount ) {
@@ -164,12 +190,11 @@ public class IoManager {
         }
 
         frame.setPayload(new byte[payloadLength]);
-        buf.get(frame.getPayload(),0,payloadLength);
+        buf.get(frame.getPayload(),0, payloadLength);
 
         if (masked) for (int i = 0; i < frame.getPayload().length; i++) frame.getPayload()[i] ^= maskingKey[i % 4];
         return frame;
     }
-
 
     public void send(Packet p) {
         IoFrameSet emitter = null;

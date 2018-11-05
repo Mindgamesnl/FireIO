@@ -1,5 +1,7 @@
 package io.fire.core.server.modules.socket.handlers;
 
+import io.fire.core.common.io.enums.ConnectionType;
+import io.fire.core.common.io.enums.IoType;
 import io.fire.core.common.ratelimiter.RateLimit;
 import io.fire.core.server.FireIoServer;
 import io.fire.core.server.modules.socket.managers.ClientManager;
@@ -143,15 +145,32 @@ public class SelectorHandler implements Runnable {
         }
 
         int finalNumRead = numRead;
-        //read the byte data
-        byte[] data = new byte[finalNumRead];
-
-        //copy array with parameters
-        System.arraycopy(buffer.array(), 0, data, 0, finalNumRead);
 
         //get adress
         SocketAddress remoteAddr = channel.socket().getRemoteSocketAddress();
+
+        //check if there may be more
+        //read the byte data
+        byte[] data = buffer.array();
+
+        //check if we may need to check for more data
+        if (finalNumRead >= 1001 && (clientManager.references.get(remoteAddr).getIoManager().getIoType() == IoType.WEBSOCKET || clientManager.references.get(remoteAddr).getIoManager().getIoType() == IoType.HTTP || clientManager.references.get(remoteAddr).getIoManager().getIoType() == IoType.UNKNOWN)) {
+            ByteBuffer nextBytes = ByteBuffer.allocate(1001);
+            while (channel.read(nextBytes) != 0) {
+                byte[] oldData = data;
+                int expender = nextBytes.flip().limit();
+                byte[] temp = new byte[oldData.length + expender];
+                System.arraycopy(oldData, 0, temp,0 , oldData.length);
+                //append newly received packet content
+                System.arraycopy(nextBytes.array(), 1, temp, oldData.length, expender - 1);
+                data = temp;
+                if (expender >= 1001) nextBytes = ByteBuffer.allocate(1001);
+            }
+        }
+
+        System.out.println("Size is around " + data.length);
+
         //parse all packets
-        clientManager.references.get(remoteAddr).getIoManager().handleData(data, server);
+        clientManager.references.get(remoteAddr).getIoManager().handleData(data, server, finalNumRead);
     }
 }

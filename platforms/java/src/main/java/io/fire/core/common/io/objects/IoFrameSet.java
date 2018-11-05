@@ -6,7 +6,6 @@ import lombok.Getter;
 
 import javax.activation.UnsupportedDataTypeException;
 import java.io.*;
-import java.nio.charset.MalformedInputException;
 import java.util.LinkedList;
 
 public class IoFrameSet {
@@ -34,11 +33,6 @@ public class IoFrameSet {
             e.printStackTrace();
         }
 
-        String testOut = "";
-        for (byte testByte : bytesOut) {
-            testOut += testByte;
-        }
-        
         if (bytesOut.length > 1000) {
             //to big of an array, spit it in multiple frames
             int numOfChunks = (int)Math.ceil((double)bytesOut.length / 1000);

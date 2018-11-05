@@ -4,6 +4,7 @@ public enum ConnectionType {
 
     FIREIO,
     WEBSOCKET,
+    HTTP,
     NONE
 
 }

@@ -4,6 +4,7 @@ public enum IoType {
 
     FIREIO,
     WEBSOCKET,
+    HTTP,
     UNKNOWN;
 
 }

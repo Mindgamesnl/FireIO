@@ -99,7 +99,6 @@ public class SocketClientHandler implements SocketEvents {
         if (packet instanceof AuthPacket) {
             UUID parsed = UUID.fromString(((AuthPacket) packet).getUuid());
             if (server.getClientModule().getClient(parsed) == null) {
-                System.out.println("is null");
                 close();
                 return;
             } else {

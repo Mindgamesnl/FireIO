@@ -60,7 +60,7 @@ public class IoReader implements Runnable {
                 //parse them to packets!
                 //in semi-rare cases the system stitches multiple packets in one stream to save on load
                 //this can mean that we receive multiple packets in one go!
-                asyncConnectionHandler.getIoManager().handleData(data, client);
+                asyncConnectionHandler.getIoManager().handleData(data, client, finalNumRead);
             } catch (Exception e) {
                 //invalid buffer! oh no...
                 client.getEventHandler().fireEvent(Event.CLOSED_UNEXPECTEDLY, new ReceivedText("Invalid buffer! (" + e.getMessage() + ")", null));
