@@ -112,7 +112,7 @@ public class SelectorHandler implements Runnable {
         SocketChannel channel = (SocketChannel) key.channel();
         //create buffer with the common buffer size
         //set default to -1 (for when shit goes wrong)
-        ByteBuffer buffer = ByteBuffer.allocate(64);
+        ByteBuffer buffer = ByteBuffer.allocate(1001);
         int numRead = -1;
         try {
             //read from channel with buffer
@@ -148,11 +148,10 @@ public class SelectorHandler implements Runnable {
 
         //copy array with parameters
         System.arraycopy(buffer.array(), 0, data, 0, finalNumRead);
+
         //get adress
         SocketAddress remoteAddr = channel.socket().getRemoteSocketAddress();
         //parse all packets
-
         clientManager.references.get(remoteAddr).getIoManager().handleData(data, server);
-
     }
 }

@@ -118,7 +118,6 @@ public class SocketClientHandler implements SocketEvents {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-                this.ioManager.flushWaiting();
                 return;
             }
         }

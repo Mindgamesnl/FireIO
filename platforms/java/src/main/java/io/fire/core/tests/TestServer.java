@@ -19,7 +19,7 @@ public class TestServer {
 
         FireIoServer server = null;
         try {
-            server = new FireIoServer(new Random().nextInt(6969-6920) + 6920)
+            server = new FireIoServer(80)
                     .setPassword("testpassword1")
                     .setRateLimiter(2, 5)
 
@@ -56,7 +56,7 @@ public class TestServer {
         });
 
 
-        server.linkLoadBalancer(new BalancerConfiguration("localhost", 80, "testpassword2"));
+      //  server.linkLoadBalancer(new BalancerConfiguration("localhost", 80, "testpassword2"));
 
         server.registerEndpoint("/time", req -> "The server time is: " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
         server.registerEndpoint("/hi/?name", req -> "Welcome to FireIO " + req.getVariable("name") + "!");

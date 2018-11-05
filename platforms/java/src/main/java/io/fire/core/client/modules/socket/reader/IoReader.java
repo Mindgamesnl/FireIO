@@ -29,7 +29,7 @@ public class IoReader implements Runnable {
         //infinite while loop in its own thread to continually check for new packets
         while (true) {
             try {
-                ByteBuffer buffer = ByteBuffer.allocate(64);
+                ByteBuffer buffer = ByteBuffer.allocate(1001);
                 int numRead = -1;
                 try {
                     //read buffer
