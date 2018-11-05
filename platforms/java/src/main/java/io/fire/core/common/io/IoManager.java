@@ -165,6 +165,11 @@ public class IoManager {
     }
 
     private WebSocketFrame parseEncodedFrame(byte[] raw) {
+
+
+        
+
+
         ByteBuffer buf = ByteBuffer.wrap(raw);
         WebSocketFrame frame = new WebSocketFrame();
         byte b = buf.get();
@@ -189,6 +194,8 @@ public class IoManager {
             buf.get(maskingKey,0,4);
         }
 
+
+        System.out.println("get payload " + payloadLength + " whilst raw it is " + raw.length);
         frame.setPayload(new byte[payloadLength]);
         buf.get(frame.getPayload(),0, payloadLength);
 

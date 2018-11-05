@@ -146,19 +146,24 @@ public class SelectorHandler implements Runnable {
 
         int finalNumRead = numRead;
 
+        int fufilled = 0;
+
         //get adress
         SocketAddress remoteAddr = channel.socket().getRemoteSocketAddress();
 
         //check if there may be more
         //read the byte data
         byte[] data = buffer.array();
+        fufilled = buffer.flip().limit();
 
         //check if we may need to check for more data
         if (finalNumRead >= 1001 && (clientManager.references.get(remoteAddr).getIoManager().getIoType() == IoType.WEBSOCKET || clientManager.references.get(remoteAddr).getIoManager().getIoType() == IoType.HTTP || clientManager.references.get(remoteAddr).getIoManager().getIoType() == IoType.UNKNOWN)) {
+            fufilled = 1001;
             ByteBuffer nextBytes = ByteBuffer.allocate(1001);
             while (channel.read(nextBytes) != 0) {
                 byte[] oldData = data;
                 int expender = nextBytes.flip().limit();
+                fufilled += expender;
                 byte[] temp = new byte[oldData.length + expender];
                 System.arraycopy(oldData, 0, temp,0 , oldData.length);
                 //append newly received packet content
@@ -168,9 +173,11 @@ public class SelectorHandler implements Runnable {
             }
         }
 
+
+
         System.out.println("Size is around " + data.length);
 
         //parse all packets
-        clientManager.references.get(remoteAddr).getIoManager().handleData(data, server, finalNumRead);
+        clientManager.references.get(remoteAddr).getIoManager().handleData(data, server, fufilled);
     }
 }
