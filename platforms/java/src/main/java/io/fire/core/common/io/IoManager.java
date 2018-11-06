@@ -6,6 +6,9 @@ import io.fire.core.common.io.enums.IoType;
 import io.fire.core.common.io.enums.Opcode;
 import io.fire.core.common.io.enums.WebSocketStatus;
 import io.fire.core.common.io.frames.FrameData;
+import io.fire.core.common.io.http.enums.HttpContentType;
+import io.fire.core.common.io.http.enums.HttpRequestMethod;
+import io.fire.core.common.io.http.enums.HttpStatusCode;
 import io.fire.core.common.io.http.objects.HttpHeaders;
 import io.fire.core.common.io.objects.IoFrame;
 import io.fire.core.common.io.objects.IoFrameSet;
@@ -46,12 +49,13 @@ public class IoManager {
     }
 
     public void handleData(byte[] input, PoolHolder poolHolder, int length) {
+
+        String requestAsString = new String(input);
         if (!hasReceived) {
-            byte first = input[0];
-            if (((char) first) == 'G') {
-                //the first is the G from GET
+            if (HttpRequestMethod.isHttp(requestAsString)) {
                 this.ioType = IoType.HTTP;
             } else {
+                requestAsString = null;
                 this.ioType = IoType.FIREIO;
             }
             hasReceived = true;
@@ -73,15 +77,14 @@ public class IoManager {
                 break;
 
             case HTTP: {
-                String data = new String(input);
-                HttpHeaders headers = new HttpHeaders(data);
+                HttpHeaders headers = new HttpHeaders(requestAsString);
 
                 //handle http input
                 //is there a websocket upgrade packet? than resume as a websocket connection
                 if (headers.getHeader("Sec-WebSocket-Key") != null && headers.getHeader("Connection") != null) {
                     //how lovely, its an upgread request, so that means, that this is a real socket! well for fucks sake...
-                    System.out.println("It is websocket");
-                    poolHolder.getPool().run(() -> webSocketHandler.accept(new WebSocketTransaction(data.split("\r\n\r\n")[0], webSocketStatus)));
+                    String finalRequestAsString = requestAsString;
+                    poolHolder.getPool().run(() -> webSocketHandler.accept(new WebSocketTransaction(finalRequestAsString.split("\r\n\r\n")[0], webSocketStatus)));
                     this.ioType = IoType.WEBSOCKET;
                     return;
                 } else {
@@ -90,7 +93,19 @@ public class IoManager {
                     headers.getHeaders().forEach((key, value) -> {
                         System.out.println("Header k="+key + " v="+value);
                     });
+                    System.out.println("Request type " + headers.getMethod());
+                    System.out.println("Body is " + headers.getBody());
                     //so handle like a http transaction
+                    HttpHeaders response = new HttpHeaders(HttpContentType.HTML, HttpStatusCode.C_200);
+                    response.setBody("Je hebt het volgende tegen me gezegt: " + headers.getBody());
+
+                    //prepare response
+                    write(response.getBuffer());
+                    try {
+                        channel.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
                 break;
             }
@@ -165,11 +180,6 @@ public class IoManager {
     }
 
     private WebSocketFrame parseEncodedFrame(byte[] raw) {
-
-
-        
-
-
         ByteBuffer buf = ByteBuffer.wrap(raw);
         WebSocketFrame frame = new WebSocketFrame();
         byte b = buf.get();

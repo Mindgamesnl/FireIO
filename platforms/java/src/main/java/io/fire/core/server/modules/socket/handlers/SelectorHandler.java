@@ -173,10 +173,6 @@ public class SelectorHandler implements Runnable {
             }
         }
 
-
-
-        System.out.println("Size is around " + data.length);
-
         //parse all packets
         clientManager.references.get(remoteAddr).getIoManager().handleData(data, server, fufilled);
     }

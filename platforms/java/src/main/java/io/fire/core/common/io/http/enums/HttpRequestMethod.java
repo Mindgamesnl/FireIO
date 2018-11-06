@@ -18,4 +18,13 @@ public enum  HttpRequestMethod {
     HttpRequestMethod(String s) {
         this.method = s;
     }
+
+    public static Boolean isHttp(String content) {
+        for (HttpRequestMethod value : values()) {
+            if (content.startsWith(value.toString())) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

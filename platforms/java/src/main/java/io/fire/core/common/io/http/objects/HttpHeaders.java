@@ -4,7 +4,9 @@ import io.fire.core.common.io.http.enums.HttpContentType;
 import io.fire.core.common.io.http.enums.HttpRequestMethod;
 import io.fire.core.common.io.http.enums.HttpStatusCode;
 import lombok.Getter;
+import lombok.Setter;
 
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -13,10 +15,13 @@ public class HttpHeaders {
 
     private String opcode = null;
     private Map<String, String> mappedData = new HashMap<>();
+    @Getter @Setter
+    private String body = "";
 
     //output
     @Getter private String url;
     @Getter private HttpRequestMethod method;
+
     //two constructors, one to import a header set and one to create an empty one
     //reader
     public HttpHeaders(String data) {
@@ -32,12 +37,14 @@ public class HttpHeaders {
         String[] headers = Arrays.copyOfRange(lines, 1, lines.length);
         for (String header : headers) {
             //is it the last element that marks the end of the headers? well, maybe!
-            if (header.equals("\r\n")) {
+            if (header.equals("")) {
                 break;
             }
             String[] plot = header.split(":");
-            if (plot.length == 2) mappedData.put(plot[0], plot[1]);
+            if (plot.length == 2) mappedData.put(plot[0], plot[1].replaceFirst(" ",""));
         }
+        String[] segments = data.split("\r\n\r\n");
+        if (segments.length == 2) body = segments[1];
     }
 
     //creator
@@ -60,6 +67,7 @@ public class HttpHeaders {
         if (opcode != null) out.append(opcode).append("\r\n");
         mappedData.forEach((k, v) -> out.append(k).append(": ").append(v).append("\r\n"));
         out.append("\r\n");
+        if (!body.equals("")) out.append(body);
         return out.toString();
     }
 
@@ -74,6 +82,11 @@ public class HttpHeaders {
 
     public void setOrigin(String origin) {
         setHeader("Origin", origin);
+    }
+
+    //as buffer
+    public ByteBuffer getBuffer() {
+        return ByteBuffer.wrap(toString().getBytes());
     }
 
     //util

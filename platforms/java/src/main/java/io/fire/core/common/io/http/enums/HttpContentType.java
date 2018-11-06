@@ -7,6 +7,7 @@ public enum HttpContentType {
     AAC_AUDIO("audio/aac"),
     CSS("text/css"),
     HTML("text/html"),
+    TEXT("text/plain"),
     JAVA_JAR("application/java-archive"),
     JAVA_SCRIPT("application/javascript"),
     JSON("application/json"),
