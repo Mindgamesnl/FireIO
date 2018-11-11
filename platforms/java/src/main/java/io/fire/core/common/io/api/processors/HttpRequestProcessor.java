@@ -65,7 +65,7 @@ public class HttpRequestProcessor {
         //default headers
         Map<String, String> headers = new HashMap<>();
         headers.put("Access-Control-Allow-Origin", "*");
-        
+
         //check rate limiter
         if (!module.getRateLimiter().allowed(pendingRequest.getSocketChannel().socket().getInetAddress().getHostName())) {
             //set response to the fail auth body

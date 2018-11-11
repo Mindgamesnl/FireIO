@@ -52,7 +52,7 @@ public class IoManager {
 
     //runner
     private InstanceSide side;
-    private FireIoServer server;
+    @Getter private FireIoServer server;
     private FireIoClient client;
 
     public IoManager(SocketChannel channel, InstanceSide side, Object parent) {
@@ -82,6 +82,7 @@ public class IoManager {
                 if (side == InstanceSide.SERVER) {
                     if (server.getSocketModule().getBlockedProtocolList().contains(BlockedProtocol.FIREIO)) {
                         try {
+                            server.getSocketModule().getAsyncNetworkService().getSelectorHandler().getReferences().remove(channel.socket().getRemoteSocketAddress());
                             channel.close();
                         } catch (IOException e) {
                             e.printStackTrace();
@@ -113,6 +114,7 @@ public class IoManager {
                         if (server.getSocketModule().getBlockedProtocolList().contains(BlockedProtocol.WEBSOCKET)) {
                             try {
                                 channel.close();
+                                server.getSocketModule().getAsyncNetworkService().getSelectorHandler().getReferences().remove(channel.socket().getRemoteSocketAddress());
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
@@ -129,6 +131,7 @@ public class IoManager {
                         if (server.getSocketModule().getBlockedProtocolList().contains(BlockedProtocol.HTTP)) {
                             try {
                                 channel.close();
+                                server.getSocketModule().getAsyncNetworkService().getSelectorHandler().getReferences().remove(channel.socket().getRemoteSocketAddress());
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
@@ -145,6 +148,12 @@ public class IoManager {
                         HttpContent errorPage = new HttpContent(HttpContentType.HTML, HttpStatusCode.C_500);
                         errorPage.setBody(page);
                         write(errorPage.getBuffer());
+                        try {
+                            channel.close();
+                        } catch (IOException e1) {
+                            e1.printStackTrace();
+                        }
+                        server.getSocketModule().getAsyncNetworkService().getSelectorHandler().getReferences().remove(channel.socket().getRemoteSocketAddress());
                         e.printStackTrace();
                     }
                 }

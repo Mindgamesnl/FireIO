@@ -14,12 +14,14 @@ import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.*;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class SelectorHandler implements Runnable {
 
     private FireIoServer server;
-    private ClientManager clientManager;
+    @Getter public Map<SocketAddress, SocketClientHandler> references = new ConcurrentHashMap<>();
 
     @Getter
     private RateLimit rateLimiter = new RateLimit(20, 10);
@@ -30,8 +32,6 @@ public class SelectorHandler implements Runnable {
     public SelectorHandler(FireIoServer server, Selector selector) {
         this.server = server;
         this.selector = selector;
-        //initialize client manager
-        this.clientManager = new ClientManager();
     }
 
     public void setRateLimiter(int timeout, int attempts) {
@@ -97,14 +97,15 @@ public class SelectorHandler implements Runnable {
         //check rate limiter for spamming connections
         if (rateLimiter.allowed(socket.getInetAddress().getHostName())) {
             //create and register the connection
-            clientManager.references.put(remoteAddr, new SocketClientHandler(server, socket, channel));
+            references.put(remoteAddr, new SocketClientHandler(server, socket, channel));
             //trigger the on open function in the client handler
-            clientManager.references.get(remoteAddr).onOpen();
+            references.get(remoteAddr).onOpen();
             //register connection
             channel.register(this.selector, SelectionKey.OP_READ);
         } else {
             //its not allowed
             socket.close();
+            references.remove(channel.socket().getRemoteSocketAddress());
             channel.close();
         }
     }
@@ -131,10 +132,10 @@ public class SelectorHandler implements Runnable {
             //get the adress
             SocketAddress remoteAddr = socket.getRemoteSocketAddress();
             //handle the close handler in the socket handler
-            if (clientManager.references.get(remoteAddr) != null) {
-                clientManager.references.get(remoteAddr).onClose();
+            if (references.get(remoteAddr) != null) {
+                references.get(remoteAddr).onClose();
                 //remove the socket handler from memory, its a dead connection
-                clientManager.references.remove(remoteAddr);
+                references.remove(remoteAddr);
             }
             //close channel
             channel.close();
@@ -157,7 +158,7 @@ public class SelectorHandler implements Runnable {
         fufilled = buffer.flip().limit();
 
         //check if we may need to check for more data
-        if (finalNumRead >= 1001 && (clientManager.references.get(remoteAddr).getIoManager().getIoType() == IoType.WEBSOCKET || clientManager.references.get(remoteAddr).getIoManager().getIoType() == IoType.HTTP || clientManager.references.get(remoteAddr).getIoManager().getIoType() == IoType.UNKNOWN)) {
+        if (finalNumRead >= 1001 && (references.get(remoteAddr).getIoManager().getIoType() == IoType.WEBSOCKET || references.get(remoteAddr).getIoManager().getIoType() == IoType.HTTP || references.get(remoteAddr).getIoManager().getIoType() == IoType.UNKNOWN)) {
             fufilled = 1001;
             ByteBuffer nextBytes = ByteBuffer.allocate(1001);
             while (channel.read(nextBytes) != 0) {
@@ -174,6 +175,6 @@ public class SelectorHandler implements Runnable {
         }
 
         //parse all packets
-        clientManager.references.get(remoteAddr).getIoManager().handleData(data, server, fufilled);
+        references.get(remoteAddr).getIoManager().handleData(data, server, fufilled);
     }
 }

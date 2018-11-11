@@ -2,6 +2,7 @@ package io.fire.core.common.io.api.request;
 
 import io.fire.core.common.io.IoManager;
 import io.fire.core.common.io.http.objects.HttpContent;
+import io.fire.core.server.FireIoServer;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -19,6 +20,7 @@ public class PendingRequest {
     public void finish(HttpContent response) {
         try {
             socketChannel.write(response.getBuffer());
+            manager.getServer().getSocketModule().getAsyncNetworkService().getSelectorHandler().getReferences().remove(socketChannel.socket().getRemoteSocketAddress());
             socketChannel.close();
         } catch (IOException e) {
             e.printStackTrace();
