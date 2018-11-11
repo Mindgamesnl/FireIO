@@ -2,7 +2,7 @@
   <img src="http://static.craftmend.com/fireio/FIREIO.png" />
 </p>
 
-# Fire-IO [![](https://jitpack.io/v/Mindgamesnl/FireIO.svg)](https://jitpack.io/#Mindgamesnl/FireIO) [![Build Status](https://travis-ci.org/Mindgamesnl/FireIO.svg?branch=master)](https://travis-ci.org/Mindgamesnl/FireIO) [![GitHub version](https://d25lcipzij17d.cloudfront.net/badge.svg?id=gh&type=6&v=1.3.4&x2=0)](https://github.com/Mindgamesnl/FireIO)
+# Fire-IO [![](https://jitpack.io/v/Mindgamesnl/FireIO.svg)](https://jitpack.io/#Mindgamesnl/FireIO) [![Build Status](https://travis-ci.org/Mindgamesnl/FireIO.svg?branch=master)](https://travis-ci.org/Mindgamesnl/FireIO) [![GitHub version](https://d25lcipzij17d.cloudfront.net/badge.svg?id=gh&type=6&v=1.3.5&x2=0)](https://github.com/Mindgamesnl/FireIO)
 Fire-IO is a [lightning fast](https://github.com/Mindgamesnl/FireIO/blob/master/performance.md) cross platform networking solution that allows you to connect and manage data from multiple platforms with one easy to use java server. The ultimate framework for your networking needs.
 
 And all that for the sweet price of nothing.
@@ -77,14 +77,14 @@ server.onRequest("whoami", (client, request, response) -> {
     response.complete(new RequestString("You are: " + client.getInfo().getHostname()));
 });
 
-http
-server.registerEndpoint("/time", req -> {
+//http time endpoint
+server.registerEndpoint("/time", (req, settings) -> {
     return "The server time is: " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
 });
 
 //one with a variable, the path is set to /hi/?name
 //this will mean that ?name will be a variable, example
-server.registerEndpoint("/hi/?name", req -> {
+server.registerEndpoint("/hi/?name", (req, settings)  -> {
     return "Welcome to FireIO " + req.getVariable("name") + "!";
 });
 ```
