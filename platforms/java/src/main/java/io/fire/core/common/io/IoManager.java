@@ -17,9 +17,9 @@ import io.fire.core.common.io.objects.IoFrame;
 import io.fire.core.common.io.objects.IoFrameSet;
 import io.fire.core.common.io.objects.WebSocketFrame;
 import io.fire.core.common.io.objects.WebSocketTransaction;
-
 import io.fire.core.server.FireIoServer;
 import io.fire.core.server.modules.socket.enums.BlockedProtocol;
+
 import lombok.Getter;
 import lombok.Setter;
 
