@@ -11,7 +11,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-public class HttpHeaders {
+public class HttpContent {
 
     private String opcode = null;
     private Map<String, String> mappedData = new HashMap<>();
@@ -24,7 +24,7 @@ public class HttpHeaders {
 
     //two constructors, one to import a header set and one to create an empty one
     //reader
-    public HttpHeaders(String data) {
+    public HttpContent(String data) {
         //now, the real part, parsing incoming packets
         String[] lines = data.split("\r\n");
         if (lines.length == 0) throw new Error("Invalid http headers (length = 0");
@@ -48,11 +48,21 @@ public class HttpHeaders {
     }
 
     //creator
-    public HttpHeaders(HttpContentType mimeType, HttpStatusCode statusCode) {
+    public HttpContent(HttpContentType mimeType, HttpStatusCode statusCode) {
         opcode = "HTTP/1.1 " + statusCode.getCode() + " " + statusCode.getType();
         setMimeType(mimeType);
         setOrigin("");
         mappedData.put("Server", "Fire-IO by Mindgamesnl");
+    }
+
+    public HttpContent() {
+
+    }
+
+    //set opcodde
+    public void setOpcode(HttpContentType mimeType, HttpStatusCode statusCode) {
+        opcode = "HTTP/1.1 " + statusCode.getCode() + " " + statusCode.getType();
+        setMimeType(mimeType);
     }
 
     //get headers

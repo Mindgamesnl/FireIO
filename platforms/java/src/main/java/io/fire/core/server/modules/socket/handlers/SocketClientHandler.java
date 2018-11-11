@@ -5,6 +5,7 @@ import io.fire.core.common.eventmanager.interfaces.EventPayload;
 import io.fire.core.common.interfaces.Packet;
 import io.fire.core.common.io.enums.ConnectionType;
 import io.fire.core.common.io.IoManager;
+import io.fire.core.common.io.enums.InstanceSide;
 import io.fire.core.common.io.enums.WebSocketStatus;
 import io.fire.core.common.io.objects.WebSocketTransaction;
 import io.fire.core.common.packets.*;
@@ -48,7 +49,7 @@ public class SocketClientHandler implements SocketEvents {
         //constructor
         this.server = server;
         this.socket = socket;
-        this.ioManager = new IoManager(channel);
+        this.ioManager = new IoManager(channel, InstanceSide.SERVER, server);
 
         this.ioManager.setPacketHandler(this::onPacket);
         this.ioManager.setWebSocketHandler(input -> {

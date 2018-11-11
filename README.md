@@ -77,7 +77,7 @@ server.onRequest("whoami", (client, request, response) -> {
     response.complete(new RequestString("You are: " + client.getInfo().getHostname()));
 });
 
-//simple http rest endpoints, one clear example and one with a variable
+http
 server.registerEndpoint("/time", req -> {
     return "The server time is: " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
 });

@@ -7,8 +7,8 @@ import lombok.NoArgsConstructor;
 public class VersionInfo {
 
     @Getter private Boolean release = true;   // switch between development or a production release
-    @Getter private int coreVersion  = 134;    // version of this release/build
-    @Getter private int protocolVersion = 132; // release number since last major protocol change
+    @Getter private int coreVersion  = 135;    // version of this release/build
+    @Getter private int protocolVersion = 135; // release number since last major protocol change
 
     @Override
     public String toString() {

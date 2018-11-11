@@ -5,6 +5,7 @@ import io.fire.core.common.eventmanager.EventHandler;
 import io.fire.core.common.eventmanager.interfaces.EventPayload;
 import io.fire.core.common.interfaces.Packet;
 import io.fire.core.common.interfaces.PoolHolder;
+import io.fire.core.common.io.api.request.HttpInteraction;
 import io.fire.core.common.objects.ThreadPool;
 import io.fire.core.server.modules.balancingmodule.BalancingModule;
 import io.fire.core.server.modules.balancingmodule.objects.BalancerConfiguration;
@@ -13,12 +14,10 @@ import io.fire.core.server.modules.client.objects.FireIoConnection;
 import io.fire.core.server.modules.client.superclasses.Client;
 import io.fire.core.server.modules.request.RequestModule;
 import io.fire.core.server.modules.request.interfaces.RequestExecutor;
-import io.fire.core.server.modules.rest.RestModule;
-import io.fire.core.server.modules.rest.interfaces.IRestModule;
-import io.fire.core.server.modules.rest.interfaces.RestExchange;
-import io.fire.core.server.modules.rest.objects.RestEndpoint;
+import io.fire.core.server.modules.http.HttpModule;
 import io.fire.core.server.modules.socket.SocketModule;
 
+import io.fire.core.server.modules.socket.enums.BlockedProtocol;
 import lombok.Getter;
 
 import java.io.IOException;
@@ -32,7 +31,7 @@ public class FireIoServer implements PoolHolder {
 
     //modules
     @Getter private SocketModule socketModule;
-    @Getter private IRestModule restModule;
+    @Getter private HttpModule httpModule;
     @Getter private ClientModule clientModule;
     @Getter private EventHandler eventHandler;
     @Getter private RequestModule requestModule;
@@ -44,8 +43,8 @@ public class FireIoServer implements PoolHolder {
         this.port = port;
         eventHandler = new EventHandler();
         clientModule = new ClientModule(this);
-        restModule = new RestModule(this, port);
-        socketModule = new SocketModule(this, (port + 1));
+        httpModule = new HttpModule(this);
+        socketModule = new SocketModule(this, port);
         requestModule = new RequestModule();
         balancingModule = new BalancingModule(this);
         System.out.println("[Fire-IO] Attaching to port " + port + " and " + (port + 1));
@@ -72,8 +71,14 @@ public class FireIoServer implements PoolHolder {
                 && client.getInfo().getArguments().get(key).equals(value)).collect(Collectors.toList());
     }
 
+    public FireIoServer denyConnection(BlockedProtocol protocol) {
+        //deny protocol
+        socketModule.getBlockedProtocolList().add(protocol);
+        return this;
+    }
+
     public FireIoServer setPassword(String password) {
-        restModule.setPassword(password);
+        httpModule.setPassword(password);
         return this;
     }
 
@@ -115,17 +120,13 @@ public class FireIoServer implements PoolHolder {
         return this;
     }
 
-    public FireIoServer registerEndpoint(String path, RestExchange exchange) {
-        if (path.equalsIgnoreCase("") || path.equalsIgnoreCase("/")) {
-            getRestModule().setDefault(new RestEndpoint(path, exchange));
-            return this;
-        }
-        getRestModule().addEndpoint(new RestEndpoint(path, exchange));
+    public FireIoServer registerEndpoint(String path, HttpInteraction exchange) {
+        getHttpModule().getHttpRequestProcessor().registerHandler(path, exchange);
         return this;
     }
 
     public FireIoServer setRateLimiter(int requests, int timeout) {
-        restModule.setRateLimiter(timeout, requests);
+        httpModule.setRateLimiter(timeout, requests);
         socketModule.getAsyncNetworkService().getSelectorHandler().setRateLimiter(timeout, requests);
         return this;
     }

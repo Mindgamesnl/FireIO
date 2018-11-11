@@ -1,7 +1,10 @@
 package io.fire.core.common.io;
 
+import io.fire.core.client.FireIoClient;
 import io.fire.core.common.interfaces.Packet;
 import io.fire.core.common.interfaces.PoolHolder;
+import io.fire.core.common.io.api.request.PendingRequest;
+import io.fire.core.common.io.enums.InstanceSide;
 import io.fire.core.common.io.enums.IoType;
 import io.fire.core.common.io.enums.Opcode;
 import io.fire.core.common.io.enums.WebSocketStatus;
@@ -9,12 +12,14 @@ import io.fire.core.common.io.frames.FrameData;
 import io.fire.core.common.io.http.enums.HttpContentType;
 import io.fire.core.common.io.http.enums.HttpRequestMethod;
 import io.fire.core.common.io.http.enums.HttpStatusCode;
-import io.fire.core.common.io.http.objects.HttpHeaders;
+import io.fire.core.common.io.http.objects.HttpContent;
 import io.fire.core.common.io.objects.IoFrame;
 import io.fire.core.common.io.objects.IoFrameSet;
 import io.fire.core.common.io.objects.WebSocketFrame;
 import io.fire.core.common.io.objects.WebSocketTransaction;
 
+import io.fire.core.server.FireIoServer;
+import io.fire.core.server.modules.socket.enums.BlockedProtocol;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -41,15 +46,26 @@ public class IoManager {
     @Getter private IoType ioType = IoType.UNKNOWN;
     private Boolean hasReceived = false;
 
+    //handlers
     @Setter private Consumer<Packet> packetHandler = (p) -> {};
     @Setter private Consumer<WebSocketTransaction> webSocketHandler = (p) -> {};
 
-    public IoManager(SocketChannel channel) {
+    //runner
+    private InstanceSide side;
+    private FireIoServer server;
+    private FireIoClient client;
+
+    public IoManager(SocketChannel channel, InstanceSide side, Object parent) {
         this.channel = channel;
+        this.side = side;
+        if (this.side == InstanceSide.SERVER) {
+            server = (FireIoServer) parent;
+        } else {
+            client = (FireIoClient) parent;
+        }
     }
 
     public void handleData(byte[] input, PoolHolder poolHolder, int length) {
-
         String requestAsString = new String(input);
         if (!hasReceived) {
             if (HttpRequestMethod.isHttp(requestAsString)) {
@@ -63,6 +79,17 @@ public class IoManager {
 
         switch (this.ioType) {
             case FIREIO:
+                if (side == InstanceSide.SERVER) {
+                    if (server.getSocketModule().getBlockedProtocolList().contains(BlockedProtocol.FIREIO)) {
+                        try {
+                            channel.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        return;
+                    }
+                }
+
                 if (frameSet == null) frameSet = new IoFrameSet();
                 try {
                     frameSet.readInput(input);
@@ -77,33 +104,47 @@ public class IoManager {
                 break;
 
             case HTTP: {
-                HttpHeaders headers = new HttpHeaders(requestAsString);
+                HttpContent headers = new HttpContent(requestAsString);
 
                 //handle http input
                 //is there a websocket upgrade packet? than resume as a websocket connection
                 if (headers.getHeader("Sec-WebSocket-Key") != null && headers.getHeader("Connection") != null) {
+                    if (side == InstanceSide.SERVER) {
+                        if (server.getSocketModule().getBlockedProtocolList().contains(BlockedProtocol.WEBSOCKET)) {
+                            try {
+                                channel.close();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                            return;
+                        }
+                    }
                     //how lovely, its an upgread request, so that means, that this is a real socket! well for fucks sake...
                     String finalRequestAsString = requestAsString;
                     poolHolder.getPool().run(() -> webSocketHandler.accept(new WebSocketTransaction(finalRequestAsString.split("\r\n\r\n")[0], webSocketStatus)));
                     this.ioType = IoType.WEBSOCKET;
                     return;
                 } else {
-                    //handle http
-                    System.out.println("Requst from " + headers.getUrl());
-                    headers.getHeaders().forEach((key, value) -> {
-                        System.out.println("Header k="+key + " v="+value);
-                    });
-                    System.out.println("Request type " + headers.getMethod());
-                    System.out.println("Body is " + headers.getBody());
-                    //so handle like a http transaction
-                    HttpHeaders response = new HttpHeaders(HttpContentType.HTML, HttpStatusCode.C_200);
-                    response.setBody("Je hebt het volgende tegen me gezegt: " + headers.getBody());
+                    if (side == InstanceSide.SERVER) {
+                        if (server.getSocketModule().getBlockedProtocolList().contains(BlockedProtocol.HTTP)) {
+                            try {
+                                channel.close();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                            return;
+                        }
+                    }
 
-                    //prepare response
-                    write(response.getBuffer());
+                    //handle http
                     try {
-                        channel.close();
+                        server.getHttpModule().getHttpRequestProcessor().handle(new PendingRequest(this, headers, channel));
                     } catch (IOException e) {
+                        //create error page
+                        String page = server.getHttpModule().getHttpResources().get("500.html").replace("{{stacktrace-message}}", e.getClass().getName() + ": " + e.getMessage());
+                        HttpContent errorPage = new HttpContent(HttpContentType.HTML, HttpStatusCode.C_500);
+                        errorPage.setBody(page);
+                        write(errorPage.getBuffer());
                         e.printStackTrace();
                     }
                 }

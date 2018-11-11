@@ -9,6 +9,7 @@ import io.fire.core.common.interfaces.ClientMeta;
 import io.fire.core.common.interfaces.ConnectedFireioClient;
 import io.fire.core.common.interfaces.Packet;
 import io.fire.core.common.io.IoManager;
+import io.fire.core.common.io.enums.InstanceSide;
 import io.fire.core.common.io.objects.WebSocketTransaction;
 import io.fire.core.common.packets.*;
 import io.fire.core.common.interfaces.SocketEvents;
@@ -78,7 +79,7 @@ public class AsyncConnectionHandler implements SocketEvents, EventPayload, Conne
         if (reader != null && reader.isAlive()) reader.stop();
         //create reader
         IoReader ioReader = new IoReader(socketChannel, this, client);
-        this.ioManager = new IoManager(socketChannel);
+        this.ioManager = new IoManager(socketChannel, InstanceSide.CLIENT, client);
         this.ioManager.setPacketHandler(input -> onPacket(input));
         socketChannel.configureBlocking(true);
         reader = new Thread(ioReader);

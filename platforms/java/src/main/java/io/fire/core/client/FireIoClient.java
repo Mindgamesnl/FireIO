@@ -117,7 +117,7 @@ public class FireIoClient implements PoolHolder {
         //connect to the server!
         System.out.println("[Fire-IO] starting client & requesting token");
 
-        //request a new token via the rest module!
+        //request a new token via the http module!
         String a = restModule.initiateHandshake();
         if (a == null) {
             //could not get api key due to a connection problem
@@ -189,7 +189,7 @@ public class FireIoClient implements PoolHolder {
         }
 
         //create socket and connect!
-        socketModule = new SocketModule(this, host, (port + 1), assignedId, connectionArguments, connectionMeta);
+        socketModule = new SocketModule(this, host, port, assignedId, connectionArguments, connectionMeta);
         return this;
     }
 

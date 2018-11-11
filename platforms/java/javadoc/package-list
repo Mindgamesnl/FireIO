@@ -26,11 +26,11 @@ io.fire.core.server.modules.client.superclasses
 io.fire.core.server.modules.request
 io.fire.core.server.modules.request.interfaces
 io.fire.core.server.modules.request.objects
-io.fire.core.server.modules.rest
-io.fire.core.server.modules.rest.enums
-io.fire.core.server.modules.rest.handlers
-io.fire.core.server.modules.rest.interfaces
-io.fire.core.server.modules.rest.objects
+io.fire.core.server.modules.http
+io.fire.core.server.modules.http.enums
+io.fire.core.server.modules.http.handlers
+io.fire.core.server.modules.http.interfaces
+io.fire.core.server.modules.http.objects
 io.fire.core.server.modules.socket
 io.fire.core.server.modules.socket.handlers
 io.fire.core.server.modules.socket.managers

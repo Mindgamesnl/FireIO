@@ -2,6 +2,8 @@ package io.fire.core.tests;
 
 import io.fire.core.common.body.RequestString;
 import io.fire.core.common.eventmanager.enums.Event;
+import io.fire.core.common.io.http.enums.HttpContentType;
+import io.fire.core.common.io.http.enums.HttpStatusCode;
 import io.fire.core.common.packets.ChannelMessagePacket;
 import io.fire.core.common.packets.ReceivedText;
 import io.fire.core.server.FireIoServer;
@@ -58,8 +60,25 @@ public class TestServer {
 
       //  server.linkLoadBalancer(new BalancerConfiguration("localhost", 80, "testpassword2"));
 
-        server.registerEndpoint("/time", req -> "The server time is: " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
-        server.registerEndpoint("/hi/?name", req -> "Welcome to FireIO " + req.getVariable("name") + "!");
+
+        server.registerEndpoint("/api/v2/getplayer/?name", ((request, settings) -> {
+            String username = request.getVariable("name");
+            String data = "{\n" +
+                    "  \"name\": \"usr\",\n" +
+                    "  \"score\": 5,\n" +
+                    "  \"kills\": 6,\n" +
+                    "  \"coins\": 1,\n" +
+                    "  \"online\": true\n" +
+                    "}";
+            data = data.replace("usr", username);
+
+            settings.setContent(HttpContentType.JSON);
+
+            return data;
+        }));
+
+        server.registerEndpoint("/time", (req, settings) -> "The server time is: " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
+        server.registerEndpoint("/hi/?name", (req, settings)  -> "Welcome to FireIO " + req.getVariable("name") + "!");
 
     }
 

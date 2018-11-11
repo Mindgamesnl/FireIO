@@ -25,7 +25,7 @@ public class RestModule {
     //force manual host
     private String getEnd() {
         if (optionalPath == null) {
-            return "fireio/register?p=" + password;
+            return "fireio/register/" + password;
         }
         return optionalPath + "/" + password;
     }
