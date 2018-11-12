@@ -26,6 +26,7 @@ public class HttpRequestProcessor {
     private VersionInfo versionInfo = new VersionInfo();
 
     private List<HttpEndpoint> endpointList = new ArrayList<>();
+    private Map<String, HttpEndpoint> cachedEndpoints = new HashMap<>();
 
     public HttpRequestProcessor(HttpModule httpModule) {
         this.module = httpModule;
@@ -78,13 +79,22 @@ public class HttpRequestProcessor {
 
         Map<String, String> variables = new HashMap<>();
         HttpEndpoint handler = null;
+
         if (url.equals("/")) {
             //root
             response.setOpcode(HttpContentType.HTML, HttpStatusCode.C_200);
-            response.setBody(module.getHttpResources().get("welcome.html").replace("{{version}}", versionInfo.getCoreVersion() + "C").replace("{{protocol-version}}", versionInfo.getProtocolVersion() + "P"));;
+            response.setBody(module.getHttpResources().get("welcome.html").replace("{{version}}", "<b>V" + versionInfo.getCoreVersion() + "</b>").replace("{{protocol-version}}", "<b>V" + versionInfo.getProtocolVersion() + "</b>"));
             pendingRequest.finish(response);
             return;
         } else {
+
+            //cache
+            HttpEndpoint cachedResponse = cachedEndpoints.get(url);
+            if (cachedResponse != null) {
+                accept(pendingRequest, request, url, variables, cachedResponse);
+                return;
+            }
+
             String[] requestedParts = url.split("/");
             int score = 0;
             for (HttpEndpoint optionalPoint : endpointList) {
@@ -128,32 +138,39 @@ public class HttpRequestProcessor {
             response.setBody(module.getHttpResources().get("404.html"));
             pendingRequest.finish(response);
         } else {
-            //handle endpoint
-            IncomingRequest incomingRequest = new IncomingRequest(request, url, pendingRequest.getSocketChannel().socket(), variables);
-            ResponseSettings responseSettings = new ResponseSettings();
-            String body = "[[body]]";
-            boolean successful = true;
-            try {
-                body = handler.getHandler().complete(incomingRequest, responseSettings);
-            } catch (Exception e) {
-                successful = false;
-                body = module.getHttpResources().get("500.html").replace("{{stacktrace-message}}", e.getClass().getName() + ": " + e.getMessage());
-                e.printStackTrace();
-            }
-
-            HttpContent output = new HttpContent();
-            responseSettings.getHeaders().forEach((k, v) -> output.setHeader(k, v));
-
-            if (!successful) {
-                output.setOpcode(HttpContentType.HTML, HttpStatusCode.C_500);
-            } else {
-                output.setOpcode(responseSettings.getContent(), responseSettings.getStatusCode());
-            }
-
-            output.setBody(body);
-
-            pendingRequest.finish(output);
+            //accept endpoint
+            accept(pendingRequest, request, url, variables, handler);
+            //save in cache
+            if (variables.size() == 0) cachedEndpoints.put(url, handler);
         }
+    }
+
+    private void accept(PendingRequest pendingRequest, HttpContent request, String url, Map<String, String> variables, HttpEndpoint handler) {
+        //handle endpoint
+        IncomingRequest incomingRequest = new IncomingRequest(request, url, pendingRequest.getSocketChannel().socket(), variables);
+        ResponseSettings responseSettings = new ResponseSettings();
+        String body = "[[body]]";
+        boolean successful = true;
+        try {
+            body = handler.getHandler().complete(incomingRequest, responseSettings);
+        } catch (Exception e) {
+            successful = false;
+            body = module.getHttpResources().get("500.html").replace("{{stacktrace-message}}", e.getClass().getName() + ": " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        HttpContent output = new HttpContent();
+        responseSettings.getHeaders().forEach((k, v) -> output.setHeader(k, v));
+
+        if (!successful) {
+            output.setOpcode(HttpContentType.HTML, HttpStatusCode.C_500);
+        } else {
+            output.setOpcode(responseSettings.getContent(), responseSettings.getStatusCode());
+        }
+
+        output.setBody(body);
+
+        pendingRequest.finish(output);
     }
 
 }

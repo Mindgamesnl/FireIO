@@ -20,18 +20,18 @@ The restful handler and service can handle up to `18940` requests per second!
 
 Test results:
 ```text
-Transactions:		       34503 hits
-Availability:		      100.00 %
-Elapsed time:		        4.65 secs
-Data transferred:	       42.28 MB
-Response time:		        0.00 secs
-Transaction rate:	     7420.00 trans/sec
-Throughput:		        9.09 MB/sec
-Concurrency:		       23.63
-Successful transactions:       34504
-Failed transactions:	           0
-Longest transaction:	        0.09
-Shortest transaction:	        0.00
+Transactions:               43943 hits
+Availability:                 100.00 %
+Elapsed time:                4.19 secs
+Data transferred:              0.13 MB
+Response time:               0.00 secs
+Transaction rate:   10487.59 trans/sec
+Throughput:                0.03 MB/sec
+Concurrency:                     23.62
+Successful transactions:         43944
+Failed transactions:                 0
+Longest transaction:              0.04
+Shortest transaction:             0.00
 ```
 
 # Socket connections
