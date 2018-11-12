@@ -40,19 +40,26 @@ public class IoManager {
 
     //buffers for the websocket protocol
     private StringBuilder wsDataStream = new StringBuilder();
-    @Setter private WebSocketStatus webSocketStatus = WebSocketStatus.IDLE_NEW;
+    @Setter
+    private WebSocketStatus webSocketStatus = WebSocketStatus.IDLE_NEW;
 
     //protocol type
-    @Getter private IoType ioType = IoType.UNKNOWN;
+    @Getter
+    private IoType ioType = IoType.UNKNOWN;
     private Boolean hasReceived = false;
 
     //handlers
-    @Setter private Consumer<Packet> packetHandler = (p) -> {};
-    @Setter private Consumer<WebSocketTransaction> webSocketHandler = (p) -> {};
+    @Setter
+    private Consumer<Packet> packetHandler = (p) -> {
+    };
+    @Setter
+    private Consumer<WebSocketTransaction> webSocketHandler = (p) -> {
+    };
 
     //runner
     private InstanceSide side;
-    @Getter private FireIoServer server;
+    @Getter
+    private FireIoServer server;
     private FireIoClient client;
 
     public IoManager(SocketChannel channel, InstanceSide side, Object parent) {
@@ -139,23 +146,25 @@ public class IoManager {
                         }
                     }
 
-                    //handle http
-                    try {
-                        server.getHttpModule().getHttpRequestProcessor().handle(new PendingRequest(this, headers, channel));
-                    } catch (IOException e) {
-                        //create error page
-                        String page = server.getHttpModule().getHttpResources().get("500.html").replace("{{stacktrace-message}}", e.getClass().getName() + ": " + e.getMessage());
-                        HttpContent errorPage = new HttpContent(HttpContentType.HTML, HttpStatusCode.C_500);
-                        errorPage.setBody(page);
-                        write(errorPage.getBuffer());
+                    poolHolder.getPool().run(() -> {
+                        //handle http
                         try {
-                            channel.close();
-                        } catch (IOException e1) {
-                            e1.printStackTrace();
+                            server.getHttpModule().getHttpRequestProcessor().handle(new PendingRequest(this, headers, channel));
+                        } catch (IOException e) {
+                            //create error page
+                            String page = server.getHttpModule().getHttpResources().get("500.html").replace("{{stacktrace-message}}", e.getClass().getName() + ": " + e.getMessage());
+                            HttpContent errorPage = new HttpContent(HttpContentType.HTML, HttpStatusCode.C_500);
+                            errorPage.setBody(page);
+                            write(errorPage.getBuffer());
+                            try {
+                                channel.close();
+                            } catch (IOException e1) {
+                                e1.printStackTrace();
+                            }
+                            server.getSocketModule().getAsyncNetworkService().getSelectorHandler().getReferences().remove(channel.socket().getRemoteSocketAddress());
+                            e.printStackTrace();
                         }
-                        server.getSocketModule().getAsyncNetworkService().getSelectorHandler().getReferences().remove(channel.socket().getRemoteSocketAddress());
-                        e.printStackTrace();
-                    }
+                    });
                 }
                 break;
             }
@@ -174,8 +183,7 @@ public class IoManager {
                             wsDataStream.append(data.split("\r\n\r\n")[1]);
                         }
                     }
-                }
-                else if (webSocketStatus == WebSocketStatus.CONNECED) {
+                } else if (webSocketStatus == WebSocketStatus.CONNECED) {
                     String data = new String(parseEncodedFrame(input).getPayload(), Charset.defaultCharset());
                     poolHolder.getPool().run(() -> webSocketHandler.accept(new WebSocketTransaction(data, webSocketStatus)));
                 }
@@ -194,11 +202,11 @@ public class IoManager {
         for (FrameData fd : out) this.channel.write((ByteBuffer) parseData(fd).flip());
     }
 
-    private byte[] toByteArray(long val, int bytecount ) {
+    private byte[] toByteArray(long val, int bytecount) {
         byte[] buffer = new byte[bytecount];
         int highest = 8 * bytecount - 8;
-        for( int i = 0; i < bytecount; i++ ) {
-            buffer[i] = ( byte ) ( val >>> ( highest - 8 * i ) );
+        for (int i = 0; i < bytecount; i++) {
+            buffer[i] = (byte) (val >>> (highest - 8 * i));
         }
         return buffer;
     }
@@ -234,11 +242,11 @@ public class IoManager {
         WebSocketFrame frame = new WebSocketFrame();
         byte b = buf.get();
         frame.setFin(((b & 0x80) != 0));
-        frame.setOpcode((byte)(b & 0x0F));
+        frame.setOpcode((byte) (b & 0x0F));
 
         b = buf.get();
         boolean masked = ((b & 0x80) != 0);
-        int payloadLength = (byte)(0x7F & b);
+        int payloadLength = (byte) (0x7F & b);
         int byteCount = 0;
         if (payloadLength == 0x7F) byteCount = 8;
         else if (payloadLength == 0x7E) byteCount = 2;
@@ -251,13 +259,11 @@ public class IoManager {
         byte maskingKey[] = null;
         if (masked) {
             maskingKey = new byte[4];
-            buf.get(maskingKey,0,4);
+            buf.get(maskingKey, 0, 4);
         }
 
-
-        System.out.println("get payload " + payloadLength + " whilst raw it is " + raw.length);
         frame.setPayload(new byte[payloadLength]);
-        buf.get(frame.getPayload(),0, payloadLength);
+        buf.get(frame.getPayload(), 0, payloadLength);
 
         if (masked) for (int i = 0; i < frame.getPayload().length; i++) frame.getPayload()[i] ^= maskingKey[i % 4];
         return frame;
