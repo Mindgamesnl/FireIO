@@ -4,7 +4,6 @@ import io.fire.core.common.io.enums.ConnectionType;
 import io.fire.core.common.io.enums.IoType;
 import io.fire.core.common.ratelimiter.RateLimit;
 import io.fire.core.server.FireIoServer;
-import io.fire.core.server.modules.socket.managers.ClientManager;
 
 import lombok.Getter;
 
@@ -104,8 +103,8 @@ public class SelectorHandler implements Runnable {
             channel.register(this.selector, SelectionKey.OP_READ);
         } else {
             //its not allowed
-            socket.close();
             references.remove(channel.socket().getRemoteSocketAddress());
+            socket.close();
             channel.close();
         }
     }

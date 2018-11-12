@@ -20,15 +20,15 @@ The restful handler and service can handle up to `18940` requests per second!
 
 Test results:
 ```text
-Transactions:		       30326 hits
+Transactions:		       34503 hits
 Availability:		      100.00 %
-Elapsed time:		        4.54 secs
-Data transferred:	        0.32 MB
+Elapsed time:		        4.65 secs
+Data transferred:	       42.28 MB
 Response time:		        0.00 secs
-Transaction rate:	     6679.74 trans/sec
-Throughput:		        0.07 MB/sec
-Concurrency:		       24.53
-Successful transactions:       30326
+Transaction rate:	     7420.00 trans/sec
+Throughput:		        9.09 MB/sec
+Concurrency:		       23.63
+Successful transactions:       34504
 Failed transactions:	           0
 Longest transaction:	        0.09
 Shortest transaction:	        0.00
