@@ -73,72 +73,27 @@ public class IoManager {
     }
 
     public void handleData(byte[] input, PoolHolder poolHolder, int length) {
-        String requestAsString = new String(input);
-        if (!hasReceived) {
-            if (HttpRequestMethod.isHttp(requestAsString)) {
-                this.ioType = IoType.HTTP;
-            } else {
-                requestAsString = null;
-                this.ioType = IoType.FIREIO;
-            }
-            hasReceived = true;
-        }
+        poolHolder.getPool().run(() -> {
 
-        switch (this.ioType) {
-            case FIREIO:
-                if (side == InstanceSide.SERVER) {
-                    if (server.getSocketModule().getBlockedProtocolList().contains(BlockedProtocol.FIREIO)) {
-                        try {
-                            server.getSocketModule().getAsyncNetworkService().getSelectorHandler().getReferences().remove(channel.socket().getRemoteSocketAddress());
-                            channel.close();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                        return;
-                    }
-                }
 
-                if (frameSet == null) frameSet = new IoFrameSet();
-                try {
-                    frameSet.readInput(input);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-                if (frameSet.isFinished()) {
-                    packetHandler.accept(frameSet.getPayload());
-                    frameSet = new IoFrameSet();
-                }
-                break;
-
-            case HTTP: {
-                HttpContent headers = new HttpContent(requestAsString);
-
-                //handle http input
-                //is there a websocket upgrade packet? than resume as a websocket connection
-                if (headers.getHeader("Sec-WebSocket-Key") != null && headers.getHeader("Connection") != null) {
-                    if (side == InstanceSide.SERVER) {
-                        if (server.getSocketModule().getBlockedProtocolList().contains(BlockedProtocol.WEBSOCKET)) {
-                            try {
-                                channel.close();
-                                server.getSocketModule().getAsyncNetworkService().getSelectorHandler().getReferences().remove(channel.socket().getRemoteSocketAddress());
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-                            return;
-                        }
-                    }
-                    //how lovely, its an upgread request, so that means, that this is a real socket! well for fucks sake...
-                    String finalRequestAsString = requestAsString;
-                    poolHolder.getPool().run(() -> webSocketHandler.accept(new WebSocketTransaction(finalRequestAsString.split("\r\n\r\n")[0], webSocketStatus)));
-                    this.ioType = IoType.WEBSOCKET;
-                    return;
+            String requestAsString = new String(input);
+            if (!hasReceived) {
+                if (HttpRequestMethod.isHttp(requestAsString)) {
+                    this.ioType = IoType.HTTP;
                 } else {
+                    requestAsString = null;
+                    this.ioType = IoType.FIREIO;
+                }
+                hasReceived = true;
+            }
+
+            switch (this.ioType) {
+                case FIREIO:
                     if (side == InstanceSide.SERVER) {
-                        if (server.getSocketModule().getBlockedProtocolList().contains(BlockedProtocol.HTTP)) {
+                        if (server.getSocketModule().getBlockedProtocolList().contains(BlockedProtocol.FIREIO)) {
                             try {
-                                channel.close();
                                 server.getSocketModule().getAsyncNetworkService().getSelectorHandler().getReferences().remove(channel.socket().getRemoteSocketAddress());
+                                channel.close();
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
@@ -146,7 +101,55 @@ public class IoManager {
                         }
                     }
 
-                    poolHolder.getPool().run(() -> {
+                    if (frameSet == null) frameSet = new IoFrameSet();
+                    try {
+                        frameSet.readInput(input);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                    if (frameSet.isFinished()) {
+                        packetHandler.accept(frameSet.getPayload());
+                        frameSet = new IoFrameSet();
+                    }
+                    break;
+
+                case HTTP: {
+                    HttpContent headers = new HttpContent(requestAsString);
+
+                    //handle http input
+                    //is there a websocket upgrade packet? than resume as a websocket connection
+                    if (headers.getHeader("Sec-WebSocket-Key") != null && headers.getHeader("Connection") != null) {
+                        if (side == InstanceSide.SERVER) {
+                            if (server.getSocketModule().getBlockedProtocolList().contains(BlockedProtocol.WEBSOCKET)) {
+                                try {
+                                    channel.close();
+                                    server.getSocketModule().getAsyncNetworkService().getSelectorHandler().getReferences().remove(channel.socket().getRemoteSocketAddress());
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                                return;
+                            }
+                        }
+                        //how lovely, its an upgread request, so that means, that this is a real socket! well for fucks sake...
+                        String finalRequestAsString = requestAsString;
+                        webSocketHandler.accept(new WebSocketTransaction(finalRequestAsString.split("\r\n\r\n")[0], webSocketStatus));
+                        this.ioType = IoType.WEBSOCKET;
+                        return;
+                    } else {
+                        if (side == InstanceSide.SERVER) {
+                            if (server.getSocketModule().getBlockedProtocolList().contains(BlockedProtocol.HTTP)) {
+                                try {
+                                    channel.close();
+                                    server.getSocketModule().getAsyncNetworkService().getSelectorHandler().getReferences().remove(channel.socket().getRemoteSocketAddress());
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                                return;
+                            }
+                        }
+
+
                         //handle http
                         try {
                             server.getHttpModule().getHttpRequestProcessor().handle(new PendingRequest(this, headers, channel));
@@ -164,34 +167,35 @@ public class IoManager {
                             server.getSocketModule().getAsyncNetworkService().getSelectorHandler().getReferences().remove(channel.socket().getRemoteSocketAddress());
                             e.printStackTrace();
                         }
-                    });
-                }
-                break;
-            }
 
-            case WEBSOCKET:
-                if (webSocketStatus == WebSocketStatus.IDLE_NEW) {
-                    wsDataStream.append(new String(input));
-                    String data = wsDataStream.toString();
-                    //does it end here?
-                    if (data.contains("\r\n\r\n")) {
-                        //does it have other parts?
-                        if (data.split("\r\n\r\n").length == 1) {
-                            poolHolder.getPool().run(() -> webSocketHandler.accept(new WebSocketTransaction(data.split("\r\n\r\n")[0], webSocketStatus)));
-                        } else {
-                            wsDataStream = new StringBuilder();
-                            wsDataStream.append(data.split("\r\n\r\n")[1]);
-                        }
                     }
-                } else if (webSocketStatus == WebSocketStatus.CONNECED) {
-                    String data = new String(parseEncodedFrame(input).getPayload(), Charset.defaultCharset());
-                    poolHolder.getPool().run(() -> webSocketHandler.accept(new WebSocketTransaction(data, webSocketStatus)));
+                    break;
                 }
-                break;
 
-            case UNKNOWN:
-                break;
-        }
+                case WEBSOCKET:
+                    if (webSocketStatus == WebSocketStatus.IDLE_NEW) {
+                        wsDataStream.append(new String(input));
+                        String data = wsDataStream.toString();
+                        //does it end here?
+                        if (data.contains("\r\n\r\n")) {
+                            //does it have other parts?
+                            if (data.split("\r\n\r\n").length == 1) {
+                                webSocketHandler.accept(new WebSocketTransaction(data.split("\r\n\r\n")[0], webSocketStatus));
+                            } else {
+                                wsDataStream = new StringBuilder();
+                                wsDataStream.append(data.split("\r\n\r\n")[1]);
+                            }
+                        }
+                    } else if (webSocketStatus == WebSocketStatus.CONNECED) {
+                        String data = new String(parseEncodedFrame(input).getPayload(), Charset.defaultCharset());
+                        webSocketHandler.accept(new WebSocketTransaction(data, webSocketStatus));
+                    }
+                    break;
+
+                case UNKNOWN:
+                    break;
+            }
+        });
     }
 
     public void sendWebSocket(String str) throws IOException {

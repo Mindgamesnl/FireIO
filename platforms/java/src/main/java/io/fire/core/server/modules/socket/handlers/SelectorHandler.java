@@ -105,7 +105,9 @@ public class SelectorHandler implements Runnable {
             //its not allowed
             references.remove(channel.socket().getRemoteSocketAddress());
             socket.close();
-            channel.close();
+            if (channel != null) {
+                channel.close();
+            }
         }
     }
 
