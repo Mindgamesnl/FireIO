@@ -28,6 +28,10 @@ public class TestServer {
 
                     .on(Event.CONNECT, eventPayload -> {
                         Client client = (Client) eventPayload;
+                        for(int i = 0; i < 50; ++i) {
+                            //System.out.println("Sending packet " + i);
+                            client.send("channel", "i am message " + i);
+                        }
                         System.out.println("A user connected via " + client.getConnectionType());
                     })
 
@@ -45,7 +49,7 @@ public class TestServer {
                         ReceivedText text = (ReceivedText) eventPayload;
                         System.out.println("Channel got: " +text.getString());
                         //send hi back
-                        text.getSender().send("channel", "well hi my love! :D");
+                        //text.getSender().send("channel", "well hi my love! :D");
                     });
 
             ;

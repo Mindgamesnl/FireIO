@@ -13,12 +13,10 @@ public class IoFrameSet {
     private boolean isReading;
     private byte[] content = new byte[0];
 
-    @Getter
-    private LinkedList<IoFrame> frames = new LinkedList<>();
-    @Getter
-    private boolean isFinished = false;
-    @Getter
-    private Packet payload;
+    @Getter private LinkedList<IoFrame> frames = new LinkedList<>();
+    @Getter private boolean isFinished = false;
+    @Getter private Packet payload;
+    @Getter private IoFrameType firstType = IoFrameType.UNKNOWN;
 
     public IoFrameSet(Packet input) throws IOException {
         this.isReading = false;
@@ -58,6 +56,15 @@ public class IoFrameSet {
         }
     }
 
+    public IoFrameSet(IoFrameType type) {
+        if (type != IoFrameType.CONFIRM_PACKET) throw new IllegalArgumentException("Can not create packet based on " + type);
+        try {
+            frames.add(new IoFrame(IoFrameType.CONFIRM_PACKET, new byte[1000]));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public IoFrameSet() {
         this.isReading = true;
     }
@@ -67,6 +74,12 @@ public class IoFrameSet {
         IoFrameType receivedType = IoFrameType.fromBytes(packet);
 
         if (receivedType == IoFrameType.UNKNOWN) throw new UnsupportedDataTypeException("Could not accept packet type of unknown value " + packet[0]);
+
+        if (receivedType == IoFrameType.CONFIRM_PACKET) {
+            isFinished = true;
+            firstType = IoFrameType.CONFIRM_PACKET;
+            return;
+        }
 
         if (receivedType == IoFrameType.SINGLE) {
             content = new byte[1000];

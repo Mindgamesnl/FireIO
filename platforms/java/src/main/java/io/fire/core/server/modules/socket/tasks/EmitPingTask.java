@@ -1,5 +1,7 @@
 package io.fire.core.server.modules.socket.tasks;
 
+import io.fire.core.common.io.objects.IoFrame;
+import io.fire.core.common.io.objects.IoFrameSet;
 import io.fire.core.common.packets.PingPacket;
 import io.fire.core.server.FireIoServer;
 import io.fire.core.server.modules.client.objects.FireIoConnection;
@@ -25,7 +27,9 @@ public class EmitPingTask extends TimerTask {
             SocketClientHandler handler = connection.getHandler();
             if (handler != null) {
                 try {
-                    handler.emit(new PingPacket(Instant.now()));
+                    for (IoFrame frame : new IoFrameSet(new PingPacket(Instant.now())).getFrames()) {
+                        handler.getIoManager().forceWrite(frame.getBuffer(), false);
+                    }
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

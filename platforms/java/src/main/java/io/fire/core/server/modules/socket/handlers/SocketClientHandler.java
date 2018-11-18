@@ -187,7 +187,7 @@ public class SocketClientHandler implements SocketEvents {
             }
 
             ioManager.setWebSocketStatus(WebSocketStatus.CONNECED);
-            ioManager.write(ByteBuffer.wrap(response));
+            ioManager.forceWrite(ByteBuffer.wrap(response), false);
             open = true;
             authenticated = true;
             server.getClientModule().getClient(connectionId).setInfo(new ClientInfo());

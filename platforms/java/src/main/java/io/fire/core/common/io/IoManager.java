@@ -4,19 +4,13 @@ import io.fire.core.client.FireIoClient;
 import io.fire.core.common.interfaces.Packet;
 import io.fire.core.common.interfaces.PoolHolder;
 import io.fire.core.common.io.api.request.PendingRequest;
-import io.fire.core.common.io.enums.InstanceSide;
-import io.fire.core.common.io.enums.IoType;
-import io.fire.core.common.io.enums.Opcode;
-import io.fire.core.common.io.enums.WebSocketStatus;
+import io.fire.core.common.io.enums.*;
 import io.fire.core.common.io.frames.FrameData;
 import io.fire.core.common.io.http.enums.HttpContentType;
 import io.fire.core.common.io.http.enums.HttpRequestMethod;
 import io.fire.core.common.io.http.enums.HttpStatusCode;
 import io.fire.core.common.io.http.objects.HttpContent;
-import io.fire.core.common.io.objects.IoFrame;
-import io.fire.core.common.io.objects.IoFrameSet;
-import io.fire.core.common.io.objects.WebSocketFrame;
-import io.fire.core.common.io.objects.WebSocketTransaction;
+import io.fire.core.common.io.objects.*;
 import io.fire.core.server.FireIoServer;
 import io.fire.core.server.modules.socket.enums.BlockedProtocol;
 
@@ -28,6 +22,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.Charset;
 import java.util.*;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.function.Consumer;
 
 public class IoManager {
@@ -39,27 +34,25 @@ public class IoManager {
     private IoFrameSet frameSet = null;
 
     //buffers for the websocket protocol
+    private WebsocketHandler weboscketUtil = new WebsocketHandler();
     private StringBuilder wsDataStream = new StringBuilder();
-    @Setter
-    private WebSocketStatus webSocketStatus = WebSocketStatus.IDLE_NEW;
+    @Setter private WebSocketStatus webSocketStatus = WebSocketStatus.IDLE_NEW;
 
     //protocol type
-    @Getter
-    private IoType ioType = IoType.UNKNOWN;
+    @Getter private IoType ioType = IoType.UNKNOWN;
     private Boolean hasReceived = false;
 
     //handlers
-    @Setter
-    private Consumer<Packet> packetHandler = (p) -> {
-    };
-    @Setter
-    private Consumer<WebSocketTransaction> webSocketHandler = (p) -> {
-    };
+    @Setter private Consumer<Packet> packetHandler = (p) -> {};
+    @Setter private Consumer<WebSocketTransaction> webSocketHandler = (p) -> {};
+
+    //packet buffers
+    private Queue<ByteBuffer> queuedFrames = new ConcurrentLinkedDeque<>();
+    private boolean isChannelLocked = false;
 
     //runner
     private InstanceSide side;
-    @Getter
-    private FireIoServer server;
+    @Getter private FireIoServer server;
     private FireIoClient client;
 
     public IoManager(SocketChannel channel, InstanceSide side, Object parent) {
@@ -73,7 +66,6 @@ public class IoManager {
     }
 
     public void handleData(byte[] input, PoolHolder poolHolder, int length) {
-        poolHolder.getPool().run(() -> {
 
 
             String requestAsString = new String(input);
@@ -109,8 +101,23 @@ public class IoManager {
                     }
 
                     if (frameSet.isFinished()) {
-                        packetHandler.accept(frameSet.getPayload());
-                        frameSet = new IoFrameSet();
+                        if (frameSet.getFirstType() == IoFrameType.CONFIRM_PACKET) {
+                            //it is a confermation, dont trigger it but handle it here
+                            //TODO: remove debug
+                            frameSet = new IoFrameSet();
+                            handlePacketConvermation();
+                        } else {
+                            //it is a normal payload, trigger it
+                            try {
+                                packetHandler.accept(frameSet.getPayload());
+                            } catch (Exception e) {
+                                System.err.println("[Fire-IO] Packet event handler caused an exception.");
+                                e.printStackTrace();
+                            }
+                            frameSet = new IoFrameSet();
+                            //let the other side know that it may send a new packet
+                            forceWrite(new IoFrameSet(IoFrameType.CONFIRM_PACKET).getFrames().get(0).getBuffer(), false);
+                        }
                     }
                     break;
 
@@ -158,7 +165,7 @@ public class IoManager {
                             String page = server.getHttpModule().getHttpResources().get("500.html").replace("{{stacktrace-message}}", e.getClass().getName() + ": " + e.getMessage());
                             HttpContent errorPage = new HttpContent(HttpContentType.HTML, HttpStatusCode.C_500);
                             errorPage.setBody(page);
-                            write(errorPage.getBuffer());
+                            forceWrite(errorPage.getBuffer(), false);
                             try {
                                 channel.close();
                             } catch (IOException e1) {
@@ -187,7 +194,7 @@ public class IoManager {
                             }
                         }
                     } else if (webSocketStatus == WebSocketStatus.CONNECED) {
-                        String data = new String(parseEncodedFrame(input).getPayload(), Charset.defaultCharset());
+                        String data = new String(weboscketUtil.parseEncodedFrame(input).getPayload(), Charset.defaultCharset());
                         webSocketHandler.accept(new WebSocketTransaction(data, webSocketStatus));
                     }
                     break;
@@ -195,7 +202,7 @@ public class IoManager {
                 case UNKNOWN:
                     break;
             }
-        });
+
     }
 
     public void sendWebSocket(String str) throws IOException {
@@ -203,74 +210,7 @@ public class IoManager {
         currentFrame.setPayload(ByteBuffer.wrap(str.getBytes("UTF-8")));
         currentFrame.setTransferemasked(false);
         List<FrameData> out = Collections.singletonList(currentFrame);
-        for (FrameData fd : out) this.channel.write((ByteBuffer) parseData(fd).flip());
-    }
-
-    private byte[] toByteArray(long val, int bytecount) {
-        byte[] buffer = new byte[bytecount];
-        int highest = 8 * bytecount - 8;
-        for (int i = 0; i < bytecount; i++) {
-            buffer[i] = (byte) (val >>> (highest - 8 * i));
-        }
-        return buffer;
-    }
-
-    private ByteBuffer parseData(FrameData framedata) {
-        ByteBuffer mes = framedata.getPayloadData();
-        int byteSize = mes.remaining() <= 125 ? 1 : mes.remaining() <= 65535 ? 2 : 8;
-        ByteBuffer buf = ByteBuffer.allocate(1 + (byteSize > 1 ? byteSize + 1 : byteSize) + 0 + mes.remaining());
-        byte opt = (byte) framedata.getOpcode().getId();
-        byte one = (byte) (framedata.isFin() ? -128 : 0);
-        one |= opt;
-        buf.put(one);
-        byte[] payload = toByteArray(mes.remaining(), byteSize);
-        assert (payload.length == byteSize);
-        if (byteSize == 1) {
-            buf.put((byte) (payload[0] | 0));
-        } else if (byteSize == 2) {
-            buf.put((byte) ((byte) 126 | 0));
-            buf.put(payload);
-        } else if (byteSize == 8) {
-            buf.put((byte) ((byte) 127 | 0));
-            buf.put(payload);
-        }
-        buf.put(mes);
-        mes.flip();
-        assert (buf.remaining() == 0) : buf.remaining();
-        buf.flip();
-        return buf;
-    }
-
-    private WebSocketFrame parseEncodedFrame(byte[] raw) {
-        ByteBuffer buf = ByteBuffer.wrap(raw);
-        WebSocketFrame frame = new WebSocketFrame();
-        byte b = buf.get();
-        frame.setFin(((b & 0x80) != 0));
-        frame.setOpcode((byte) (b & 0x0F));
-
-        b = buf.get();
-        boolean masked = ((b & 0x80) != 0);
-        int payloadLength = (byte) (0x7F & b);
-        int byteCount = 0;
-        if (payloadLength == 0x7F) byteCount = 8;
-        else if (payloadLength == 0x7E) byteCount = 2;
-
-        while (--byteCount > 0) {
-            b = buf.get();
-            payloadLength |= (b & 0xFF) << (8 * byteCount);
-        }
-
-        byte maskingKey[] = null;
-        if (masked) {
-            maskingKey = new byte[4];
-            buf.get(maskingKey, 0, 4);
-        }
-
-        frame.setPayload(new byte[payloadLength]);
-        buf.get(frame.getPayload(), 0, payloadLength);
-
-        if (masked) for (int i = 0; i < frame.getPayload().length; i++) frame.getPayload()[i] ^= maskingKey[i % 4];
-        return frame;
+        for (FrameData fd : out) this.channel.write((ByteBuffer) weboscketUtil.parseData(fd).flip());
     }
 
     public void send(Packet p) {
@@ -282,18 +222,34 @@ public class IoManager {
         }
 
         for (IoFrame frame : emitter.getFrames()) {
-            write(frame.getBuffer());
+            proposeWrite(frame.getBuffer());
         }
     }
 
-    public void write(ByteBuffer wrap) {
+    private void proposeWrite(ByteBuffer content) {
+        if (queuedFrames.size() == 0 && !isChannelLocked) {
+            forceWrite(content, true);
+        } else {
+            queuedFrames.add(content);
+        }
+    }
+
+    public void forceWrite(ByteBuffer wrap, boolean requiresLock) {
         if (this.channel.isOpen()) {
             try {
+                if (requiresLock) isChannelLocked = true;
                 this.channel.write(wrap);
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
         wrap.clear();
+    }
+
+    private void handlePacketConvermation() {
+        isChannelLocked = false;
+        if (queuedFrames.size() != 0) {
+            forceWrite(queuedFrames.poll(), true);
+        }
     }
 }

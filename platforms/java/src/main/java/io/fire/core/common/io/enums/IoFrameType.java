@@ -8,6 +8,7 @@ public enum IoFrameType {
     START((byte) 2),
     CONTINUE((byte) 3),
     FINISH((byte) 4),
+    CONFIRM_PACKET((byte) 5),
     UNKNOWN((byte) -1);
 
     @Getter private byte contentByte;
@@ -24,8 +25,8 @@ public enum IoFrameType {
                 return START;
             case 3:
                 return CONTINUE;
-            case 4:
-                return FINISH;
+            case 5:
+                return CONFIRM_PACKET;
             default:
                 return UNKNOWN;
         }
