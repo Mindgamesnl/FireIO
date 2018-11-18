@@ -121,10 +121,9 @@ public class IoManager {
 
             case HTTP: {
                 HttpContent headers = new HttpContent(requestAsString);
-
                 //handle http input
                 //is there a websocket upgrade packet? than resume as a websocket connection
-                if (headers.getHeader("Sec-WebSocket-Key") != null && headers.getHeader("Connection") != null) {
+                if (!headers.getHeader("Sec-WebSocket-Key").equals("") && !headers.getHeader("Connection").equals("")) {
                     if (side == InstanceSide.SERVER) {
                         if (server.getSocketModule().getBlockedProtocolList().contains(BlockedProtocol.WEBSOCKET)) {
                             try {

@@ -7,6 +7,7 @@ import io.fire.core.common.io.api.request.HttpInteraction;
 import io.fire.core.common.io.api.request.PendingRequest;
 import io.fire.core.common.io.http.enums.HttpContentType;
 import io.fire.core.common.io.http.enums.HttpStatusCode;
+import io.fire.core.common.io.http.objects.ConnectionInfo;
 import io.fire.core.common.io.http.objects.HttpContent;
 import io.fire.core.common.objects.VersionInfo;
 import io.fire.core.server.modules.http.HttpModule;
@@ -60,6 +61,25 @@ public class HttpRequestProcessor {
         HttpContent response = new HttpContent();
         HttpContent request = pendingRequest.getHeaders();
 
+        //ip data
+        //variables we will use for setting the ip
+        ConnectionInfo connectionInfo = null;
+
+        //configure ip adress for proxxy
+        if (request.getRancherActiveProxyContent() != null) {
+            connectionInfo = new ConnectionInfo(request.getRancherActiveProxyContent().getForwardedPort(),
+                    request.getRancherActiveProxyContent().getRealIp(),
+                    request.getRancherActiveProxyContent().isForwardedSsl(),
+                    request.getRancherActiveProxyContent().getForwardedProtocol(),
+                    true);
+        } else {
+            connectionInfo = new ConnectionInfo(0,
+                    pendingRequest.getSocketChannel().socket().getInetAddress().getHostAddress(),
+                    false,
+                    null,
+                    false);
+        }
+
         //data
         String url = request.getUrl();
 
@@ -68,7 +88,8 @@ public class HttpRequestProcessor {
         headers.put("Access-Control-Allow-Origin", "*");
 
         //check rate limiter
-        if (!module.getRateLimiter().allowed(pendingRequest.getSocketChannel().socket().getInetAddress().getHostName())) {
+        System.out.println("ip = " + connectionInfo.getIpAddress() + " proxy="+connectionInfo.isProxy());
+        if (!module.getRateLimiter().allowed(connectionInfo.getIpAddress())) {
             //set response to the fail auth body
             //blocked by rate limiter!
             response.setOpcode(HttpContentType.TEXT, HttpStatusCode.C_403);
@@ -91,7 +112,7 @@ public class HttpRequestProcessor {
             //cache
             HttpEndpoint cachedResponse = cachedEndpoints.get(url);
             if (cachedResponse != null) {
-                accept(pendingRequest, request, url, variables, cachedResponse);
+                accept(pendingRequest, request, url, variables, cachedResponse, connectionInfo);
                 return;
             }
 
@@ -139,15 +160,15 @@ public class HttpRequestProcessor {
             pendingRequest.finish(response);
         } else {
             //accept endpoint
-            accept(pendingRequest, request, url, variables, handler);
+            accept(pendingRequest, request, url, variables, handler, connectionInfo);
             //save in cache
             if (variables.size() == 0) cachedEndpoints.put(url, handler);
         }
     }
 
-    private void accept(PendingRequest pendingRequest, HttpContent request, String url, Map<String, String> variables, HttpEndpoint handler) {
+    private void accept(PendingRequest pendingRequest, HttpContent request, String url, Map<String, String> variables, HttpEndpoint handler, ConnectionInfo connectionInfo) {
         //handle endpoint
-        IncomingRequest incomingRequest = new IncomingRequest(request, url, pendingRequest.getSocketChannel().socket(), variables);
+        IncomingRequest incomingRequest = new IncomingRequest(request, url, connectionInfo, variables);
         ResponseSettings responseSettings = new ResponseSettings();
         String body = "[[body]]";
         boolean successful = true;

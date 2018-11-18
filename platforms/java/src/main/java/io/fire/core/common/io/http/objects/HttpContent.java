@@ -15,12 +15,14 @@ public class HttpContent {
 
     private String opcode = null;
     private Map<String, String> mappedData = new HashMap<>();
-    @Getter @Setter
-    private String body = "";
+    @Getter @Setter private String body = "";
 
     //output
     @Getter private String url;
     @Getter private HttpRequestMethod method;
+
+    //rancher active proxy data
+    @Getter private RancherActiveProxyContent rancherActiveProxyContent;
 
     //two constructors, one to import a header set and one to create an empty one
     //reader
@@ -45,6 +47,15 @@ public class HttpContent {
         }
         String[] segments = data.split("\r\n\r\n");
         if (segments.length == 2) body = segments[1];
+
+        //at the end, check for proxy
+        if (!getHeader("X-Real-IP").equals("")) {
+            rancherActiveProxyContent = new RancherActiveProxyContent();
+            rancherActiveProxyContent.setRealIp(getHeader("X-Real-IP"));
+            rancherActiveProxyContent.setForwardedSsl(getHeader("X-Forwarded-Ssl").equals("on"));
+            rancherActiveProxyContent.setForwardedProtocol(getHeader("X-Forwarded-Proto"));
+            rancherActiveProxyContent.setForwardedPort(Integer.parseInt(getHeader("X-Forwarded-Port")));
+        }
     }
 
     //creator
@@ -55,9 +66,7 @@ public class HttpContent {
         mappedData.put("Server", "Fire-IO by Mindgamesnl");
     }
 
-    public HttpContent() {
-
-    }
+    public HttpContent() {}
 
     //set opcodde
     public void setOpcode(HttpContentType mimeType, HttpStatusCode statusCode) {
@@ -87,6 +96,7 @@ public class HttpContent {
     }
 
     public String getHeader(String key) {
+        if (!mappedData.containsKey(key)) return "";
         return mappedData.get(key);
     }
 

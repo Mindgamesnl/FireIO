@@ -63,7 +63,7 @@ public class RestHandlers {
             //register new expecting node
             FireIoNode node = balancer.getServerManager().create(id);
             node.setPort(Integer.valueOf(request.getVariable("port")));
-            node.setHost(request.getAdress().getHostName());
+            node.setHost(request.getConnectionInfo().getIpAddress());
             return out;
         });
     }

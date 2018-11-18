@@ -1,7 +1,9 @@
 package io.fire.core.common.io.api.api;
 
+import io.fire.core.common.io.http.objects.ConnectionInfo;
 import io.fire.core.common.io.http.objects.HttpContent;
 
+import io.fire.core.server.FireIoServer;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -14,16 +16,11 @@ public class IncomingRequest {
 
     @Getter private HttpContent request;
     @Getter private String url;
-    private Socket socket;
+    @Getter private ConnectionInfo connectionInfo;
     private Map<String, String> variables;
 
     public String getVariable(String key) {
         if (!variables.containsKey(key)) return "";
         return variables.get(key);
     }
-
-    public InetAddress getAdress() {
-        return socket.getInetAddress();
-    }
-
 }

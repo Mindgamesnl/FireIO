@@ -12,7 +12,8 @@ And all that for the sweet price of nothing.
  * **Java** Client
  * **JavaScript** Small web client
  * **PHP & Other** Can make use of socket, websocket or the Rest implementation
- * **Load Balancer** Fire-IO comes with a real time load balancer to scale your application.  
+ * **Load Balancer** Fire-IO comes with a real time load balancer to scale your application.
+ * **Rancher** Working within rancher environments with active proxy  
 
 ### Features
  * **Events** All event driven API
