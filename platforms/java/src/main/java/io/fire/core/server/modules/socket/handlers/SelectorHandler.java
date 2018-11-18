@@ -176,6 +176,11 @@ public class SelectorHandler implements Runnable {
         }
 
         //parse all packets
-        references.get(remoteAddr).getIoManager().handleData(data, server, fufilled);
+        try {
+            references.get(remoteAddr).getIoManager().handleData(data, server, fufilled);
+        } catch (Exception e) {
+            System.err.println("[Fire-IO] Failed to handle a packet.");
+            e.printStackTrace();
+        }
     }
 }

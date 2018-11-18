@@ -66,26 +66,87 @@ public class IoManager {
     }
 
     public void handleData(byte[] input, PoolHolder poolHolder, int length) {
-
-
-            String requestAsString = new String(input);
-            if (!hasReceived) {
-                if (HttpRequestMethod.isHttp(requestAsString)) {
-                    this.ioType = IoType.HTTP;
-                } else {
-                    requestAsString = null;
-                    this.ioType = IoType.FIREIO;
-                }
-                hasReceived = true;
+        String requestAsString = new String(input);
+        if (!hasReceived) {
+            if (HttpRequestMethod.isHttp(requestAsString)) {
+                this.ioType = IoType.HTTP;
+            } else {
+                requestAsString = null;
+                this.ioType = IoType.FIREIO;
             }
+            hasReceived = true;
+        }
 
-            switch (this.ioType) {
-                case FIREIO:
+        switch (this.ioType) {
+            case FIREIO:
+                if (side == InstanceSide.SERVER) {
+                    if (server.getSocketModule().getBlockedProtocolList().contains(BlockedProtocol.FIREIO)) {
+                        try {
+                            server.getSocketModule().getAsyncNetworkService().getSelectorHandler().getReferences().remove(channel.socket().getRemoteSocketAddress());
+                            channel.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        return;
+                    }
+                }
+
+                if (frameSet == null) frameSet = new IoFrameSet();
+                try {
+                    frameSet.readInput(input);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                if (frameSet.isFinished()) {
+                    if (frameSet.getFirstType() == IoFrameType.CONFIRM_PACKET) {
+                        //it is a confermation, dont trigger it but handle it here
+                        //TODO: remove debug
+                        frameSet = new IoFrameSet();
+                        handlePacketConvermation();
+                    } else {
+                        //it is a normal payload, trigger it
+                        try {
+                            packetHandler.accept(frameSet.getPayload());
+                        } catch (Exception e) {
+                            System.err.println("[Fire-IO] Packet event handler caused an exception.");
+                            e.printStackTrace();
+                        }
+                        frameSet = new IoFrameSet();
+                        //let the other side know that it may send a new packet
+                        forceWrite(new IoFrameSet(IoFrameType.CONFIRM_PACKET).getFrames().get(0).getBuffer(), false);
+                    }
+                }
+                break;
+
+            case HTTP: {
+                HttpContent headers = new HttpContent(requestAsString);
+
+                //handle http input
+                //is there a websocket upgrade packet? than resume as a websocket connection
+                if (headers.getHeader("Sec-WebSocket-Key") != null && headers.getHeader("Connection") != null) {
                     if (side == InstanceSide.SERVER) {
-                        if (server.getSocketModule().getBlockedProtocolList().contains(BlockedProtocol.FIREIO)) {
+                        if (server.getSocketModule().getBlockedProtocolList().contains(BlockedProtocol.WEBSOCKET)) {
                             try {
-                                server.getSocketModule().getAsyncNetworkService().getSelectorHandler().getReferences().remove(channel.socket().getRemoteSocketAddress());
                                 channel.close();
+                                server.getSocketModule().getAsyncNetworkService().getSelectorHandler().getReferences().remove(channel.socket().getRemoteSocketAddress());
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                            return;
+                        }
+                    }
+                    //how lovely, its an upgread request, so that means, that this is a real socket! well for fucks sake...
+                    String finalRequestAsString = requestAsString;
+                    webSocketHandler.accept(new WebSocketTransaction(finalRequestAsString.split("\r\n\r\n")[0], webSocketStatus));
+                    this.ioType = IoType.WEBSOCKET;
+                    return;
+                } else {
+                    if (side == InstanceSide.SERVER) {
+                        if (server.getSocketModule().getBlockedProtocolList().contains(BlockedProtocol.HTTP)) {
+                            try {
+                                channel.close();
+                                server.getSocketModule().getAsyncNetworkService().getSelectorHandler().getReferences().remove(channel.socket().getRemoteSocketAddress());
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
@@ -93,71 +154,9 @@ public class IoManager {
                         }
                     }
 
-                    if (frameSet == null) frameSet = new IoFrameSet();
-                    try {
-                        frameSet.readInput(input);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
 
-                    if (frameSet.isFinished()) {
-                        if (frameSet.getFirstType() == IoFrameType.CONFIRM_PACKET) {
-                            //it is a confermation, dont trigger it but handle it here
-                            //TODO: remove debug
-                            frameSet = new IoFrameSet();
-                            handlePacketConvermation();
-                        } else {
-                            //it is a normal payload, trigger it
-                            try {
-                                packetHandler.accept(frameSet.getPayload());
-                            } catch (Exception e) {
-                                System.err.println("[Fire-IO] Packet event handler caused an exception.");
-                                e.printStackTrace();
-                            }
-                            frameSet = new IoFrameSet();
-                            //let the other side know that it may send a new packet
-                            forceWrite(new IoFrameSet(IoFrameType.CONFIRM_PACKET).getFrames().get(0).getBuffer(), false);
-                        }
-                    }
-                    break;
-
-                case HTTP: {
-                    HttpContent headers = new HttpContent(requestAsString);
-
-                    //handle http input
-                    //is there a websocket upgrade packet? than resume as a websocket connection
-                    if (headers.getHeader("Sec-WebSocket-Key") != null && headers.getHeader("Connection") != null) {
-                        if (side == InstanceSide.SERVER) {
-                            if (server.getSocketModule().getBlockedProtocolList().contains(BlockedProtocol.WEBSOCKET)) {
-                                try {
-                                    channel.close();
-                                    server.getSocketModule().getAsyncNetworkService().getSelectorHandler().getReferences().remove(channel.socket().getRemoteSocketAddress());
-                                } catch (IOException e) {
-                                    e.printStackTrace();
-                                }
-                                return;
-                            }
-                        }
-                        //how lovely, its an upgread request, so that means, that this is a real socket! well for fucks sake...
-                        String finalRequestAsString = requestAsString;
-                        webSocketHandler.accept(new WebSocketTransaction(finalRequestAsString.split("\r\n\r\n")[0], webSocketStatus));
-                        this.ioType = IoType.WEBSOCKET;
-                        return;
-                    } else {
-                        if (side == InstanceSide.SERVER) {
-                            if (server.getSocketModule().getBlockedProtocolList().contains(BlockedProtocol.HTTP)) {
-                                try {
-                                    channel.close();
-                                    server.getSocketModule().getAsyncNetworkService().getSelectorHandler().getReferences().remove(channel.socket().getRemoteSocketAddress());
-                                } catch (IOException e) {
-                                    e.printStackTrace();
-                                }
-                                return;
-                            }
-                        }
-
-
-                        //handle http
+                    //handle http
+                    poolHolder.getPool().run(() -> {
                         try {
                             server.getHttpModule().getHttpRequestProcessor().handle(new PendingRequest(this, headers, channel));
                         } catch (IOException e) {
@@ -174,34 +173,34 @@ public class IoManager {
                             server.getSocketModule().getAsyncNetworkService().getSelectorHandler().getReferences().remove(channel.socket().getRemoteSocketAddress());
                             e.printStackTrace();
                         }
-
-                    }
-                    break;
+                    });
                 }
-
-                case WEBSOCKET:
-                    if (webSocketStatus == WebSocketStatus.IDLE_NEW) {
-                        wsDataStream.append(new String(input));
-                        String data = wsDataStream.toString();
-                        //does it end here?
-                        if (data.contains("\r\n\r\n")) {
-                            //does it have other parts?
-                            if (data.split("\r\n\r\n").length == 1) {
-                                webSocketHandler.accept(new WebSocketTransaction(data.split("\r\n\r\n")[0], webSocketStatus));
-                            } else {
-                                wsDataStream = new StringBuilder();
-                                wsDataStream.append(data.split("\r\n\r\n")[1]);
-                            }
-                        }
-                    } else if (webSocketStatus == WebSocketStatus.CONNECED) {
-                        String data = new String(weboscketUtil.parseEncodedFrame(input).getPayload(), Charset.defaultCharset());
-                        webSocketHandler.accept(new WebSocketTransaction(data, webSocketStatus));
-                    }
-                    break;
-
-                case UNKNOWN:
-                    break;
+                break;
             }
+
+            case WEBSOCKET:
+                if (webSocketStatus == WebSocketStatus.IDLE_NEW) {
+                    wsDataStream.append(new String(input));
+                    String data = wsDataStream.toString();
+                    //does it end here?
+                    if (data.contains("\r\n\r\n")) {
+                        //does it have other parts?
+                        if (data.split("\r\n\r\n").length == 1) {
+                            webSocketHandler.accept(new WebSocketTransaction(data.split("\r\n\r\n")[0], webSocketStatus));
+                        } else {
+                            wsDataStream = new StringBuilder();
+                            wsDataStream.append(data.split("\r\n\r\n")[1]);
+                        }
+                    }
+                } else if (webSocketStatus == WebSocketStatus.CONNECED) {
+                    String data = new String(weboscketUtil.parseEncodedFrame(input).getPayload(), Charset.defaultCharset());
+                    webSocketHandler.accept(new WebSocketTransaction(data, webSocketStatus));
+                }
+                break;
+
+            case UNKNOWN:
+                break;
+        }
 
     }
 
