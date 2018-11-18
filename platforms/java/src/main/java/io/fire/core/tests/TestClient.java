@@ -1,6 +1,7 @@
 package io.fire.core.tests;
 
 import io.fire.core.client.FireIoClient;
+import io.fire.core.client.modules.request.interfaces.ClientRequest;
 import io.fire.core.common.body.RequestString;
 import io.fire.core.common.eventmanager.enums.Event;
 import io.fire.core.common.packets.ReceivedText;
@@ -25,6 +26,10 @@ public class TestClient {
                 //System.out.println("Sending packet " + i);
                 client.send("channel", "i am message " + i);
             }
+
+            client.request("whoami", null, r -> {
+                System.out.println("request resulted");
+            });
         });
 
         client.on("channel", eventPayload -> {

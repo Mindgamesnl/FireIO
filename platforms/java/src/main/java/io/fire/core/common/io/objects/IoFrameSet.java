@@ -69,11 +69,20 @@ public class IoFrameSet {
         this.isReading = true;
     }
 
+    private boolean isZero(byte[] in) {
+        for (byte b : in) {
+            if (b != 0) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public void readInput(byte[] packet) throws IOException {
         if (!isReading) throw new IllegalStateException("Input readers may not receive data when it is writing a packet");
         IoFrameType receivedType = IoFrameType.fromBytes(packet);
 
-        if (receivedType == IoFrameType.UNKNOWN) throw new UnsupportedDataTypeException("Could not accept packet type of unknown value " + packet[0]);
+        if (receivedType == IoFrameType.UNKNOWN && !isZero(packet)) throw new UnsupportedDataTypeException("Could not accept packet type of unknown value " + packet[0]);
 
         if (receivedType == IoFrameType.CONFIRM_PACKET) {
             isFinished = true;
@@ -101,7 +110,7 @@ public class IoFrameSet {
             try (ObjectInput in = new ObjectInputStream(inputStream)) {
                 payload = (Packet) in.readObject();
             } catch (IOException | ClassNotFoundException e) {
-                throw new IOException("The buffered input does not corrospond with a java class");
+                throw new IOException("The buffered input does not corrospond with a java class, either it is corrupted or you class is not included.");
             }
         }
     }

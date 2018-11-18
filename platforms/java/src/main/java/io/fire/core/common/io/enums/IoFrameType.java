@@ -25,6 +25,8 @@ public enum IoFrameType {
                 return START;
             case 3:
                 return CONTINUE;
+            case 4:
+                return FINISH;
             case 5:
                 return CONFIRM_PACKET;
             default:

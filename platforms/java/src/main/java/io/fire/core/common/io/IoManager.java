@@ -101,9 +101,9 @@ public class IoManager {
                 if (frameSet.isFinished()) {
                     if (frameSet.getFirstType() == IoFrameType.CONFIRM_PACKET) {
                         //it is a confermation, dont trigger it but handle it here
-                        //TODO: remove debug
                         frameSet = new IoFrameSet();
                         handlePacketConvermation();
+                        return;
                     } else {
                         //it is a normal payload, trigger it
                         try {
@@ -112,9 +112,9 @@ public class IoManager {
                             System.err.println("[Fire-IO] Packet event handler caused an exception.");
                             e.printStackTrace();
                         }
-                        frameSet = new IoFrameSet();
                         //let the other side know that it may send a new packet
                         forceWrite(new IoFrameSet(IoFrameType.CONFIRM_PACKET).getFrames().get(0).getBuffer(), false);
+                        frameSet = new IoFrameSet();
                     }
                 }
                 break;
@@ -226,14 +226,14 @@ public class IoManager {
     }
 
     private void proposeWrite(ByteBuffer content) {
-        if (queuedFrames.size() == 0 && !isChannelLocked) {
+        if (queuedFrames.size() == 0 || !isChannelLocked) {
             forceWrite(content, true);
         } else {
             queuedFrames.add(content);
         }
     }
 
-    public void forceWrite(ByteBuffer wrap, boolean requiresLock) {
+    public void  forceWrite(ByteBuffer wrap, boolean requiresLock) {
         if (this.channel.isOpen()) {
             try {
                 if (requiresLock) isChannelLocked = true;
