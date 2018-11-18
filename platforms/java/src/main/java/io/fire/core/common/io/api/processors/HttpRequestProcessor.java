@@ -73,7 +73,7 @@ public class HttpRequestProcessor {
                     request.getRancherActiveProxyContent().getForwardedProtocol(),
                     true);
         } else {
-            connectionInfo = new ConnectionInfo(0,
+            connectionInfo = new ConnectionInfo(module.getMain().getPort(),
                     pendingRequest.getSocketChannel().socket().getInetAddress().getHostAddress(),
                     false,
                     null,
