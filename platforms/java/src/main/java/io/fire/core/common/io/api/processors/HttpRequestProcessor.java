@@ -88,7 +88,6 @@ public class HttpRequestProcessor {
         headers.put("Access-Control-Allow-Origin", "*");
 
         //check rate limiter
-        System.out.println("ip = " + connectionInfo.getIpAddress() + " proxy="+connectionInfo.isProxy());
         if (!module.getRateLimiter().allowed(connectionInfo.getIpAddress())) {
             //set response to the fail auth body
             //blocked by rate limiter!
