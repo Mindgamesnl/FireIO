@@ -21,7 +21,13 @@ public class ClientRequestModule {
         this.client = client;
     }
 
-    //create, register and send a request
+    /**
+     * Create, a request, register it to the local cache for execution and send it to the server
+     *
+     * @param channel
+     * @param request
+     * @param callback
+     */
     public void createRequest(String channel, RequestBody request, ClientRequest callback) {
         //create and set
         SubmitRequestPacket requestPacket = new SubmitRequestPacket();
@@ -44,7 +50,12 @@ public class ClientRequestModule {
         }
     }
 
-    //not handled by server, cancel
+    /**
+     * Request canceling, it was not (correctly) handeled by the server so the client should cancel it
+     * to prevent memory leaks from eating up the heap
+     *
+     * @param id
+     */
     public void cancel(UUID id) {
         //remove the callback since it wont get triggered again
         ongoingRequests.remove(id);
@@ -58,8 +69,16 @@ public class ClientRequestModule {
             }
         }
     }
-
-    //handle request with result
+    
+    /**
+     *
+     * The server finished the request with a response value
+     * now the client should trigger the callback with the value
+     * and remove it from local storage since it wont be triggered again
+     *
+     * @param id
+     * @param response
+     */
     public void handleRequestResponse(UUID id, RequestBody response) {
         //check if the request actually excists, prevents nullpointers and other weird behavior
         if (!ongoingRequests.containsKey(id)) return;

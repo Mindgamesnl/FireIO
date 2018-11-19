@@ -10,6 +10,10 @@ import java.util.UUID;
 @Data
 public class FireIoNode {
 
+    /**
+     * A connected node to the network of servers
+     */
+
     private Client pipe;
     private int connections;
     private UUID uuid;

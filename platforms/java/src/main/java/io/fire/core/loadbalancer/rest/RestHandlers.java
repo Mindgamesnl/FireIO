@@ -13,6 +13,11 @@ public class RestHandlers {
     @Setter private String clientPassword = null;
     @Setter private String serverPassword = null;
 
+    /**
+     * Setup/overwrite rest endpoints for the loadbalancer
+     *
+     * @param balancer
+     */
     public RestHandlers(FireIoBalancer balancer) {
 
         //change "authentication" endpoint to allow redirects

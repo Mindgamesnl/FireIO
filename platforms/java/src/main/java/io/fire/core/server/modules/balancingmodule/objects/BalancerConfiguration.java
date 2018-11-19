@@ -11,6 +11,12 @@ public class BalancerConfiguration {
     private int port;
     private String password = null;
 
+    /**
+     * Loadbalancer configuration, used to connect with a external loadbalancer
+     *
+     * @param host
+     * @param port
+     */
     public BalancerConfiguration(String host, int port) {
         this.host = host;
         this.port = port;

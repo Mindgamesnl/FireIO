@@ -4,6 +4,11 @@ import lombok.Getter;
 
 public enum HttpContentType {
 
+    /**
+     * Most used HTTP content types
+     * Notated with their HTTP mime type
+     */
+
     AAC_AUDIO("audio/aac"),
     CSS("text/css"),
     HTML("text/html"),

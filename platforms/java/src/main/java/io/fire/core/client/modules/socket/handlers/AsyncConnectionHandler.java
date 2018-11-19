@@ -53,7 +53,18 @@ public class AsyncConnectionHandler implements SocketEvents, EventPayload, Conne
     //when the client failed to send a packet, it will retry at a moment to prevent packet loss.
     private Queue<Packet> missedPackets = new LinkedList<>();
 
-    //constructor, apply data and try to connect. if the connection fails, then handle it appropriately
+
+    /**
+     * Setup the AsyncConnectionHandler
+     * This handler handles all IO and distrubutes it across the API
+     *
+     * @param client
+     * @param host
+     * @param port
+     * @param id
+     * @param arguments
+     * @param argumentsMeta
+     */
     public AsyncConnectionHandler(FireIoClient client, String host, int port, UUID id, Map<String, String> arguments, Map<String, ClientMeta> argumentsMeta) {
         try {
             this.timer = new Timer();
@@ -71,6 +82,12 @@ public class AsyncConnectionHandler implements SocketEvents, EventPayload, Conne
         }
     }
 
+
+    /**
+     * Start authentication and then connect to the socket if the authentication was fufilled
+     *
+     * @throws IOException
+     */
     private void connect() throws IOException {
         //open a socket channel, create a socket reader with a default buffer, and then try to authenticate over the newly created socket.
         //the default buffer is common in everything of Fire-Io, when bigger data is getting send it will change in the whole network to what ever is needed.
@@ -89,10 +106,21 @@ public class AsyncConnectionHandler implements SocketEvents, EventPayload, Conne
         emit(new AuthPacket(identifier.toString(), System.getProperty("os.name"), arguments, argumentsMeta));
     }
 
+
+    /**
+     * Send a raw packet
+     *
+     * @param p
+     * @throws IOException
+     */
     public void emit(Packet p) throws IOException {
         this.ioManager.send(p);
     }
 
+
+    /**
+     * Force close the connection
+     */
     public void close() {
         try {
             this.timer.cancel();
@@ -109,6 +137,12 @@ public class AsyncConnectionHandler implements SocketEvents, EventPayload, Conne
         }
     }
 
+
+    /**
+     * A packet was received, now handle the packet and check for internal ussage
+     *
+     * @param packet
+     */
     @Override
     public void onPacket(Packet packet) {
         if (isDead) return;
@@ -183,11 +217,22 @@ public class AsyncConnectionHandler implements SocketEvents, EventPayload, Conne
         }
     }
 
+
+    /**
+     * Required by interface, but not used on the client side
+     *
+     * @param webSocketTransaction
+     */
     @Override
-    public void onWebSocketPacket(WebSocketTransaction webSocketTransaction) throws Exception {
+    public void onWebSocketPacket(WebSocketTransaction webSocketTransaction) {
         //not handled in this instance.
     }
 
+
+    /**
+     * this function is called when the connection has died or if closed
+     * this also triggeres the appropriate events
+     */
     @Override
     public void onClose() {
         //the ioreader detected that the channel closed or dropped connection
@@ -205,6 +250,11 @@ public class AsyncConnectionHandler implements SocketEvents, EventPayload, Conne
         }
     }
 
+
+    /**
+     * This function is called when a connection opens,
+     * in this case, it resets the expectedClosing function
+     */
     @Override
     public void onOpen() {
         //a EMPTY & DEFAULT connection opened, reset default values
@@ -212,11 +262,24 @@ public class AsyncConnectionHandler implements SocketEvents, EventPayload, Conne
         //(dent send anything yet since we are not authenticated yet and thus the server will ignore it)
     }
 
+
+    /**
+     * get the active IoManager
+     *
+     * @return active IoManager
+     */
     @Override
     public IoManager getIoManager() {
         return ioManager;
     }
 
+
+    /**
+     * send a message over a channel
+     *
+     * @param channel
+     * @param message
+     */
     @Override
     public void send(String channel, String message) {
         //function from the ConnectedFireioClient interface for use in the API
@@ -229,6 +292,13 @@ public class AsyncConnectionHandler implements SocketEvents, EventPayload, Conne
         }
     }
 
+
+    /**
+     * send a packet over a channel
+     *
+     * @param channel
+     * @param packet
+     */
     @Override
     public void send(String channel, Packet packet) {
         //function from the ConnectedFireioClient interface for use in the API
@@ -242,6 +312,12 @@ public class AsyncConnectionHandler implements SocketEvents, EventPayload, Conne
         }
     }
 
+
+    /**
+     * get the client Id
+     *
+     * @return UUID assigned by the server
+     */
     @Override
     public UUID getId() {
         //function from the ConnectedFireioClient interface for use in the API

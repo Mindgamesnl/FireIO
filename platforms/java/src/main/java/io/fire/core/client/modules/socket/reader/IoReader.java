@@ -18,12 +18,23 @@ public class IoReader implements Runnable {
     //connection handler
     private AsyncConnectionHandler asyncConnectionHandler;
 
+    /**
+     * Setup a new IO reader
+     *
+     * @param channel
+     * @param ins
+     * @param client
+     */
     public IoReader(SocketChannel channel, AsyncConnectionHandler ins, FireIoClient client) {
         this.channel = channel;
         this.client = client;
         this.asyncConnectionHandler = ins;
     }
 
+
+    /**
+     * Function by interface, wait for data send when appropriate.
+     */
     @Override
     public void run() {
         //infinite while loop in its own thread to continually check for new packets

@@ -17,6 +17,12 @@ public class ServerManager {
 
     @Getter private Map<UUID, FireIoNode> nodes = new ConcurrentHashMap<>();
 
+
+    /**
+     * Setup the server manager and a task scheduler to check the health of all the nodes
+     *
+     * @param balancer
+     */
     public ServerManager(FireIoBalancer balancer) {
         //clearance
         Timer timer = new Timer();
@@ -38,6 +44,11 @@ public class ServerManager {
     }
 
 
+    /**
+     * Get best available server with the least connected and concurrent clients
+     *
+     * @return
+     */
     public FireIoNode getAvailableServer() {
         return nodes.values().stream()
                 .filter(node -> node.getState() == NodeState.CONNECTED)
@@ -46,6 +57,11 @@ public class ServerManager {
     }
 
 
+    /**
+     * Get a server with the least amount of http tasks in the last few seconds
+     *
+     * @return
+     */
     public FireIoNode getAvailableEndpoint() {
         return nodes.values().stream()
                 .filter(node -> node.getState() == NodeState.CONNECTED)
@@ -53,12 +69,26 @@ public class ServerManager {
                 .orElse(null);
     }
 
+
+    /**
+     * register a new node by id, and return the base object
+     *
+     * @param uuid
+     * @return
+     */
     public FireIoNode create(UUID uuid) {
         FireIoNode node = new FireIoNode(uuid);
         nodes.put(uuid, node);
         return node;
     }
 
+
+    /**
+     * Get a node by ID
+     *
+     * @param client
+     * @return
+     */
     public FireIoNode getNode(Client client) {
         return nodes.get(client.getId());
     }

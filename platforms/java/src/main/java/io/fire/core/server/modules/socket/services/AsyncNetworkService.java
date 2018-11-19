@@ -21,6 +21,15 @@ public class AsyncNetworkService {
 
     @Getter private SelectorHandler selectorHandler;
 
+
+    /**
+     * Setup for the Async network service
+     * and the other scheduled tasks
+     *
+     * @param server
+     * @param port
+     * @throws IOException
+     */
     public  AsyncNetworkService(FireIoServer server, int port) throws IOException {
         this.server = server;
         ServerSocketChannel serverChannel = ServerSocketChannel.open();
@@ -41,6 +50,12 @@ public class AsyncNetworkService {
         timer.schedule(new EmitPingTask(server), 0, 2000);
     }
 
+
+    /**
+     * Broadcast a packet to all connected AND READY clients
+     *
+     * @param p
+     */
     public void broadcast(Packet p) {
         for (FireIoConnection connection : server.getClientModule().connectionMap.values()) {
             try {

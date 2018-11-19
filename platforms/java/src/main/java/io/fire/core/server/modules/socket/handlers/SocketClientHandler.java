@@ -45,6 +45,17 @@ public class SocketClientHandler implements SocketEvents {
     @Getter private Instant initiated = Instant.now();
     @Getter private ConnectionType connectionType = ConnectionType.NONE;
 
+
+    /**
+     * Register and setup a SocketClientHandler
+     *
+     * this class handles ALL interaction for a specific client
+     * and contains all data related to a client/connection
+     *
+     * @param server
+     * @param socket
+     * @param channel
+     */
     SocketClientHandler(FireIoServer server, Socket socket, SocketChannel channel) {
         //constructor
         this.server = server;
@@ -61,11 +72,22 @@ public class SocketClientHandler implements SocketEvents {
         });
     }
 
+
+    /**
+     * Register the on-message handler, used for internal cross overs
+     *
+     * @param listener
+     */
     public void onMessage(Consumer<EventPayload> listener) {
         //set message handler
         this.consumer = listener;
     }
 
+
+    /**
+     * Close the connection in a clean way on both sides
+     * when finished, clean up on both sides and remove all traces of it ever existing
+     */
     public void close() {
         //close connection
         try {
@@ -78,6 +100,18 @@ public class SocketClientHandler implements SocketEvents {
         }
     }
 
+
+    /**
+     * Emit or write a packet
+     *
+     * this checks the connection type
+     *
+     * IF WEBSOCKET: try to serialize it and send it
+     *
+     * IF FIRE-IO: handle it in the IoManager (acts as the protocol implementation)
+     * @param p
+     * @throws IOException
+     */
     public void emit(Packet p) throws IOException {
         if (!authenticated) return;
         if (connectionType == ConnectionType.WEBSOCKET) {
@@ -94,6 +128,14 @@ public class SocketClientHandler implements SocketEvents {
         }
     }
 
+
+    /**
+     * FIRST low level Packet handler
+     *
+     * The first thing that happens when a packet is received, this handles internal packets and triggers the API
+     *
+     * @param packet
+     */
     @Override
     public void onPacket(Packet packet) {
         this.connectionType = ConnectionType.FIREIO;
@@ -141,6 +183,14 @@ public class SocketClientHandler implements SocketEvents {
         if (consumer != null) consumer.accept(packet);
     }
 
+
+    /**
+     * Java implementation of the WebSocket handshake over the HTTP protocol
+     * (connection upgrade)
+     *
+     * @param webSocketTransaction
+     * @throws Exception
+     */
     @Override
     public void onWebSocketPacket(WebSocketTransaction webSocketTransaction) throws Exception {
         this.connectionType = ConnectionType.WEBSOCKET;
@@ -207,6 +257,12 @@ public class SocketClientHandler implements SocketEvents {
         }
     }
 
+
+    /**
+     * Close handler
+     * this checks the state in which the connection is closed and handles it appropriately
+     * this is where gets decided if the connection got CLOSED or that it DIED
+     */
     @Override
     public void onClose() {
         //fire io's garbage collector will clean it up so this is not a memory leak!
@@ -222,11 +278,22 @@ public class SocketClientHandler implements SocketEvents {
         }
     }
 
+
+    /**
+     * On open handler
+     * reset the expectedClosing state
+     */
     @Override
     public void onOpen() {
         expectedClosing = false;
     }
 
+
+    /**
+     * Get the current active IoHandler
+     *
+     * @return the current active IoHandler
+     */
     @Override
     public IoManager getIoManager() {
         return ioManager;

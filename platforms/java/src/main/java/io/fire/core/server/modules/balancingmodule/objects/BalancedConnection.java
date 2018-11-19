@@ -14,6 +14,15 @@ public class BalancedConnection implements EventPayload {
     private boolean isReady = false;
     @Getter private UUID id;
 
+
+    /**
+     * A connection with a loadbalancer, used to register and update status
+     *
+     * @param main
+     * @param hos
+     * @param port
+     * @param password
+     */
     public BalancedConnection(FireIoServer main, String hos, int port, String password) {
         //setup custom fireio client
         fireIoClient = new FireIoClient(hos, port);

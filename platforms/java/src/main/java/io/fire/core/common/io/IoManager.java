@@ -39,7 +39,7 @@ public class IoManager {
     @Setter private WebSocketStatus webSocketStatus = WebSocketStatus.IDLE_NEW;
 
     //protocol type
-    @Getter private IoType ioType = IoType.UNKNOWN;
+    @Getter private ConnectionType ioType = ConnectionType.NONE;
     private Boolean hasReceived = false;
 
     //handlers
@@ -55,6 +55,14 @@ public class IoManager {
     @Getter private FireIoServer server;
     private FireIoClient client;
 
+
+    /**
+     * Setup the IoManager instance
+     *
+     * @param channel
+     * @param side
+     * @param parent
+     */
     public IoManager(SocketChannel channel, InstanceSide side, Object parent) {
         this.channel = channel;
         this.side = side;
@@ -65,14 +73,23 @@ public class IoManager {
         }
     }
 
+
+    /**
+     * Handle data that was received by the socket.
+     * This handles ALL data, it decides what protocol to use, when and what to do with it.
+     *
+     * @param input
+     * @param poolHolder
+     * @param length
+     */
     public void handleData(byte[] input, PoolHolder poolHolder, int length) {
         String requestAsString = new String(input);
         if (!hasReceived) {
             if (HttpRequestMethod.isHttp(requestAsString)) {
-                this.ioType = IoType.HTTP;
+                this.ioType = ConnectionType.HTTP;
             } else {
                 requestAsString = null;
-                this.ioType = IoType.FIREIO;
+                this.ioType = ConnectionType.FIREIO;
             }
             hasReceived = true;
         }
@@ -102,7 +119,7 @@ public class IoManager {
                     if (frameSet.getFirstType() == IoFrameType.CONFIRM_PACKET) {
                         //it is a confermation, dont trigger it but handle it here
                         frameSet = new IoFrameSet();
-                        handlePacketConvermation();
+                        handlePacketConfirmation();
                         return;
                     } else {
                         //it is a normal payload, trigger it
@@ -138,7 +155,7 @@ public class IoManager {
                     //how lovely, its an upgread request, so that means, that this is a real socket! well for fucks sake...
                     String finalRequestAsString = requestAsString;
                     webSocketHandler.accept(new WebSocketTransaction(finalRequestAsString.split("\r\n\r\n")[0], webSocketStatus));
-                    this.ioType = IoType.WEBSOCKET;
+                    this.ioType = ConnectionType.WEBSOCKET;
                     return;
                 } else {
                     if (side == InstanceSide.SERVER) {
@@ -197,12 +214,19 @@ public class IoManager {
                 }
                 break;
 
-            case UNKNOWN:
+            case NONE:
                 break;
         }
 
     }
 
+
+    /**
+     * Create and send a websocket packet
+     *
+     * @param str
+     * @throws IOException
+     */
     public void sendWebSocket(String str) throws IOException {
         FrameData currentFrame = new FrameData(Opcode.TEXT);
         currentFrame.setPayload(ByteBuffer.wrap(str.getBytes("UTF-8")));
@@ -211,6 +235,12 @@ public class IoManager {
         for (FrameData fd : out) this.channel.write((ByteBuffer) weboscketUtil.parseData(fd).flip());
     }
 
+
+    /**
+     * Send a packet, this parses it to individual Fire-Io-Protocol-Frames and requests to send them
+     *
+     * @param p
+     */
     public void send(Packet p) {
         IoFrameSet emitter = null;
         try {
@@ -224,6 +254,14 @@ public class IoManager {
         }
     }
 
+
+    /**
+     * Propose the writing of data.
+     * This checks if the channel is ready.
+     * If ready send it immediately, else add it to a que for later sending in the correct order
+     *
+     * @param content
+     */
     private void proposeWrite(ByteBuffer content) {
         if (queuedFrames.size() == 0 || !isChannelLocked) {
             forceWrite(content, true);
@@ -232,7 +270,15 @@ public class IoManager {
         }
     }
 
-    public void  forceWrite(ByteBuffer wrap, boolean requiresLock) {
+
+    /**
+     * Force write a packet over the channel.
+     * Blocks the que if necessary
+     *
+     * @param wrap
+     * @param requiresLock
+     */
+    public void forceWrite(ByteBuffer wrap, boolean requiresLock) {
         if (this.channel.isOpen()) {
             try {
                 if (requiresLock) isChannelLocked = true;
@@ -244,7 +290,12 @@ public class IoManager {
         wrap.clear();
     }
 
-    private void handlePacketConvermation() {
+
+    /**
+     * Handles a confirmation of the packet from the other side.
+     * This resets the lock and triggers the FIRST and longest waiting que object to send
+     */
+    private void handlePacketConfirmation() {
         isChannelLocked = false;
         if (queuedFrames.size() != 0) {
             forceWrite(queuedFrames.poll(), true);

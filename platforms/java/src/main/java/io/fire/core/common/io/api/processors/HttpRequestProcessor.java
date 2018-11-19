@@ -29,6 +29,12 @@ public class HttpRequestProcessor {
     private List<HttpEndpoint> endpointList = new ArrayList<>();
     private Map<String, HttpEndpoint> cachedEndpoints = new HashMap<>();
 
+
+    /**
+     * Setup the HTTP module with the HTTP-PRE-PROCESSORS and default api endpoints
+     *
+     * @param httpModule
+     */
     public HttpRequestProcessor(HttpModule httpModule) {
         this.module = httpModule;
         //registration endpoint
@@ -53,10 +59,26 @@ public class HttpRequestProcessor {
         registerHandler("/fireio/register/?password", interaction);
     }
 
+
+    /**
+     * Register a endpoint with a path and a callback to fire
+     *
+     * @param path
+     * @param interaction
+     */
     public void registerHandler(String path, HttpInteraction interaction) {
         endpointList.add(new HttpEndpoint(path, interaction));
     }
 
+
+    /**
+     * Handle a pending request.
+     * This parses the HTTP request, does a lookup for the handler, executes the handler
+     * set's up the response and then emits the response to the client
+     *
+     * @param pendingRequest
+     * @throws IOException
+     */
     public void handle(PendingRequest pendingRequest) throws IOException {
         HttpContent response = new HttpContent();
         HttpContent request = pendingRequest.getHeaders();
@@ -165,6 +187,18 @@ public class HttpRequestProcessor {
         }
     }
 
+
+    /**
+     * Accept PendingRequest
+     * This function finishes the request, makes it ready for reading by the client and then sends it over the socket.
+     *
+     * @param pendingRequest
+     * @param request
+     * @param url
+     * @param variables
+     * @param handler
+     * @param connectionInfo
+     */
     private void accept(PendingRequest pendingRequest, HttpContent request, String url, Map<String, String> variables, HttpEndpoint handler, ConnectionInfo connectionInfo) {
         //handle endpoint
         IncomingRequest incomingRequest = new IncomingRequest(request, url, connectionInfo, variables);

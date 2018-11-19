@@ -1,40 +1,30 @@
 package io.fire.core.common.eventmanager;
 
 import io.fire.core.common.eventmanager.enums.Event;
-import io.fire.core.common.eventmanager.interfaces.CompletePayload;
 import io.fire.core.common.eventmanager.interfaces.EventPayload;
-import io.fire.core.common.eventmanager.interfaces.GlobalListener;
+import lombok.NoArgsConstructor;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Consumer;
 
+@NoArgsConstructor
 public class EventHandler {
 
     //storage of events and what to do with them
     private Map<String, ConcurrentLinkedQueue<Consumer<EventPayload>>> events = new ConcurrentHashMap();
     private Map<Event, ConcurrentLinkedQueue<Consumer<EventPayload>>> systemEvents = new ConcurrentHashMap();
 
-    //debug listeners
-    private List<GlobalListener> globalListeners = new ArrayList<>();
 
-    public EventHandler() {
-    }
-
+    /**
+     * Trigger a event on a channel listener
+     *
+     * @param event
+     * @param payload
+     */
     public void fireEvent(String event, EventPayload payload) {
         //fire channel based event!
-        //check if it has any listeners for debug global
-        if (globalListeners.size() > 0) {
-            CompletePayload completePayload = new CompletePayload();
-            completePayload.setIsEvent(false);
-            completePayload.setChannel(event);
-            completePayload.setOriginalPayload(payload);
-            globalListeners.forEach(gl -> gl.call(completePayload));
-        }
-
         //check if it has any api listeners
         if (events.containsKey(event)) {
             //loop for all listeners
@@ -45,17 +35,15 @@ public class EventHandler {
         }
     }
 
+
+    /**
+     * Fire an API event and trigger the listeners
+     *
+     * @param event
+     * @param payload
+     */
     public void fireEvent(Event event, EventPayload payload) {
         //fire channel based event!
-        //check if it has any listeners for debug global
-        if (globalListeners.size() > 0) {
-            CompletePayload completePayload = new CompletePayload();
-            completePayload.setIsEvent(true);
-            completePayload.setEvent(event);
-            completePayload.setChannel(event.toString());
-            completePayload.setOriginalPayload(payload);
-            globalListeners.forEach(gl -> gl.call(completePayload));
-        }
 
         //check if it has any api listeners
         if (systemEvents.containsKey(event)) {
@@ -68,11 +56,14 @@ public class EventHandler {
         }
     }
 
-    public EventHandler on(GlobalListener globalListener) {
-        globalListeners.add(globalListener);
-        return this;
-    }
 
+    /**
+     * Register a channel listener
+     *
+     * @param event
+     * @param listener
+     * @return
+     */
     public EventHandler on(String event, Consumer<EventPayload> listener) {
         //register channel listener
         //check if there already exists a que for this listener
@@ -93,6 +84,14 @@ public class EventHandler {
         return this;
     }
 
+
+    /**
+     * Register a event listener
+     *
+     * @param e
+     * @param listener
+     * @return
+     */
     public EventHandler on(Event e, Consumer<EventPayload> listener) {
         //register channel listener
         //check if there already exists a que for this listener

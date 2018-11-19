@@ -12,6 +12,16 @@ public class IoFrame {
     private ByteBuffer buffer;
     private IoFrameType type;
 
+    /**
+     * Fire-IO protocol frame.
+     *
+     * Contains a control byte (first)
+     * followed by 1000 content bytes
+     *
+     * @param type
+     * @param content
+     * @throws IOException
+     */
     public IoFrame(IoFrameType type, byte[] content) throws IOException {
         if (content.length > 1000) throw new IOException("Content length may not be over 1000 bytes.");
         this.type = type;

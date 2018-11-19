@@ -17,12 +17,21 @@ public class RestModule {
     @Setter private String optionalPath = null;
     @Setter private String password = null;
 
-    //initialize and build url
+    /**
+     * Initialize the module
+     *
+     * @param client
+     */
     public RestModule(FireIoClient client) {
         this.client = client;
     }
 
-    //force manual host
+    /**
+     * Get the required endpoint
+     * (if nothing set, use default)
+     *
+     * @return regestration endpoint
+     */
     private String getEnd() {
         if (optionalPath == null) {
             return "fireio/register/" + password;
@@ -30,7 +39,11 @@ public class RestModule {
         return optionalPath + "/" + password;
     }
 
-    //get token eindpoint
+    /**
+     * Build to endpoint, then return it
+     *
+     * @return full url for request with ip, port and endpoint
+     */
     public String initiateHandshake() {
         try {
             //connect to path + endpoint with password parameter

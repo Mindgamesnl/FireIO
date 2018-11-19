@@ -18,6 +18,12 @@ public class IoFrameSet {
     @Getter private Packet payload;
     @Getter private IoFrameType firstType = IoFrameType.UNKNOWN;
 
+    /**
+     * Generate a Io-Frame-Set based on a Packet object
+     *
+     * @param input
+     * @throws IOException
+     */
     public IoFrameSet(Packet input) throws IOException {
         this.isReading = false;
         byte[] bytesOut = new byte[0];
@@ -56,6 +62,12 @@ public class IoFrameSet {
         }
     }
 
+
+    /**
+     * Generate a FrameSet with a specific status code
+     *
+     * @param type
+     */
     public IoFrameSet(IoFrameType type) {
         if (type != IoFrameType.CONFIRM_PACKET) throw new IllegalArgumentException("Can not create packet based on " + type);
         try {
@@ -65,10 +77,21 @@ public class IoFrameSet {
         }
     }
 
+
+    /**
+     * Generate a empty FrameSet, used for reading
+     */
     public IoFrameSet() {
         this.isReading = true;
     }
 
+
+    /**
+     * Utility function to check the validity of a byte array
+     *
+     * @param in
+     * @return
+     */
     private boolean isZero(byte[] in) {
         for (byte b : in) {
             if (b != 0) {
@@ -78,6 +101,17 @@ public class IoFrameSet {
         return true;
     }
 
+
+    /**
+     * Read a packet.
+     *
+     * Converts a Packet with a size of 1001 to its matching status code and content
+     *
+     * if it is marked as completed, de-serialize it as an object
+     *
+     * @param packet
+     * @throws IOException
+     */
     public void readInput(byte[] packet) throws IOException {
         if (!isReading) throw new IllegalStateException("Input readers may not receive data when it is writing a packet");
         IoFrameType receivedType = IoFrameType.fromBytes(packet);

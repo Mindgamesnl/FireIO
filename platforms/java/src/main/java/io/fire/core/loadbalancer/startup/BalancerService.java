@@ -7,6 +7,13 @@ import java.io.IOException;
 
 public class BalancerService {
 
+
+    /**
+     * Main method.
+     * Cuz java has royal autism and wants it to be static.
+     *
+     * @param args
+     */
     public static void main(String[] args) {
         try {
             ConfigFile config = new ConfigFile();

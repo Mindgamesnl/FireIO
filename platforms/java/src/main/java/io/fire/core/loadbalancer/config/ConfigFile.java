@@ -12,6 +12,12 @@ public class ConfigFile {
 
     private Map<String, String> values = new LinkedHashMap<>();
 
+
+    /**
+     * Create or load a config file
+     *
+     * @throws IOException
+     */
     public ConfigFile() throws IOException {
         //defaults
         values.put("# Config file for the Fire-IO load balancer. Changes will be loaded after a restart \n# Public password, used for clients that are connecting via the load balancer. \n# Private password, used for Fire-IO servers to login to the load balancer.", "");
@@ -32,23 +38,56 @@ public class ConfigFile {
         }
     }
 
+
+    /**
+     * Overwrite a config file with the current data
+     *
+     * @throws IOException
+     */
     public void save() throws IOException {
         FileOutputStream out = new FileOutputStream("server.properties");
         out.write(toString().getBytes());
         out.close();
     }
 
+
+    /**
+     * Set a string
+     *
+     * @param key
+     * @param value
+     */
     public void setString(String key, String value) {
         values.put(key, value);
     }
 
+
+    /**
+     * Get a int by key
+     *
+     * @param key
+     * @return
+     */
     public int getInt(String key) {
         return Integer.valueOf(getString(key));
     }
+
+    /**
+     * Get a string by key
+     *
+     * @param key
+     * @return
+     */
     public String getString(String key) {
         return values.get(key);
     }
 
+
+    /**
+     * Load/parse a config file from a key
+     *
+     * @param data
+     */
     public void load(String data) {
         for (String s : data.split("\n")) {
             if (!s.startsWith("#")) {
@@ -58,6 +97,12 @@ public class ConfigFile {
         }
     }
 
+
+    /**
+     * Serialize the config file to a string
+     *
+     * @return
+     */
     @Override
     public String toString() {
         final String[] out = {""};

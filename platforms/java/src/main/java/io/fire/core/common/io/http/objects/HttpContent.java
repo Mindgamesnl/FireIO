@@ -24,8 +24,13 @@ public class HttpContent {
     //rancher active proxy data
     @Getter private RancherActiveProxyContent rancherActiveProxyContent;
 
-    //two constructors, one to import a header set and one to create an empty one
-    //reader
+
+    /**
+     * Intepretes a string as a http packet.
+     *
+     * This parses the headers, types, request, IP-address and optional request body
+     * @param data
+     */
     public HttpContent(String data) {
         //now, the real part, parsing incoming packets
         String[] lines = data.split("\r\n");
@@ -39,9 +44,7 @@ public class HttpContent {
         String[] headers = Arrays.copyOfRange(lines, 1, lines.length);
         for (String header : headers) {
             //is it the last element that marks the end of the headers? well, maybe!
-            if (header.equals("")) {
-                break;
-            }
+            if (header.equals("")) break;
             String[] plot = header.split(":");
             if (plot.length == 2) mappedData.put(plot[0], plot[1].replaceFirst(" ",""));
         }
@@ -49,6 +52,7 @@ public class HttpContent {
         if (segments.length == 2) body = segments[1];
 
         //at the end, check for proxy
+        //implementation of rancher active proxy https://github.com/adi90x/rancher-active-proxy
         if (!getHeader("X-Real-IP").equals("")) {
             rancherActiveProxyContent = new RancherActiveProxyContent();
             rancherActiveProxyContent.setRealIp(getHeader("X-Real-IP"));
@@ -58,7 +62,13 @@ public class HttpContent {
         }
     }
 
-    //creator
+
+    /**
+     * Creation constructor to setup a new HTTP header set by known values
+     *
+     * @param mimeType
+     * @param statusCode
+     */
     public HttpContent(HttpContentType mimeType, HttpStatusCode statusCode) {
         opcode = "HTTP/1.1 " + statusCode.getCode() + " " + statusCode.getType();
         setMimeType(mimeType);
@@ -66,20 +76,38 @@ public class HttpContent {
         mappedData.put("Server", "Fire-IO by Mindgamesnl");
     }
 
+
+    /**
+     * Empty constructor to create a headerset of yet-unknown values
+     */
     public HttpContent() {}
 
-    //set opcodde
+
+    /**
+     * Set or change the OPCODE of a http interaction
+     *
+     * @param mimeType
+     * @param statusCode
+     */
     public void setOpcode(HttpContentType mimeType, HttpStatusCode statusCode) {
         opcode = "HTTP/1.1 " + statusCode.getCode() + " " + statusCode.getType();
         setMimeType(mimeType);
     }
 
-    //get headers
+
+    /**
+     * Return a mapped collection of all the set or received HTTP headers
+     * @return
+     */
     public Map<String, String> getHeaders() {
         return mappedData;
     }
 
-    //write as packet
+
+    /**
+     * export the class as a usable http header set or packet that can be interpreted by web browsers
+     * @return
+     */
     @Override
     public String toString() {
         StringBuilder out = new StringBuilder();
@@ -90,26 +118,54 @@ public class HttpContent {
         return out.toString();
     }
 
-    //set common headers
+
+    /**
+     * Set MIME type header
+     * @param contentType
+     */
     public void setMimeType(HttpContentType contentType) {
         setHeader("Content-Type", contentType.getMimeType());
     }
 
+
+    /**
+     * Get a header by value
+     *
+     * @param key
+     * @return
+     */
     public String getHeader(String key) {
         if (!mappedData.containsKey(key)) return "";
         return mappedData.get(key);
     }
 
+
+    /**
+     * Set the allowed origin of your web endpoint
+     *
+     * @param origin
+     */
     public void setOrigin(String origin) {
         setHeader("Origin", origin);
     }
 
-    //as buffer
+
+    /**
+     * Generate the packet and allocate a ByteBuffer with the contents
+     *
+     * @return
+     */
     public ByteBuffer getBuffer() {
         return ByteBuffer.wrap(toString().getBytes());
     }
 
-    //util
+
+    /**
+     * Set a header with a value
+     *
+     * @param key
+     * @param value
+     */
     public void setHeader(String key, String value) {
         if (!key.equals("Server")) mappedData.put(key, value);
     }

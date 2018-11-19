@@ -19,8 +19,10 @@ import java.util.UUID;
 
 public class FireIoConnection extends Client {
 
-    //this class is the main client object for the server side
-    //it contains the api functions and holds everything together
+    /**
+     * this class is the main client object for the server side
+     * it contains the api functions and holds everything together
+     */
 
     //connection handler
     @Getter private SocketClientHandler handler;
@@ -28,12 +30,23 @@ public class FireIoConnection extends Client {
     @Setter private ClientInfo info;
     private FireIoServer server;
 
-    //create client and set random id
+
+    /**
+     * Create client and generate the random ID
+     * @param server
+     */
     public FireIoConnection(FireIoServer server) {
         setId(UUID.randomUUID());
         this.server = server;
     }
 
+
+    /**
+     * Send a packet over a channel
+     *
+     * @param channel
+     * @param packet
+     */
     @Override
     public void send(String channel, Packet packet) {
         //function from the Client interface (api)
@@ -49,6 +62,13 @@ public class FireIoConnection extends Client {
         }
     }
 
+
+    /**
+     * get a meta tag by a key
+     *
+     * @param key
+     * @return
+     */
     @Override
     public ClientMeta getMeta(String key) {
         //function from the Client interface (api)
@@ -56,6 +76,13 @@ public class FireIoConnection extends Client {
         return info.getArgumentsMeta().get(key);
     }
 
+
+    /**
+     * get tag by key
+     *
+     * @param key
+     * @return
+     */
     @Override
     public String getTag(String key) {
         //function from the Client interface (api)
@@ -63,6 +90,12 @@ public class FireIoConnection extends Client {
         return info.getArguments().get(key);
     }
 
+
+    /**
+     * get client connection info
+     *
+     * @return
+     */
     @Override
     public ClientInfo getInfo() {
         //function from the Client interface (api)
@@ -70,6 +103,12 @@ public class FireIoConnection extends Client {
         return info;
     }
 
+
+    /**
+     * Send a message (String) over a channel
+     * @param channel
+     * @param message
+     */
     @Override
     public void send(String channel, String message) {
         //function from the Client interface (api)
@@ -85,11 +124,22 @@ public class FireIoConnection extends Client {
         }
     }
 
+
+    /**
+     * Get the connection type, to check if it is HTTP, WEBSOCKET or FIRE-IO
+     *
+     * @return
+     */
     @Override
     public ConnectionType getConnectionType() {
         return this.handler.getConnectionType();
     }
 
+
+    /**
+     * Finish and close the connection on both sides
+     * and then trigger the finish events
+     */
     @Override
     public void close() {
         //function from the Client interface (api)
@@ -109,6 +159,12 @@ public class FireIoConnection extends Client {
         server.getClientModule().removeClient(getId());
     }
 
+
+    /**
+     * Set the handler
+     * Used for callbacks and finishing incoming packet requests
+     * @param handler
+     */
     public void setHandler(SocketClientHandler handler) {
         //set the handler thats given to this connection
         //this happens every time a handshake finishes successfully

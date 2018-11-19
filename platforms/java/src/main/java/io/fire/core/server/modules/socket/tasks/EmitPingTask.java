@@ -20,6 +20,11 @@ public class EmitPingTask extends TimerTask {
         this.server = server;
     }
 
+
+    /**
+     * Emit the current UNIX time stamp to all the clients
+     * so that they can run health checks
+     */
     @Override
     public void run() {
         Instant now = Instant.now();

@@ -9,6 +9,12 @@ import io.fire.core.server.modules.client.superclasses.Client;
 
 public class SocketHandler {
 
+
+    /**
+     * Setup balancer event listeners
+     *
+     * @param balancer
+     */
     public SocketHandler(FireIoBalancer balancer) {
         balancer.getBalancingServer().on(Event.CONNECT, eventPayload -> {
             Client client = (Client) eventPayload;

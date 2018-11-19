@@ -17,6 +17,13 @@ public class FireIoBalancer {
     @Getter private ServerManager serverManager;
     @Getter private SocketHandler socketHandler;
 
+
+    /**
+     * Setup and initiate the FireIoBalancer based of a Config File
+     *
+     * @param configFile
+     * @throws IOException
+     */
     public FireIoBalancer(ConfigFile configFile) throws IOException {
         //load from config
         int port = Integer.valueOf(configFile.getString("port"));
@@ -32,11 +39,25 @@ public class FireIoBalancer {
         setNetworkPassword(configFile.getString("private_password"));
     }
 
+
+    /**
+     * Set public password, for clients to connect to
+     *
+     * @param pswd
+     * @return
+     */
     public FireIoBalancer setPublicPassword(String pswd) {
         this.restModule.setClientPassword(pswd);
         return this;
     }
 
+
+    /**
+     * Set private password, for servers to join the network
+     *
+     * @param pswd
+     * @return
+     */
     public FireIoBalancer setNetworkPassword(String pswd) {
         this.restModule.setServerPassword(pswd);
         return this;

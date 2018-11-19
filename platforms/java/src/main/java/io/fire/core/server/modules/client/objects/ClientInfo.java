@@ -13,8 +13,10 @@ import java.util.Map;
 @AllArgsConstructor
 public class ClientInfo {
 
-    //client info object
-    //acts as holder for client information
+    /**
+     * client info object
+     * acts as holder for client information
+     */
 
     //platform, example: UBUNTU
     private String platform;

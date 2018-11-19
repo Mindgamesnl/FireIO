@@ -14,6 +14,9 @@ public class PingCheckTask extends TimerTask {
 
     private AsyncConnectionHandler connectionHandler;
 
+    /**
+     * Repeating task, checks the time of the last ping received to check if the server is still keeping up or if the connection died
+     */
     @Override
     public void run() {
         if (connectionHandler.getIsSetup() && !connectionHandler.getIsDead()) {

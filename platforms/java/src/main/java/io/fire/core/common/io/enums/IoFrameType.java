@@ -4,6 +4,10 @@ import lombok.Getter;
 
 public enum IoFrameType {
 
+    /**
+     * Frame types of the Fire-IO protocol
+     */
+
     SINGLE((byte) 1),
     START((byte) 2),
     CONTINUE((byte) 3),

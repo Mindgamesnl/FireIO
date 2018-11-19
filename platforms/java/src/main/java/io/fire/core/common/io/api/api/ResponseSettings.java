@@ -16,10 +16,22 @@ public class ResponseSettings {
     @Setter @Getter private HttpStatusCode statusCode = HttpStatusCode.C_200;
     private Map<String, String> headers = new HashMap<>();
 
+    /**
+     * Set a header value by key
+     *
+     * @param headerKey
+     * @param headerValue
+     */
     public void setHeader(String headerKey, String headerValue) {
         headers.put(headerKey, headerValue);
     }
 
+
+    /**
+     * Get all headers that are present in the response
+     *
+     * @return
+     */
     public Map<String, String> getHeaders() {
         return headers;
     }

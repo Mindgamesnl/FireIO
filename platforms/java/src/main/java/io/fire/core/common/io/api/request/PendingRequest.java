@@ -17,6 +17,12 @@ public class PendingRequest {
     private HttpContent headers;
     private SocketChannel socketChannel;
 
+
+    /**
+     * Translate the response to a bytebuffer, write it and then finish and close the socket
+     *
+     * @param response
+     */
     public void finish(HttpContent response) {
         try {
             socketChannel.write(response.getBuffer());

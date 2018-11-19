@@ -12,6 +12,13 @@ public class HttpResources {
 
     private Map<String, String> cache = new HashMap<>();
 
+    /**
+     * Resource cache for default web pages
+     * like the 404, 500 and index HTML
+     *
+     * @param file
+     * @return
+     */
     public String get(String file) {
         if (cache.containsKey(file)) return cache.get(file);
 

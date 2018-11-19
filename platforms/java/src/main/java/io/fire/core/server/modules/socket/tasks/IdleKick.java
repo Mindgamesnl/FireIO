@@ -16,6 +16,10 @@ public class IdleKick extends TimerTask {
         this.server = server;
     }
 
+
+    /**
+     * Periodically check the health of all connected clients and kick dead/inactive ones to save on resources
+     */
     @Override
     public void run() {
         Instant now = Instant.now();

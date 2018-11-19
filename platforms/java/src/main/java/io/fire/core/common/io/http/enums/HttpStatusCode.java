@@ -4,6 +4,12 @@ import lombok.Getter;
 
 public enum HttpStatusCode {
 
+    /**
+     * HTTP-Status-Codes
+     *
+     * Notated with their numerical ID and there visual representation
+     */
+
     C_100(100, "Continue"),
     C_101(101, "Switching Protocols"),
     C_200(200, "OK"),

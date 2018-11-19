@@ -40,6 +40,17 @@ public class FireIoClient implements PoolHolder {
     private Map<String, ClientMeta> connectionMeta = new HashMap<>();
     private ThreadPool pool = new ThreadPool();
 
+
+    /**
+     * Main FireIoClient
+     *
+     * Takes the host and port of a server
+     * This is where the real party starts!
+     * or the nightmare, depending on what you think of networking
+     *
+     * @param host
+     * @param port
+     */
     public FireIoClient(String host, int port) {
         //constructor! create the client!
         //register variables
@@ -54,6 +65,14 @@ public class FireIoClient implements PoolHolder {
         eventHandler.on(Event.CONNECT, a-> connectAttampt = 0);
     }
 
+
+    /**
+     * Set the password to connect to the server
+     * only has effect before the connect() function is called
+     *
+     * @param password
+     * @return
+     */
     public FireIoClient setPassword(String password) {
         //set password
         //overwrites the default null value
@@ -61,6 +80,14 @@ public class FireIoClient implements PoolHolder {
         return this;
     }
 
+
+    /**
+     * Sets and enables the auto reconnect for the client
+     * This means that when the connection dies or gets disrupted the client will try to re-connect after a set amount of milliseconds
+     *
+     * @param timeout in milliseconds
+     * @return
+     */
     public FireIoClient setAutoReConnect(int timeout) {
         //enable auto reconnect!
         //register a event to detect when the connection closed
@@ -89,13 +116,32 @@ public class FireIoClient implements PoolHolder {
         return this;
     }
 
-    public FireIoClient setParameter(String s, String b) {
+
+    /**
+     * Set a tag, this can be used by the server API to identify clients
+     * works like a username
+     *
+     * @param s
+     * @param b
+     * @return
+     */
+    public FireIoClient setTag(String s, String b) {
         //set parameter!
         //can be used for custom authentication, can be accessed by the server before the handshake is finished
         connectionArguments.put(s, b);
         return this;
     }
 
+
+    /**
+     * Set a meta data tag
+     * can be used to supply extra information mid handshake
+     * (like client location or device information)
+     *
+     * @param s
+     * @param meta
+     * @return
+     */
     public FireIoClient setMeta(String s, ClientMeta meta) {
         //set meta!
         //can be used to send client metadata mid handshake, can be accessed by the server before the handshake is finished
@@ -103,11 +149,27 @@ public class FireIoClient implements PoolHolder {
         return this;
     }
 
+
+    /**
+     * Set the thread pool size used to execute events
+     * All events are ASYNC by default
+     *
+     * default is 1
+     *
+     * @param size
+     * @return
+     */
     public FireIoClient setThreadPoolSize(int size) {
         pool.setSize(size);
         return this;
     }
 
+    /**
+     * Connect function
+     * this takes all default or set information about the client and attempts to connect and start a connection with the server
+     *
+     * @return
+     */
     public FireIoClient connect() {
         //check for excisting connection
         if (socketModule != null) {
@@ -193,6 +255,14 @@ public class FireIoClient implements PoolHolder {
         return this;
     }
 
+
+    /**
+     * Send a packet over a channel to the server
+     *
+     * @param channel
+     * @param packet
+     * @return
+     */
     public FireIoClient send(String channel, Packet packet) {
         //send a custom packet via a channel, this will trigger the appropriate channel on the server side with our custom packet
         try {
@@ -205,6 +275,14 @@ public class FireIoClient implements PoolHolder {
         return this;
     }
 
+
+    /**
+     * Send a message (string) over a channel to the server
+     *
+     * @param channel
+     * @param message
+     * @return
+     */
     public FireIoClient send(String channel, String message) {
         //send a string via a channel, this will trigger the appropriate channel on the server side with our string
         try {
@@ -216,6 +294,12 @@ public class FireIoClient implements PoolHolder {
         return this;
     }
 
+
+    /**
+     * Close the connection in a normal way
+     *
+     * @return
+     */
     public FireIoClient close() {
         //prepare and then close the connection
         socketModule.getConnection().close();
@@ -223,6 +307,14 @@ public class FireIoClient implements PoolHolder {
         return this;
     }
 
+    /**
+     * Submit a request to the server, with a callback function for when the request is finished
+     *
+     * @param channel
+     * @param request
+     * @param callback
+     * @return
+     */
     public FireIoClient request(String channel, RequestBody request, ClientRequest callback) {
         //create a request!
         //kinda like completablefutures but cross server!
@@ -231,23 +323,52 @@ public class FireIoClient implements PoolHolder {
         return this;
     }
 
+
+    /**
+     * Another way to close the client,
+     * effectively the same as close();
+     *
+     * @return
+     */
     public FireIoClient stop() {
         //another function for close
         return close();
     }
 
+
+    /**
+     * Registers a event with a callback for when said event is fired
+     *
+     * @param e
+     * @param r
+     * @return
+     */
     public FireIoClient on(Event e, Consumer<EventPayload> r) {
         //register event listener
         eventHandler.on(e, r);
         return this;
     }
 
+
+    /**
+     * Registers a channel with a callback to fire when a packet is received on the channel
+     *
+     * @param e
+     * @param r
+     * @return
+     */
     public FireIoClient on(String e, Consumer<EventPayload> r) {
         //register channel listener
         eventHandler.on(e, r);
         return this;
     }
 
+
+    /**
+     * get thread pool, for internal usage
+     *
+     * @return
+     */
     @Override
     public ThreadPool getPool() {
         return pool;

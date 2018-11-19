@@ -2,7 +2,9 @@ package io.fire.core.common.eventmanager.enums;
 
 public enum Event {
 
-    //the three basic events
+    /**
+     * All default events for the Fire-IO API
+     */
 
     CONNECT,
     DISCONNECT,

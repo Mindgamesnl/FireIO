@@ -19,7 +19,14 @@ public class ClientModule {
         server = s;
     }
 
-    //get client by id
+
+    /**
+     * Get a client by ID
+     * returns NULL if the id is not valid
+     *
+     * @param connectionId
+     * @return
+     */
     public FireIoConnection getClient(UUID connectionId) {
         if (connectionId == null) return null;
         //check if it exists
@@ -28,12 +35,24 @@ public class ClientModule {
         return connectionMap.get(connectionId);
     }
 
-    //remove client and delete it's resources
+
+    /**
+     * Remove a client and delete its resources
+     * Prevents memory leaks and unused objects hanging around
+     *
+     * @param c
+     */
     public void removeClient(UUID c) {
         connectionMap.remove(c);
     }
 
-    //create new empty client for new connections
+
+    /**
+     * Create a new empty client
+     * Ready to setup for new incoming connections
+     *
+     * @return
+     */
     public FireIoConnection registerConnection() {
         //create connection object
         FireIoConnection client = new FireIoConnection(server);
@@ -43,6 +62,12 @@ public class ClientModule {
         return client;
     }
 
+
+    /**
+     * Get all connected clients
+     *
+     * @return
+     */
     public Collection<FireIoConnection> getAll() {
         //get and return all connections
         return connectionMap.values();

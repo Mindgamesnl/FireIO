@@ -1,7 +1,6 @@
 package io.fire.core.server.modules.socket.handlers;
 
 import io.fire.core.common.io.enums.ConnectionType;
-import io.fire.core.common.io.enums.IoType;
 import io.fire.core.common.ratelimiter.RateLimit;
 import io.fire.core.server.FireIoServer;
 
@@ -28,16 +27,41 @@ public class SelectorHandler implements Runnable {
     //channel selector
     private Selector selector;
 
+
+    /**
+     * Setup a selector handler, this so the socket can read and receive data at any time
+     *
+     * @param server
+     * @param selector
+     */
     public SelectorHandler(FireIoServer server, Selector selector) {
         this.server = server;
         this.selector = selector;
     }
 
+
+    /**
+     * set or change the rate limiter settings
+     * this overwrites the current or default settings
+     *
+     * @param timeout
+     * @param attempts
+     */
     public void setRateLimiter(int timeout, int attempts) {
         rateLimiter.stop();
         rateLimiter = new RateLimit(timeout, attempts);
     }
 
+
+    /**
+     * Main loop
+     *
+     * this keeps on checking the socket in a new thread
+     * for new socket channel messages, when found it gets tossed over to the client handler.
+     *
+     * If a new connection is detected, we check it for authentication and register it on our side,
+     * and finish up the handshake if all seems to be legit.
+     */
     @Override
     public void run() {
         //loop for ever checking and accepting new incoming streams
@@ -80,6 +104,13 @@ public class SelectorHandler implements Runnable {
         }
     }
 
+
+    /**
+     * A new client tried to open a connection, check it for validation and register it
+     *
+     * @param key
+     * @throws IOException
+     */
     private void accept(SelectionKey key) throws IOException {
         //accept a new connection
         //get the channel
@@ -111,6 +142,14 @@ public class SelectorHandler implements Runnable {
         }
     }
 
+
+    /**
+     * A client send data to the server.
+     *
+     * Parse it with the full size (follows the Fire-IO protocol spec but also accepts some other protocols)
+     * @param key
+     * @throws IOException
+     */
     private void read(SelectionKey key) throws IOException {
         //get socket channel that has send the data
         SocketChannel channel = (SocketChannel) key.channel();
@@ -159,7 +198,7 @@ public class SelectorHandler implements Runnable {
         fufilled = buffer.flip().limit();
 
         //check if we may need to check for more data
-        if (finalNumRead >= 1001 && (references.get(remoteAddr).getIoManager().getIoType() == IoType.WEBSOCKET || references.get(remoteAddr).getIoManager().getIoType() == IoType.HTTP || references.get(remoteAddr).getIoManager().getIoType() == IoType.UNKNOWN)) {
+        if (finalNumRead >= 1001 && (references.get(remoteAddr).getIoManager().getIoType() == ConnectionType.WEBSOCKET || references.get(remoteAddr).getIoManager().getIoType() == ConnectionType.HTTP || references.get(remoteAddr).getIoManager().getIoType() == ConnectionType.NONE)) {
             fufilled = 1001;
             ByteBuffer nextBytes = ByteBuffer.allocate(1001);
             while (channel.read(nextBytes) != 0) {
