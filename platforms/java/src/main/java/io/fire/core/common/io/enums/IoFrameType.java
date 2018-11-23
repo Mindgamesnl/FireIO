@@ -13,6 +13,7 @@ public enum IoFrameType {
     CONTINUE((byte) 3),
     FINISH((byte) 4),
     CONFIRM_PACKET((byte) 5),
+    PING_PACKET((byte) 6),
     UNKNOWN((byte) -1);
 
     @Getter private byte contentByte;
@@ -33,6 +34,8 @@ public enum IoFrameType {
                 return FINISH;
             case 5:
                 return CONFIRM_PACKET;
+            case 6:
+                return PING_PACKET;
             default:
                 return UNKNOWN;
         }

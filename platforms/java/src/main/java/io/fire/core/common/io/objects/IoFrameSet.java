@@ -1,11 +1,14 @@
 package io.fire.core.common.io.objects;
 
 import io.fire.core.common.interfaces.Packet;
+import io.fire.core.common.io.IoManager;
+import io.fire.core.common.io.enums.InstanceSide;
 import io.fire.core.common.io.enums.IoFrameType;
 import lombok.Getter;
 
 import javax.activation.UnsupportedDataTypeException;
 import java.io.*;
+import java.time.Instant;
 import java.util.LinkedList;
 
 public class IoFrameSet {
@@ -17,6 +20,8 @@ public class IoFrameSet {
     @Getter private boolean isFinished = false;
     @Getter private Packet payload;
     @Getter private IoFrameType firstType = IoFrameType.UNKNOWN;
+    private boolean startedReading = false;
+    private IoManager ioManager;
 
     /**
      * Generate a Io-Frame-Set based on a Packet object
@@ -69,9 +74,9 @@ public class IoFrameSet {
      * @param type
      */
     public IoFrameSet(IoFrameType type) {
-        if (type != IoFrameType.CONFIRM_PACKET) throw new IllegalArgumentException("Can not create packet based on " + type);
+        if (!(type == IoFrameType.CONFIRM_PACKET || type == IoFrameType.PING_PACKET)) throw new IllegalArgumentException("Can not create packet based on " + type);
         try {
-            frames.add(new IoFrame(IoFrameType.CONFIRM_PACKET, new byte[1000]));
+            frames.add(new IoFrame(type, new byte[1000]));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -87,7 +92,19 @@ public class IoFrameSet {
 
 
     /**
+     * Generate frame set with client handler, so we can handle pings
+     *
+     * @param ioManager
+     */
+    public IoFrameSet(IoManager ioManager) {
+        this.isReading = true;
+        this.ioManager = ioManager;
+    }
+
+
+    /**
      * Utility function to check the validity of a byte array
+     * also mark for reading
      *
      * @param in
      * @return
@@ -116,13 +133,24 @@ public class IoFrameSet {
         if (!isReading) throw new IllegalStateException("Input readers may not receive data when it is writing a packet");
         IoFrameType receivedType = IoFrameType.fromBytes(packet);
 
-        if (receivedType == IoFrameType.UNKNOWN && !isZero(packet)) throw new UnsupportedDataTypeException("Could not accept packet type of unknown value " + packet[0]);
+        if (!startedReading) {
+            if (receivedType == IoFrameType.UNKNOWN && !isZero(packet)) throw new UnsupportedDataTypeException("Could not accept packet type of unknown value " + packet[0]);
 
-        if (receivedType == IoFrameType.CONFIRM_PACKET) {
-            isFinished = true;
-            firstType = IoFrameType.CONFIRM_PACKET;
-            return;
+            if (receivedType == IoFrameType.CONFIRM_PACKET) {
+                isFinished = true;
+                firstType = IoFrameType.CONFIRM_PACKET;
+                return;
+            }
+
+            if (receivedType == IoFrameType.PING_PACKET) {
+                if (ioManager.getSide() == InstanceSide.CLIENT) {
+                    ioManager.getClient().getSocketModule().getConnection().setLastPing(Instant.now());
+                }
+                return;
+            }
         }
+
+        startedReading = true;
 
         if (receivedType == IoFrameType.SINGLE) {
             content = new byte[1000];
@@ -139,12 +167,17 @@ public class IoFrameSet {
             isFinished = receivedType == IoFrameType.FINISH;
         }
 
+        finish();
+    }
+
+    private void finish() throws IOException {
         if (isFinished) {
             ByteArrayInputStream inputStream = new ByteArrayInputStream(content);
             try (ObjectInput in = new ObjectInputStream(inputStream)) {
                 payload = (Packet) in.readObject();
             } catch (IOException | ClassNotFoundException e) {
-                throw new IOException("The buffered input does not corrospond with a java class, either it is corrupted or you class is not included.");
+                e.printStackTrace();
+                throw new IOException("The buffered input does not corrospond with a java class, either it is corrupted or you class is not included. e:"+e.getClass().getSimpleName());
             }
         }
     }

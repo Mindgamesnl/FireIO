@@ -15,6 +15,7 @@ import io.fire.core.common.packets.*;
 import io.fire.core.common.interfaces.SocketEvents;
 import io.fire.core.server.modules.socket.tasks.IdleKick;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -37,7 +38,7 @@ public class AsyncConnectionHandler implements SocketEvents, EventPayload, Conne
 
     //api, connection handler/receiver, channel and reader thread
     @Getter private FireIoClient client;
-    @Getter private Instant lastPing = Instant.now();
+    @Setter @Getter private Instant lastPing = Instant.now();
     private SocketChannel socketChannel;
     private Thread reader;
     private IoManager ioManager;
@@ -173,12 +174,6 @@ public class AsyncConnectionHandler implements SocketEvents, EventPayload, Conne
             //flag intended closure of connection, handle it as cleanly closed and dont try to re connect when the ioreader spits a timed out error
             exptectedClosing = true;
             return;
-        }
-
-        //check if the ping is received, if is, set local to it
-        if (packet instanceof PingPacket) {
-            PingPacket pingPacket = (PingPacket) packet;
-            this.lastPing = pingPacket.getSendTime();
         }
 
         //finish a pending request from the request api

@@ -51,9 +51,9 @@ public class IoManager {
     private boolean isChannelLocked = false;
 
     //runner
-    private InstanceSide side;
+    @Getter private InstanceSide side;
     @Getter private FireIoServer server;
-    private FireIoClient client;
+    @Getter private FireIoClient client;
 
 
     /**
@@ -96,44 +96,49 @@ public class IoManager {
 
         switch (this.ioType) {
             case FIREIO:
-                if (side == InstanceSide.SERVER) {
-                    if (server.getSocketModule().getBlockedProtocolList().contains(BlockedProtocol.FIREIO)) {
-                        try {
-                            server.getSocketModule().getAsyncNetworkService().getSelectorHandler().getReferences().remove(channel.socket().getRemoteSocketAddress());
-                            channel.close();
-                        } catch (IOException e) {
-                            e.printStackTrace();
+                poolHolder.getPool().run(() -> {
+                    if (side == InstanceSide.SERVER) {
+                        if (server.getSocketModule().getBlockedProtocolList().contains(BlockedProtocol.FIREIO)) {
+                            try {
+                                server.getSocketModule().getAsyncNetworkService().getSelectorHandler().getReferences().remove(channel.socket().getRemoteSocketAddress());
+                                channel.close();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                            return;
                         }
-                        return;
                     }
-                }
 
-                if (frameSet == null) frameSet = new IoFrameSet();
-                try {
-                    frameSet.readInput(input);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                    if (frameSet == null) frameSet = new IoFrameSet(this);
+                    try {
+                        frameSet.readInput(input);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
 
-                if (frameSet.isFinished()) {
-                    if (frameSet.getFirstType() == IoFrameType.CONFIRM_PACKET) {
-                        //it is a confermation, dont trigger it but handle it here
-                        frameSet = new IoFrameSet();
-                        handlePacketConfirmation();
-                        return;
-                    } else {
-                        //it is a normal payload, trigger it
-                        try {
-                            packetHandler.accept(frameSet.getPayload());
-                        } catch (Exception e) {
-                            System.err.println("[Fire-IO] Packet event handler caused an exception.");
-                            e.printStackTrace();
+                    if (frameSet.isFinished()) {
+                        if (frameSet.getFirstType() == IoFrameType.CONFIRM_PACKET) {
+                            //it is a confermation, dont trigger it but handle it here
+                            frameSet = new IoFrameSet(this);
+                            handlePacketConfirmation();
+                            return;
+                        } else {
+                            forceWrite(new IoFrameSet(IoFrameType.CONFIRM_PACKET).getFrames().get(0).getBuffer(), false);
+                            //it is a normal payload, trigger it
+                            try {
+                                packetHandler.accept(frameSet.getPayload());
+                            } catch (Exception e) {
+                                System.err.println("[Fire-IO] Packet event handler caused an exception.");
+                                e.printStackTrace();
+                            }
+                            //let the other side know that it may send a new packet
+                            frameSet = new IoFrameSet(this);
+                            return;
                         }
-                        //let the other side know that it may send a new packet
-                        forceWrite(new IoFrameSet(IoFrameType.CONFIRM_PACKET).getFrames().get(0).getBuffer(), false);
-                        frameSet = new IoFrameSet();
                     }
-                }
+
+                    forceWrite(new IoFrameSet(IoFrameType.CONFIRM_PACKET).getFrames().get(0).getBuffer(), false);
+                });
                 break;
 
             case HTTP: {
@@ -263,7 +268,7 @@ public class IoManager {
      * @param content
      */
     private void proposeWrite(ByteBuffer content) {
-        if (queuedFrames.size() == 0 || !isChannelLocked) {
+        if (!isChannelLocked && queuedFrames.size() == 0) {
             forceWrite(content, true);
         } else {
             queuedFrames.add(content);
