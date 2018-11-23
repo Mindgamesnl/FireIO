@@ -40,12 +40,12 @@ A single packet goes to a few steps on both sides to complete interaction.
  # Opcode table
  Opcodes
  
- | Opcode           | id | hex        |
- |------------------|----|------------|
- | SINGLE           | 1  | 0x00000001 |
- | START            | 2  | 0x00000002 |
- | CONTINUE         | 3  | 0x00000003 |
- | FINISH           | 4  | 0x00000004 |
- | CONFIRM_PACKET   | 5  | 0x00000005 |
- | PING_PACKET      | 6  | 0x00000006 |
- | UNKNOWN          | 0  | 0x00000000 |
+ | Opcode           | id | hex          |
+ |------------------|----|--------------|
+ | `SINGLE`         | 1  | `0x00000001` |
+ | `START`          | 2  | `0x00000002` |
+ | `CONTINUE`       | 3  | `0x00000003` |
+ | `FINISH`         | 4  | `0x00000004` |
+ | `CONFIRM_PACKET` | 5  | `0x00000005` |
+ | `PING_PACKET`    | 6  | `0x00000006` |
+ | `UNKNOWN`        | 0  | `0x00000000` |
