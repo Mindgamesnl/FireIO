@@ -28,6 +28,7 @@ And all that for the sweet price of nothing.
  * **Load Balancer** improve the reliability and response times of your applications by setting up load balancers to evenly spread the request and connections among your servers.
  
 ### Useful Links
+ - [Event Documentation](https://github.com/Mindgamesnl/FireIO/blob/master/documentation/events.md)
  - [Protocol Specification](https://github.com/Mindgamesnl/FireIO/blob/master/documentation/protocolspec.md)
  - [Technical notes](https://github.com/Mindgamesnl/FireIO/blob/master/documentation/technotes.md)
  - [Load Balancer Documentation](https://github.com/Mindgamesnl/FireIO/blob/master/documentation/loadbalancer.md)
