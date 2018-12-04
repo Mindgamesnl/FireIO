@@ -97,14 +97,11 @@ public class IoManager {
         switch (this.ioType) {
             case FIREIO:
                 poolHolder.getPool().run(() -> {
+                    try {
                     if (side == InstanceSide.SERVER) {
                         if (server.getSocketModule().getBlockedProtocolList().contains(BlockedProtocol.FIREIO)) {
-                            try {
                                 server.getSocketModule().getAsyncNetworkService().getSelectorHandler().getReferences().remove(channel.socket().getRemoteSocketAddress());
                                 channel.close();
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
                             return;
                         }
                     }
@@ -125,12 +122,7 @@ public class IoManager {
                         } else {
                             forceWrite(new IoFrameSet(IoFrameType.CONFIRM_PACKET).getFrames().get(0).getBuffer(), false);
                             //it is a normal payload, trigger it
-                            try {
-                                packetHandler.accept(frameSet.getPayload());
-                            } catch (Exception e) {
-                                System.err.println("[Fire-IO] Packet event handler caused an exception.");
-                                e.printStackTrace();
-                            }
+                            packetHandler.accept(frameSet.getPayload());
                             //let the other side know that it may send a new packet
                             frameSet = new IoFrameSet(this);
                             return;
@@ -138,6 +130,11 @@ public class IoManager {
                     }
 
                     forceWrite(new IoFrameSet(IoFrameType.CONFIRM_PACKET).getFrames().get(0).getBuffer(), false);
+                    } catch (Exception e) {
+                        System.out.println("[Fire-IO] Error, failed to load packet.");
+                        frameSet = new IoFrameSet(this);
+                        forceWrite(new IoFrameSet(IoFrameType.CONFIRM_PACKET).getFrames().get(0).getBuffer(), false);
+                    }
                 });
                 break;
 

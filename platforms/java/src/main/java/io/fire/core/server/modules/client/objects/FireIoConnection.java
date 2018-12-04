@@ -191,7 +191,7 @@ public class FireIoConnection extends Client {
                 //set this client as the sender
                 packetPacket.setSender(this);
                 //trigger the correct event channel with the payload
-                server.getEventHandler().triggerPacket(this, packetPacket, packetPacket.getChannel() );
+                server.getEventHandler().triggerPacket(this, packetPacket.getPacket(), packetPacket.getChannel() );
             }
         });
     }

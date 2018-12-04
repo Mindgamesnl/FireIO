@@ -125,7 +125,7 @@ public class FireIoServer implements PoolHolder {
      * @return
      */
     public <E extends Packet> EventExecutor<E> onPacket(Class<E> packet, String channel, EventPriority priority) {
-        return eventHandler.registerEvent(packet, channel , priority);
+        return eventHandler.registerEvent(packet, channel, priority);
     }
 
 

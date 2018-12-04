@@ -197,7 +197,7 @@ public class AsyncConnectionHandler implements SocketEvents, ConnectedFireioClie
             //cast the correct internal packet
             ChannelPacketPacket packetPacket = (ChannelPacketPacket) packet;
             //trigger event handler with channel and custom packet
-            client.getEventHandler().triggerPacket(null, packetPacket, packetPacket.getChannel());
+            client.getEventHandler().triggerPacket(null, packetPacket.getPacket(), packetPacket.getChannel());
             return;
         }
 

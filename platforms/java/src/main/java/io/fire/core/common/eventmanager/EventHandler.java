@@ -107,7 +107,7 @@ public class EventHandler {
         //get all executors, and pass them the payload
         executorMap.get(packet.getClass().getName())
                 .stream()
-                .filter(eventExecutor -> eventExecutor.getChannel() == channel)
+                .filter(eventExecutor -> eventExecutor.getChannel().equals(channel))
                 .sorted(Comparator.comparing(eventExecutor -> eventExecutor.getEventPriority().getLevel()))
                 .collect(Collectors.toList())
                 .forEach(eventExecutor -> eventExecutor.run(client, packet));
