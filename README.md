@@ -50,27 +50,22 @@ FireIoServer server = new FireIoServer(80)
     .setPassword("testpassword1")
     .setRateLimiter(2, 10)
 
-.on(Event.CONNECT, eventPayload -> {
-    Client client = (Client) eventPayload;
+.on(Event.CONNECT, client -> {
     client.send("MOTD", "test");
 })
 
-.on(Event.CLOSED_UNEXPECTEDLY, eventPayload -> {
-    Client client = (Client) eventPayload;
-    System.out.println(client.getId() + " closed unexpectedly!");
+.on(Event.TIMED_OUT, client -> {
+    System.out.println(client.getId() + " closed unexpectedly! " + client.getConnectionType());
 })
 
-.on(Event.DISCONNECT, eventPayload -> {
-    Client client = (Client) eventPayload;
+.on(Event.DISCONNECT, client -> {
     System.out.println(client.getId() + " just disconnected");
 })
 
-.on("cookie_jar", eventPayload -> {
-    ChannelPacketPacket receivedPacket = (ChannelPacketPacket) eventPayload;
-    CookieJar cookieJar = (CookieJar) receivedPacket.getPacket();
-    System.out.println("Received a cookie jar from : " + receivedPacket.getSender().getId() + ". The jar contains " + cookieJar.getAmount() + " cookies. The cookies type is: " + cookieJar.getType());
+.onPacket(CookieJar.class, "cookie_jar").onExecute((sender, cookieJar) -> {
+    System.out.println("Received a cookie jar from : " + sender.getId() + ". The jar contains " + cookieJar.getAmount() + " cookies. The cookies type is: " + cookieJar.getType());
     //thank the client for the cookies
-    receivedPacket.getSender().send("thanks", "thanks");
+    sender.send("thanks", "thanks");
 });
 
 //simple request based endpoint
@@ -123,22 +118,21 @@ FireIoClient client = new FireIoClient("localhost", 80)
         .setParameter("appversion", "1.0-RELEASE")
         .connect();
 
-client.on(Event.CONNECT, a -> {
+.on(Event.CONNECT, ignored -> {
     System.out.println("Connected with the server!");
 })
 
-.on(Event.DISCONNECT, a -> {
+.on(Event.DISCONNECT, ignored -> {
     System.out.println("Connection with the server has closed!");
 })
 
-.on("MOTD", payload -> {
-    String text = ((ReceivedText) payload).getString();
-    System.out.println("The message of the day is: " + text);
+.on("channel", (client, message) -> {
+    System.out.println("The message of the day is: " + message);
     //send a cookie jar
     client.send("cookie_jar", new CookieJar(5, "chocolate"));
 })
 
-.on("thanks", eventPayload -> {
+.on("thanks", (client, message) -> {
     System.out.println("The server thanked you for your cookies");
 });
 ```
@@ -148,38 +142,5 @@ client.on(Event.CONNECT, a -> {
 public class CookieJar extends Packet {
     private int amount = 0;
     private String type;
-}
-```
-
-
-# Dependencies
-##### Maven
-```xml
-<repositories>
-    <repository>
-        <id>jitpack.io</id>
-        <url>https://jitpack.io</url>
-    </repository>
-</repositories>
-
-<dependency>
-    <groupId>com.github.Mindgamesnl</groupId>
-    <artifactId>FireIO</artifactId>
-    <version>LATEST</version>
-</dependency>
-```
-
-##### Gradle
-```
-allprojects {
-    repositories {
-        maven { url 'https://jitpack.io' }
-    }
-}
-```
-
-```
-dependencies {
-    compile 'com.github.Mindgamesnl:FireIO:BUILD NUMBER'
 }
 ```

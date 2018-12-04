@@ -25,7 +25,7 @@ public class TestServer {
                     .setThreadPoolSize(22)
                     .setRateLimiter(100000, 1)
 
-                    .on(Event.CONNECT, eventPayload -> {
+                    .on(Event.CONNECT, client -> {
                         Client client = (Client) eventPayload;
                         for(int i = 0; i < 50; ++i) {
                             System.out.println("Sending packet " + i);
@@ -34,22 +34,20 @@ public class TestServer {
                         System.out.println("A user connected via " + client.getConnectionType());
                     })
 
-                    .on(Event.TIMED_OUT, eventPayload -> {
-                        Client client = (Client) eventPayload;
-                        System.out.println(client.getId() + " closed unexpectedly! " + client.getConnectionType());
-                    })
+.on(Event.TIMED_OUT, client -> {
+    System.out.println(client.getId() + " closed unexpectedly! " + client.getConnectionType());
+})
 
                     .on(Event.DISCONNECT, eventPayload -> {
                         Client client = (Client) eventPayload;
                         System.out.println(client.getId() + " just disconnected");
                     });
 
-                server.on("channel", (client, message) -> {
+                server.on("channel", (message) -> {
                     System.out.println("Channel got: " + message);
                 });
 
-                server.onPacket(PingPacket.class, "my-channel", EventPriority.NORMAL)
-                        .onExecute((sender, packer) -> {
+                server.onPacket(CookieJar.class, "cookie_jar").onExecute((sender, packer) -> {
                     System.out.println(sender.getId() + " has send a ping packet on " + packer.getSendTime());
                 });
         } catch (IOException e) {
