@@ -2,10 +2,12 @@ package io.fire.core.server;
 
 import io.fire.core.common.eventmanager.enums.Event;
 import io.fire.core.common.eventmanager.EventHandler;
-import io.fire.core.common.eventmanager.interfaces.EventPayload;
+import io.fire.core.common.eventmanager.enums.EventPriority;
+import io.fire.core.common.eventmanager.executors.EventExecutor;
 import io.fire.core.common.interfaces.Packet;
 import io.fire.core.common.interfaces.PoolHolder;
 import io.fire.core.common.io.api.request.HttpInteraction;
+import io.fire.core.common.io.enums.InstanceSide;
 import io.fire.core.common.objects.ThreadPool;
 import io.fire.core.server.modules.balancingmodule.BalancingModule;
 import io.fire.core.server.modules.balancingmodule.objects.BalancerConfiguration;
@@ -24,6 +26,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -51,7 +54,7 @@ public class FireIoServer implements PoolHolder {
      */
     public FireIoServer(int port) throws IOException {
         this.port = port;
-        eventHandler = new EventHandler();
+        eventHandler = new EventHandler(InstanceSide.SERVER);
         clientModule = new ClientModule(this);
         httpModule = new HttpModule(this);
         socketModule = new SocketModule(this, port);
@@ -65,13 +68,78 @@ public class FireIoServer implements PoolHolder {
      * Register an event handler for a specific Event
      * Mostly used for Fire-IO native API
      *
+     * Deprecated since the Introduction of the new event api.
+     *
      * @param e
      * @param r
      * @return
      */
-    public FireIoServer on(Event e, Consumer<EventPayload> r) {
-        eventHandler.on(e, r);
+    @Deprecated
+    public FireIoServer on(Event e, Consumer<Client> r) {
+        eventHandler.registerEvent(e).onExecute((client, string) -> r.accept(client));
         return this;
+    }
+
+
+    /**
+     * Register an event handler for a specific Event
+     * Mostly used for Fire-IO native API (with string payload)
+     *
+     * Deprecated since the Introduction of the new event api.
+     *
+     * @param e
+     * @param r
+     * @return
+     */
+    @Deprecated
+    public FireIoServer on(Event e, BiConsumer<Client, String> r) {
+        eventHandler.registerEvent(e).onExecute(r);
+        return this;
+    }
+
+
+    /**
+     * Register an string handler for a specific Channel
+     * Mostly used for Fire-IO native API (with string payload)
+     *
+     * Deprecated since the Introduction of the new event api.
+     *
+     * @param r
+     * @return
+     */
+    @Deprecated
+    public FireIoServer on(String string, BiConsumer<Client, String> r) {
+        eventHandler.registerTextChannel(string, EventPriority.NORMAL).onExecute((client, message) -> r.accept(client, message));
+        return this;
+    }
+
+
+    /**
+     * New event API
+     * This registers a handler for a packet class on a channel with a priority
+     *
+     * @param packet
+     * @param channel
+     * @param priority
+     * @param <E>
+     * @return
+     */
+    public <E extends Packet> EventExecutor<E> onPacket(Class<E> packet, String channel, EventPriority priority) {
+        return eventHandler.registerEvent(packet, channel , priority);
+    }
+
+
+    /**
+     * New event API
+     * This registers a handler for a packet class on a channel with a normal priority
+     *
+     * @param packet
+     * @param channel
+     * @param <E>
+     * @return
+     */
+    public <E extends Packet> EventExecutor<E> onPacket(Class<E> packet, String channel) {
+        return eventHandler.registerEvent(packet, channel , EventPriority.NORMAL);
     }
 
 
@@ -216,19 +284,6 @@ public class FireIoServer implements PoolHolder {
                 c.send(channel, message);
             }
         });
-        return this;
-    }
-
-
-    /**
-     * Register an event handler for a channel
-     *
-     * @param e
-     * @param r
-     * @return
-     */
-    public FireIoServer on(String e, Consumer<EventPayload> r) {
-        eventHandler.on(e, r);
         return this;
     }
 

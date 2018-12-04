@@ -1,7 +1,6 @@
 package io.fire.core.server.modules.socket.handlers;
 
 import io.fire.core.common.eventmanager.enums.Event;
-import io.fire.core.common.eventmanager.interfaces.EventPayload;
 import io.fire.core.common.interfaces.Packet;
 import io.fire.core.common.io.enums.ConnectionType;
 import io.fire.core.common.io.IoManager;
@@ -25,17 +24,17 @@ import java.time.Instant;
 import java.util.UUID;
 import java.util.function.Consumer;
 
-public class SocketClientHandler implements SocketEvents {
+public class SocketClientHandler<T> implements SocketEvents {
 
     //java socket channel and socket
     private Socket socket;
 
     //packet listener/handler
-    private Consumer<EventPayload> consumer;
     private IoManager ioManager;
 
     //main instance
     private FireIoServer server;
+    private Consumer<T> packetConsumer;
 
     //meta and connection info
     public boolean authenticated = false;
@@ -74,13 +73,12 @@ public class SocketClientHandler implements SocketEvents {
 
 
     /**
-     * Register the on-message handler, used for internal cross overs
+     * Set a data handler for the given type
      *
-     * @param listener
+     * @param consumer
      */
-    public void onMessage(Consumer<EventPayload> listener) {
-        //set message handler
-        this.consumer = listener;
+    public void setHandler(Consumer<T> consumer) {
+        this.packetConsumer = consumer;
     }
 
 
@@ -154,7 +152,7 @@ public class SocketClientHandler implements SocketEvents {
                 clientInfo.setPlatform(((AuthPacket) packet).getPlatform());
                 server.getClientModule().getClient(connectionId).setInfo(clientInfo);
                 server.getClientModule().getClient(connectionId).setHandler(this);
-                server.getEventHandler().fireEvent(Event.CONNECT, server.getClientModule().getClient(connectionId));
+                server.getEventHandler().triggerEvent(Event.CONNECT, server.getClientModule().getClient(connectionId), "Successfully connected and authenticated.");
                 try {
                     emit(new FinishHandshake());
                 } catch (IOException e) {
@@ -180,7 +178,7 @@ public class SocketClientHandler implements SocketEvents {
             return;
         }
 
-        if (consumer != null) consumer.accept(packet);
+        if (packetConsumer != null) packetConsumer.accept((T) packet);
     }
 
 
@@ -242,7 +240,7 @@ public class SocketClientHandler implements SocketEvents {
             authenticated = true;
             server.getClientModule().getClient(connectionId).setInfo(new ClientInfo());
             server.getClientModule().getClient(connectionId).setHandler(this);
-            server.getEventHandler().fireEvent(Event.CONNECT, server.getClientModule().getClient(connectionId));
+            server.getEventHandler().triggerEvent(Event.CONNECT, server.getClientModule().getClient(connectionId), "The websocket client is OK and authenticated");
             return;
         }
 
@@ -253,7 +251,7 @@ public class SocketClientHandler implements SocketEvents {
             data = data.replaceFirst("channelmessage:", "");
             String channel = data.split(":")[0];
             data = data.replaceFirst(channel + ":", "");
-            consumer.accept(new ChannelMessagePacket(channel, data));
+            packetConsumer.accept((T) new ChannelMessagePacket(channel, data));
         }
     }
 
@@ -269,11 +267,11 @@ public class SocketClientHandler implements SocketEvents {
         if (expectedClosing) {
             authenticated = false;
             open = false;
-            server.getEventHandler().fireEvent(Event.DISCONNECT, server.getClientModule().getClient(connectionId));
+            server.getEventHandler().triggerEvent(Event.DISCONNECT, server.getClientModule().getClient(connectionId), "Connection got closed by request");
             connectionId = null;
         } else {
             authenticated = false;
-            if (server.getClientModule().getClient(connectionId) != null) server.getEventHandler().fireEvent(Event.CLOSED_UNEXPECTEDLY, server.getClientModule().getClient(connectionId));
+            if (server.getClientModule().getClient(connectionId) != null) server.getEventHandler().triggerEvent(Event.TIMED_OUT, server.getClientModule().getClient(connectionId), "Connection got terminated by an unknown reason");
             connectionId = null;
         }
     }

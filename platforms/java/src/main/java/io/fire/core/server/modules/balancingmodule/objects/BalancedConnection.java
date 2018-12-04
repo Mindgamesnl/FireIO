@@ -2,13 +2,12 @@ package io.fire.core.server.modules.balancingmodule.objects;
 
 import io.fire.core.client.FireIoClient;
 import io.fire.core.common.eventmanager.enums.Event;
-import io.fire.core.common.eventmanager.interfaces.EventPayload;
 import io.fire.core.server.FireIoServer;
 import lombok.Getter;
 
 import java.util.UUID;
 
-public class BalancedConnection implements EventPayload {
+public class BalancedConnection {
 
     private FireIoClient fireIoClient;
     private boolean isReady = false;
@@ -39,17 +38,15 @@ public class BalancedConnection implements EventPayload {
         });
 
         fireIoClient.on(Event.CONNECT, eventPayload -> {
-            main.getEventHandler().fireEvent(Event.LOAD_BALANCER_LINKED, this);
             id = fireIoClient.getSocketModule().getConnection().getId();
             isReady = true;
         });
 
-        fireIoClient.on(Event.CLOSED_UNEXPECTEDLY, eventPayload -> {
+        fireIoClient.on(Event.TIMED_OUT, eventPayload -> {
             isReady = false;
         });
 
         fireIoClient.on(Event.DISCONNECT, eventPayload -> {
-            main.getEventHandler().fireEvent(Event.LOAD_BALANCER_UNLINKED, this);
             isReady = false;
         });
 

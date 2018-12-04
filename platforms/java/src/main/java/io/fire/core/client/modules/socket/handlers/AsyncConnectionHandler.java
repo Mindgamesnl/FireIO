@@ -4,7 +4,6 @@ import io.fire.core.client.FireIoClient;
 import io.fire.core.client.modules.socket.reader.IoReader;
 import io.fire.core.client.modules.socket.task.PingCheckTask;
 import io.fire.core.common.eventmanager.enums.Event;
-import io.fire.core.common.eventmanager.interfaces.EventPayload;
 import io.fire.core.common.interfaces.ClientMeta;
 import io.fire.core.common.interfaces.ConnectedFireioClient;
 import io.fire.core.common.interfaces.Packet;
@@ -13,7 +12,7 @@ import io.fire.core.common.io.enums.InstanceSide;
 import io.fire.core.common.io.objects.WebSocketTransaction;
 import io.fire.core.common.packets.*;
 import io.fire.core.common.interfaces.SocketEvents;
-import io.fire.core.server.modules.socket.tasks.IdleKick;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -24,7 +23,7 @@ import java.nio.channels.SocketChannel;
 import java.time.Instant;
 import java.util.*;
 
-public class AsyncConnectionHandler implements SocketEvents, EventPayload, ConnectedFireioClient  {
+public class AsyncConnectionHandler implements SocketEvents, ConnectedFireioClient  {
 
     //Main FireIo client!
     //contains all the functional logic, authentication, data (like meta and ID) and handlers
@@ -79,7 +78,7 @@ public class AsyncConnectionHandler implements SocketEvents, EventPayload, Conne
             connect();
         } catch (IOException e) {
             //trigger fatal error event for api and internal ussage
-            client.getEventHandler().fireEvent(Event.CLOSED_UNEXPECTEDLY, new ReceivedText("Connection timed out! (could not initiate handshake)" ,null));
+            client.getEventHandler().triggerEvent(Event.TIMED_OUT, null, "Connection timed out! (could not initiate handshake)");
         }
     }
 
@@ -155,7 +154,7 @@ public class AsyncConnectionHandler implements SocketEvents, EventPayload, Conne
         if (packet instanceof FinishHandshake) {
             //trigger connected event
             isSetup = true;
-            client.getEventHandler().fireEvent(Event.CONNECT, null);
+            client.getEventHandler().triggerEvent(Event.CONNECT, null, "finished handshake.");
             //check for previously failed packets and retry them in order that they where attempted to send
             while (missedPackets.size() != 0) {
                 Packet p = missedPackets.peek();
@@ -198,7 +197,7 @@ public class AsyncConnectionHandler implements SocketEvents, EventPayload, Conne
             //cast the correct internal packet
             ChannelPacketPacket packetPacket = (ChannelPacketPacket) packet;
             //trigger event handler with channel and custom packet
-            client.getEventHandler().fireEvent(packetPacket.getChannel(), packetPacket);
+            client.getEventHandler().triggerPacket(null, packetPacket, packetPacket.getChannel());
             return;
         }
 
@@ -207,7 +206,7 @@ public class AsyncConnectionHandler implements SocketEvents, EventPayload, Conne
             //cast the correct internal packet
             ChannelMessagePacket message = (ChannelMessagePacket) packet;
             //trigger event handler with channel and newly created text based payload
-            client.getEventHandler().fireEvent(message.getChannel(), new ReceivedText(message.getText(), null));
+            client.getEventHandler().triggerTextChannel(null, message.getChannel(), message.getText());
             return;
         }
     }
@@ -236,12 +235,12 @@ public class AsyncConnectionHandler implements SocketEvents, EventPayload, Conne
         //check if it was expected to close
         if (exptectedClosing) {
             //it was expected to close, either we or the server has requested it
-            client.getEventHandler().fireEvent(Event.DISCONNECT, null);
+            client.getEventHandler().triggerEvent(Event.DISCONNECT, null, "Connection closed by request.");
         } else {
             //MURDER!
             //it timed out or died a un expected death!
             //trigger event and possibly trigger auto reconnect (if set)
-            client.getEventHandler().fireEvent(Event.CLOSED_UNEXPECTEDLY, this);
+            client.getEventHandler().triggerEvent(Event.TIMED_OUT, null, "Client connection unexpectedly");
         }
     }
 

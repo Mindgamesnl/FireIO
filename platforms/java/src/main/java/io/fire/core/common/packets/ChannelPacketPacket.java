@@ -1,6 +1,5 @@
 package io.fire.core.common.packets;
 
-import io.fire.core.common.eventmanager.interfaces.EventPayload;
 import io.fire.core.common.interfaces.Packet;
 import io.fire.core.server.modules.client.superclasses.Client;
 
@@ -13,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ChannelPacketPacket extends Packet implements EventPayload {
+public class ChannelPacketPacket extends Packet {
 
     //trigger a channel with a custom packet
     //commonly used by client and server

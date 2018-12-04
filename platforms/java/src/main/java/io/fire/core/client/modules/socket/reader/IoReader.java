@@ -3,7 +3,6 @@ package io.fire.core.client.modules.socket.reader;
 import io.fire.core.client.FireIoClient;
 import io.fire.core.client.modules.socket.handlers.AsyncConnectionHandler;
 import io.fire.core.common.eventmanager.enums.Event;
-import io.fire.core.common.packets.ReceivedText;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -47,7 +46,7 @@ public class IoReader implements Runnable {
                     numRead = channel.read(buffer);
                 } catch (IOException e) {
                     //could not read from channel! (timed out)
-                    client.getEventHandler().fireEvent(Event.CLOSED_UNEXPECTEDLY, new ReceivedText("Connection timed out! (server unreachable)", null));
+                    client.getEventHandler().triggerEvent(Event.TIMED_OUT, null, "Connection timed out! (server unreachable)");
                     //failed to read!
                 }
 
@@ -56,7 +55,7 @@ public class IoReader implements Runnable {
                     //this means that the other end of the socket closed the connection
                     //handle it and trigger the event
                     asyncConnectionHandler.onClose();
-                    client.getEventHandler().fireEvent(Event.CLOSED_UNEXPECTEDLY, new ReceivedText("Connection timed out! (invalid data)", null));
+                    client.getEventHandler().triggerEvent(Event.TIMED_OUT, null, "Connection timed out! (invalid data)");
                     //close channel, its dead anyhow
                     channel.close();
                     //exit, don't try to parse it anyway
@@ -74,7 +73,7 @@ public class IoReader implements Runnable {
                 asyncConnectionHandler.getIoManager().handleData(data, client, finalNumRead);
             } catch (Exception e) {
                 //invalid buffer! oh no...
-                client.getEventHandler().fireEvent(Event.CLOSED_UNEXPECTEDLY, new ReceivedText("Invalid buffer! (" + e.getMessage() + ")", null));
+                client.getEventHandler().triggerEvent(Event.TIMED_OUT, null, "Invalid buffer! (" + e.getMessage() + ")");
                 e.printStackTrace();
             }
 

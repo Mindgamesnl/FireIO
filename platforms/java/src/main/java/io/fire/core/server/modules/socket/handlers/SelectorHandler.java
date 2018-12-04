@@ -1,5 +1,6 @@
 package io.fire.core.server.modules.socket.handlers;
 
+import io.fire.core.common.interfaces.Packet;
 import io.fire.core.common.io.enums.ConnectionType;
 import io.fire.core.common.ratelimiter.RateLimit;
 import io.fire.core.server.FireIoServer;
@@ -127,7 +128,7 @@ public class SelectorHandler implements Runnable {
         //check rate limiter for spamming connections
         if (rateLimiter.allowed(socket.getInetAddress().getHostName())) {
             //create and register the connection
-            references.put(remoteAddr, new SocketClientHandler(server, socket, channel));
+            references.put(remoteAddr, new SocketClientHandler<Packet>(server, socket, channel));
             //trigger the on open function in the client handler
             references.get(remoteAddr).onOpen();
             //register connection

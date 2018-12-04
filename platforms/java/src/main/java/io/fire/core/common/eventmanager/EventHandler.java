@@ -1,115 +1,157 @@
 package io.fire.core.common.eventmanager;
 
+
 import io.fire.core.common.eventmanager.enums.Event;
-import io.fire.core.common.eventmanager.interfaces.EventPayload;
-import lombok.NoArgsConstructor;
+import io.fire.core.common.eventmanager.enums.EventPriority;
+import io.fire.core.common.eventmanager.executors.EventExecutor;
+import io.fire.core.common.interfaces.Packet;
+import io.fire.core.common.io.enums.InstanceSide;
+import io.fire.core.server.modules.client.superclasses.Client;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.function.Consumer;
+import java.util.*;
+import java.util.stream.Collectors;
 
-@NoArgsConstructor
 public class EventHandler {
 
-    //storage of events and what to do with them
-    private Map<String, ConcurrentLinkedQueue<Consumer<EventPayload>>> events = new ConcurrentHashMap();
-    private Map<Event, ConcurrentLinkedQueue<Consumer<EventPayload>>> systemEvents = new ConcurrentHashMap();
+    private Map<String, List<EventExecutor>> executorMap = new HashMap<>();
+    private InstanceSide instanceSide;
 
 
     /**
-     * Trigger a event on a channel listener
+     * Setup the EventHandler by registering the instance side
      *
-     * @param event
-     * @param payload
+     * @param instanceSide
      */
-    public void fireEvent(String event, EventPayload payload) {
-        //fire channel based event!
-        //check if it has any api listeners
-        if (events.containsKey(event)) {
-            //loop for all listeners
-            for (Consumer<EventPayload> cons : events.get(event)) {
-                //call listener
-                cons.accept(payload);
-            }
-        }
+    public EventHandler(InstanceSide instanceSide) {
+        this.instanceSide = instanceSide;
     }
 
 
     /**
-     * Fire an API event and trigger the listeners
+     * Register a class (Packet) as an event, along with a channel and priority
      *
      * @param event
-     * @param payload
-     */
-    public void fireEvent(Event event, EventPayload payload) {
-        //fire channel based event!
-
-        //check if it has any api listeners
-        if (systemEvents.containsKey(event)) {
-            //loop for all listeners in its own pool
-
-            for (Consumer<EventPayload> cons : systemEvents.get(event)) {
-                //call listener
-                if (cons != null) cons.accept(payload);
-            }
-        }
-    }
-
-
-    /**
-     * Register a channel listener
-     *
-     * @param event
-     * @param listener
+     * @param channel
+     * @param priority
+     * @param <E>
      * @return
      */
-    public EventHandler on(String event, Consumer<EventPayload> listener) {
-        //register channel listener
-        //check if there already exists a que for this listener
-        //it needs to be a que so if there are multiple listeners for one event they will all be triggered in order
-        ConcurrentLinkedQueue callbacks = events.get(event);
-        //check if it returned null
-        if (callbacks == null) {
-            //create new linked list for listeners
-            callbacks = new ConcurrentLinkedQueue();
-            //save with channel as key and list as value
-            ConcurrentLinkedQueue tempCallbacks = events.putIfAbsent(event, callbacks);
-            if (tempCallbacks != null) {
-                callbacks = tempCallbacks;
-            }
-        }
-        //add listener to list
-        callbacks.add(listener);
-        return this;
+    public <E extends Packet> EventExecutor<E> registerEvent(Class<E> event, String channel, EventPriority priority) {
+        //check if it exists, if not then add it to chan
+        if (!executorMap.containsKey(event.getName())) executorMap.put(event.getName(), new ArrayList<>());
+
+        //setup executor
+        EventExecutor<E> executor = new EventExecutor<>(channel, priority);
+
+        //register and return executor
+        executorMap.get(event.getName()).add(executor);
+
+        return executor;
     }
 
 
     /**
-     * Register a event listener
+     * Register a text channel, with the channel name and the priority
      *
-     * @param e
-     * @param listener
+     * @param channel
+     * @param priority
+     * @param <E>
      * @return
      */
-    public EventHandler on(Event e, Consumer<EventPayload> listener) {
-        //register channel listener
-        //check if there already exists a que for this listener
-        //it needs to be a que so if there are multiple listeners for one event they will all be triggered in order
-        ConcurrentLinkedQueue callbacks = systemEvents.get(e);
-        //check if it returned null
-        if (callbacks == null) {
-            //create new linked list for listeners
-            callbacks = new ConcurrentLinkedQueue();
-            //save with channel as key and list as value
-            ConcurrentLinkedQueue tempCallbacks = systemEvents.putIfAbsent(e, callbacks);
-            if (tempCallbacks != null) {
-                callbacks = tempCallbacks;
-            }
-        }
-        //add listener to list
-        callbacks.add(listener);
-        return this;
+    public <E extends String> EventExecutor<E> registerTextChannel(String channel, EventPriority priority) {
+        //check if it exists, if not then add it to chan
+        if (!executorMap.containsKey("text")) executorMap.put("text", new ArrayList<>());
+
+        //setup executor
+        EventExecutor<E> executor = new EventExecutor<>(channel, priority);
+
+        //register and return executor
+        executorMap.get("text").add(executor);
+
+        return executor;
+    }
+
+
+    /**
+     * Trigger a text channel, by the client (invoker), the channel and the string (payload)
+     *
+     * @param client
+     * @param channel
+     * @param string
+     */
+    public void triggerTextChannel(Client client, String channel, String string) {
+        //check if it exists, if not, cancel since there are no handlers, so why do anything
+        if (!executorMap.containsKey("text")) return;
+
+        //get all executors, and pass them the payload
+        executorMap.get("text")
+                .stream()
+                .filter(eventExecutor -> eventExecutor.getChannel() == channel)
+                .sorted(Comparator.comparing(eventExecutor -> eventExecutor.getEventPriority().getLevel()))
+                .collect(Collectors.toList())
+                .forEach(eventExecutor -> eventExecutor.run(client, string));
+    }
+
+
+    /**
+     * Trigger a packet listener, requires the client (invoker), the packet instance (payload and data) and the channel
+     *
+     * @param client
+     * @param packet
+     * @param channel
+     */
+    public void triggerPacket(Client client, Packet packet, String channel) {
+        //check if it exists, if not, cancel since there are no handlers, so why do anything
+        if (!executorMap.containsKey(packet.getClass().getName())) return;
+
+        //get all executors, and pass them the payload
+        executorMap.get(packet.getClass().getName())
+                .stream()
+                .filter(eventExecutor -> eventExecutor.getChannel() == channel)
+                .sorted(Comparator.comparing(eventExecutor -> eventExecutor.getEventPriority().getLevel()))
+                .collect(Collectors.toList())
+                .forEach(eventExecutor -> eventExecutor.run(client, packet));
+    }
+
+
+    /**
+     * Register an event with string in the callback
+     *
+     * @param event
+     * @return
+     */
+    public EventExecutor<String> registerEvent(Event event) {
+        //check if it exists, if not then add it to chan
+        if (!executorMap.containsKey(event.getClass().getName())) executorMap.put(event.getClass().getName(), new ArrayList<>());
+
+        //setup executor
+        EventExecutor<String> executor = new EventExecutor<>(event.toString(), EventPriority.NORMAL);
+
+        //register and return executor
+        executorMap.get(event.getClass().getName()).add(executor);
+
+        return executor;
+    }
+
+
+    /**
+     * Trigger an event, along with a client (invoker) and an optional string (message)
+     *
+     * @param event
+     * @param client
+     * @param string
+     */
+    public void triggerEvent(Event event, Client client, String string) {
+        //check if it exists, if not, cancel since there are no handlers, so why do anything
+        if (!executorMap.containsKey(event.getClass().getName())) return;
+
+        //get all executors, and pass them the payload
+        executorMap.get(event.getClass().getName())
+                .stream()
+                .filter(eventExecutor -> eventExecutor.getChannel() == event.toString())
+                .sorted(Comparator.comparing(eventExecutor -> eventExecutor.getEventPriority().getLevel()))
+                .collect(Collectors.toList())
+                .forEach(eventExecutor -> eventExecutor.run(client, string));
     }
 
 }

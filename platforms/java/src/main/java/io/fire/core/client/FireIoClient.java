@@ -6,21 +6,24 @@ import io.fire.core.client.modules.rest.RestModule;
 import io.fire.core.client.modules.socket.SocketModule;
 import io.fire.core.common.eventmanager.EventHandler;
 import io.fire.core.common.eventmanager.enums.Event;
-import io.fire.core.common.eventmanager.interfaces.EventPayload;
+import io.fire.core.common.eventmanager.enums.EventPriority;
+import io.fire.core.common.eventmanager.executors.EventExecutor;
 import io.fire.core.common.interfaces.ClientMeta;
 import io.fire.core.common.interfaces.Packet;
 import io.fire.core.common.interfaces.PoolHolder;
 import io.fire.core.common.interfaces.RequestBody;
+import io.fire.core.common.io.enums.InstanceSide;
 import io.fire.core.common.objects.ThreadPool;
 import io.fire.core.common.objects.VersionInfo;
 import io.fire.core.common.packets.ChannelMessagePacket;
 import io.fire.core.common.packets.ChannelPacketPacket;
-import io.fire.core.common.packets.ReceivedText;
 
+import io.fire.core.server.modules.client.superclasses.Client;
 import lombok.Getter;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 public class FireIoClient implements PoolHolder {
@@ -28,7 +31,7 @@ public class FireIoClient implements PoolHolder {
     //modules + getters
     @Getter private SocketModule socketModule;
     @Getter private RestModule restModule;
-    @Getter private EventHandler eventHandler = new EventHandler();
+    @Getter private EventHandler eventHandler = new EventHandler(InstanceSide.CLIENT);
     @Getter private ClientRequestModule clientRequestModule;
 
     //data we need in the client + some meta and connection arguments to use mid-handshake
@@ -62,7 +65,7 @@ public class FireIoClient implements PoolHolder {
         clientRequestModule = new ClientRequestModule(this);
 
         //register a listener for the connect event to reset attempt count every time a connection is made
-        eventHandler.on(Event.CONNECT, a-> connectAttampt = 0);
+        on(Event.CONNECT, (a-> connectAttampt = 0));
     }
 
 
@@ -91,18 +94,17 @@ public class FireIoClient implements PoolHolder {
     public FireIoClient setAutoReConnect(int timeout) {
         //enable auto reconnect!
         //register a event to detect when the connection closed
-        eventHandler.on(Event.CLOSED_UNEXPECTEDLY, a-> {
+        on(Event.TIMED_OUT, (client, string) -> {
             //parse the even payload (error message in this case)
-            String message = ((ReceivedText) a).getString();
 
             //fire disconnect event
-            getEventHandler().fireEvent(Event.DISCONNECT, null);
+            getEventHandler().triggerEvent(Event.DISCONNECT, null, "Disconnected.. attempting reconnect in " + timeout + "MS.");
 
             //log information about problem
             System.err.println("[Fire-IO] Connection closed unexpectedly! attempting re-connect in " + timeout + "MS.");
-            System.err.println(" - Error: " + message);
+            System.err.println(" - Error: " + "connection could");
             connectAttampt++;
-            System.err.println(" - Attempt: " + connectAttampt);
+            System.err.println(" - Attempt: " + string);
 
             //retry after a given amount of milliseconds, if it fails this event will be triggered again creating a loop until a new connection was successful
             scheduler.schedule(new TimerTask() {
@@ -184,7 +186,7 @@ public class FireIoClient implements PoolHolder {
         if (a == null) {
             //could not get api key due to a connection problem
             //trigger event and trigger auto reconnect if set
-            getEventHandler().fireEvent(Event.CLOSED_UNEXPECTEDLY, new ReceivedText("Failed to get api key" ,null));
+            getEventHandler().triggerEvent(Event.TIMED_OUT, null, "Failed to get api key");
             return this;
         }
 
@@ -203,14 +205,14 @@ public class FireIoClient implements PoolHolder {
         if (a.equals("ratelimit")) {
             //ratifier blocked our request! we might have been creating to many new identities in a too short amount of time
             //trigger event and trigger auto reconnect if set
-            getEventHandler().fireEvent(Event.CLOSED_UNEXPECTEDLY, new ReceivedText("Connection blocked by ratelimiter" ,null));
+            getEventHandler().triggerEvent(Event.TIMED_OUT, null, "Connection blocked by ratelimiter");
             return this;
         }
 
         if (a.equals("fail-auth")) {
             //failed to authenticate! we wither did not give a password or did not use the correct password!
             //trigger event and trigger auto reconnect if set
-            getEventHandler().fireEvent(Event.CLOSED_UNEXPECTEDLY, new ReceivedText("Failed to authenticate, is your password correct?" ,null));
+            getEventHandler().triggerEvent(Event.TIMED_OUT, null, "Failed to authenticate, is your password correct?");
             return this;
         }
 
@@ -223,7 +225,7 @@ public class FireIoClient implements PoolHolder {
             if (assignedId == null) {
                 //end the party here, it's an invalid id or unexpected result
                 //trigger event and trigger auto reconnect if set
-                getEventHandler().fireEvent(Event.CLOSED_UNEXPECTEDLY, new ReceivedText("Failed to parse api key" ,null));
+                getEventHandler().triggerEvent(Event.TIMED_OUT, null,"Failed to parse api key");
                 return this;
             }
         } else if (a.length() > 36) {
@@ -234,7 +236,7 @@ public class FireIoClient implements PoolHolder {
             if (assignedId == null) {
                 //end the party here, it's an invalid id or unexpected result
                 //trigger event and trigger auto reconnect if set
-                getEventHandler().fireEvent(Event.CLOSED_UNEXPECTEDLY, new ReceivedText("Failed to parse api key" ,null));
+                getEventHandler().triggerEvent(Event.TIMED_OUT, null,"Failed to parse api key");
                 return this;
             }
 
@@ -337,29 +339,80 @@ public class FireIoClient implements PoolHolder {
 
 
     /**
-     * Registers a event with a callback for when said event is fired
+     * Register an event handler for a specific Event
+     * Mostly used for Fire-IO native API
+     *
+     * Deprecated since the Introduction of the new event api.
      *
      * @param e
      * @param r
      * @return
      */
-    public FireIoClient on(Event e, Consumer<EventPayload> r) {
-        //register event listener
-        eventHandler.on(e, r);
+    @Deprecated
+    public FireIoClient on(Event e, Consumer<Client> r) {
+        eventHandler.registerEvent(e).onExecute((client, string) -> r.accept(client));
         return this;
     }
 
 
     /**
-     * Registers a channel with a callback to fire when a packet is received on the channel
+     * Register an event handler for a specific Event
+     * Mostly used for Fire-IO native API (with string payload)
+     *
+     * Deprecated since the Introduction of the new event api.
      *
      * @param e
      * @param r
      * @return
      */
-    public FireIoClient on(String e, Consumer<EventPayload> r) {
-        //register channel listener
-        eventHandler.on(e, r);
+    @Deprecated
+    public FireIoClient on(Event e, BiConsumer<Client, String> r) {
+        eventHandler.registerEvent(e).onExecute(r);
+        return this;
+    }
+
+
+    /**
+     * New event API
+     * This registers a handler for a packet class on a channel with a priority
+     *
+     * @param packet
+     * @param channel
+     * @param priority
+     * @param <E>
+     * @return
+     */
+    public <E extends Packet> EventExecutor<E> onPacket(Class<E> packet, String channel, EventPriority priority) {
+        return eventHandler.registerEvent(packet, channel , priority);
+    }
+
+
+    /**
+     * New event API
+     * This registers a handler for a packet class on a channel with a normal priority
+     *
+     * @param packet
+     * @param channel
+     * @param <E>
+     * @return
+     */
+    public <E extends Packet> EventExecutor<E> onPacket(Class<E> packet, String channel) {
+        return eventHandler.registerEvent(packet, channel , EventPriority.NORMAL);
+    }
+
+
+    /**
+     * Register an string handler for a specific Channel
+     * Mostly used for Fire-IO native API (with string payload)
+     *
+     * Deprecated since the Introduction of the new event api.
+     *
+     * @param r
+     * @return
+     */
+    @Deprecated
+    public FireIoClient on(String string, BiConsumer<Client, String> r) {
+        eventHandler.registerTextChannel(string, EventPriority.NORMAL).onExecute((client, message) -> r.accept(client, message));
         return this;
     }
 

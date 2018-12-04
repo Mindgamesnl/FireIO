@@ -1,7 +1,6 @@
 package io.fire.core.loadbalancer.socket;
 
 import io.fire.core.common.eventmanager.enums.Event;
-import io.fire.core.common.packets.ReceivedText;
 import io.fire.core.loadbalancer.FireIoBalancer;
 import io.fire.core.loadbalancer.servermanager.enums.NodeState;
 import io.fire.core.loadbalancer.servermanager.objects.FireIoNode;
@@ -26,21 +25,18 @@ public class SocketHandler {
             System.out.println("[Fire-IO-Balancer] Node connected, id="+node.getUuid().toString());
         });
 
-        balancer.getBalancingServer().on("adduser", eventPayload -> {
-            ReceivedText text = (ReceivedText) eventPayload;
-            FireIoNode node = balancer.getServerManager().getNode(text.getSender());
+        balancer.getBalancingServer().on("adduser", (sender, text) -> {
+            FireIoNode node = balancer.getServerManager().getNode(sender);
             node.setConnections(node.getConnections() + 1);
         });
 
-        balancer.getBalancingServer().on("removeuser", eventPayload -> {
-            ReceivedText text = (ReceivedText) eventPayload;
-            FireIoNode node = balancer.getServerManager().getNode(text.getSender());
+        balancer.getBalancingServer().on("removeuser", (sender, text) -> {
+            FireIoNode node = balancer.getServerManager().getNode(sender);
             node.setConnections(node.getConnections() - 1);
         });
 
-        balancer.getBalancingServer().on(Event.DISCONNECT, eventPayload -> {
-            Client client = (Client) eventPayload;
-            FireIoNode node = balancer.getServerManager().getNode(client);
+        balancer.getBalancingServer().on(Event.DISCONNECT, (sender, text) -> {
+            FireIoNode node = balancer.getServerManager().getNode(sender);
 
             //reset node state
             node.setConnections(0);

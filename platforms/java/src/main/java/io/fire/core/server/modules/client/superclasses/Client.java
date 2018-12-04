@@ -1,6 +1,5 @@
 package io.fire.core.server.modules.client.superclasses;
 
-import io.fire.core.common.eventmanager.interfaces.EventPayload;
 import io.fire.core.common.interfaces.ClientMeta;
 import io.fire.core.common.interfaces.ConnectedFireioClient;
 import io.fire.core.common.interfaces.Packet;
@@ -12,7 +11,7 @@ import lombok.Data;
 import java.util.UUID;
 
 @Data
-public abstract class Client implements EventPayload, ConnectedFireioClient {
+public abstract class Client implements ConnectedFireioClient {
 
     /**
      * abstract client class

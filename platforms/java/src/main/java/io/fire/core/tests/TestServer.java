@@ -2,10 +2,9 @@ package io.fire.core.tests;
 
 import io.fire.core.common.body.RequestString;
 import io.fire.core.common.eventmanager.enums.Event;
+import io.fire.core.common.eventmanager.enums.EventPriority;
 import io.fire.core.common.io.http.enums.HttpContentType;
-import io.fire.core.common.io.http.enums.HttpStatusCode;
-import io.fire.core.common.packets.ChannelMessagePacket;
-import io.fire.core.common.packets.ReceivedText;
+import io.fire.core.common.packets.PingPacket;
 import io.fire.core.server.FireIoServer;
 import io.fire.core.server.modules.balancingmodule.objects.BalancerConfiguration;
 import io.fire.core.server.modules.client.superclasses.Client;
@@ -35,7 +34,7 @@ public class TestServer {
                         System.out.println("A user connected via " + client.getConnectionType());
                     })
 
-                    .on(Event.CLOSED_UNEXPECTEDLY, eventPayload -> {
+                    .on(Event.TIMED_OUT, eventPayload -> {
                         Client client = (Client) eventPayload;
                         System.out.println(client.getId() + " closed unexpectedly! " + client.getConnectionType());
                     })
@@ -43,16 +42,16 @@ public class TestServer {
                     .on(Event.DISCONNECT, eventPayload -> {
                         Client client = (Client) eventPayload;
                         System.out.println(client.getId() + " just disconnected");
-                    })
-
-                    .on("channel", eventPayload -> {
-                        ReceivedText text = (ReceivedText) eventPayload;
-                        System.out.println("Channel got: " +text.getString());
-                        //send hi back
-                        //text.getSender().send("channel", "well hi my love! :D");
                     });
 
-            ;
+                server.on("channel", (client, message) -> {
+                    System.out.println("Channel got: " + message);
+                });
+
+                server.onPacket(PingPacket.class, "my-channel", EventPriority.NORMAL)
+                        .onExecute((sender, packer) -> {
+                    System.out.println(sender.getId() + " has send a ping packet on " + packer.getSendTime());
+                });
         } catch (IOException e) {
             e.printStackTrace();
         }

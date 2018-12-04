@@ -5,7 +5,6 @@ import io.fire.core.common.interfaces.Packet;
 import io.fire.core.common.io.enums.ConnectionType;
 import io.fire.core.common.packets.ChannelMessagePacket;
 import io.fire.core.common.packets.ChannelPacketPacket;
-import io.fire.core.common.packets.ReceivedText;
 import io.fire.core.server.FireIoServer;
 import io.fire.core.server.modules.client.superclasses.Client;
 import io.fire.core.common.eventmanager.enums.Event;
@@ -153,7 +152,7 @@ public class FireIoConnection extends Client {
             }
         }
         //trigger disconnect event with this class as payload
-        server.getEventHandler().fireEvent(Event.DISCONNECT, this);
+        server.getEventHandler().triggerEvent(Event.DISCONNECT, this, "Closed connection on request");
         //remove client from the client manager (deletes this object, the handler and id)
         //this prevent memory leaks
         server.getClientModule().removeClient(getId());
@@ -170,17 +169,17 @@ public class FireIoConnection extends Client {
         //this happens every time a handshake finishes successfully
         this.handler = handler;
         //register packet handler from the socket handler (yo)
-        handler.onMessage(packet -> {
+        handler.setHandler(packet -> {
             //check if it is a channel message packet
             if (packet instanceof ChannelMessagePacket) {
                 //cast correct packet object
                 ChannelMessagePacket messagePacket = (ChannelMessagePacket) packet;
                 //create payload with the channel, string and this client subclass as sender
                 //the Client object can be cast to FireIoConnection to get the handler
-                server.getEventHandler().fireEvent(
+                server.getEventHandler().triggerTextChannel(
+                        this,
                         messagePacket.getChannel(),
-                        new ReceivedText(messagePacket.getText(),
-                                this));
+                        messagePacket.getText());
                 //stop running since we are finished
                 return;
             }
@@ -192,7 +191,7 @@ public class FireIoConnection extends Client {
                 //set this client as the sender
                 packetPacket.setSender(this);
                 //trigger the correct event channel with the payload
-                server.getEventHandler().fireEvent(packetPacket.getChannel(), packetPacket);
+                server.getEventHandler().triggerPacket(this, packetPacket, packetPacket.getChannel() );
             }
         });
     }
