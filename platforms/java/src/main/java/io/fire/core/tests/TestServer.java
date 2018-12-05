@@ -26,7 +26,6 @@ public class TestServer {
                     .setRateLimiter(100000, 1)
 
                     .on(Event.CONNECT, client -> {
-                        Client client = (Client) eventPayload;
                         for(int i = 0; i < 50; ++i) {
                             System.out.println("Sending packet " + i);
                             client.send("channel", "i am message " + i);
@@ -43,13 +42,10 @@ public class TestServer {
                         System.out.println(client.getId() + " just disconnected");
                     });
 
-                server.on("channel", (message) -> {
+                server.on("channel", (client, message) -> {
                     System.out.println("Channel got: " + message);
                 });
 
-                server.onPacket(CookieJar.class, "cookie_jar").onExecute((sender, packer) -> {
-                    System.out.println(sender.getId() + " has send a ping packet on " + packer.getSendTime());
-                });
         } catch (IOException e) {
             e.printStackTrace();
         }
