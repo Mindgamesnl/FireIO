@@ -21,7 +21,6 @@ public class AsyncNetworkService {
 
     @Getter private SelectorHandler selectorHandler;
 
-
     /**
      * Setup for the Async network service
      * and the other scheduled tasks
