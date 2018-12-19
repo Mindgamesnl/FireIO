@@ -326,7 +326,23 @@ public class FireIoServer implements PoolHolder {
      */
     public FireIoServer setRateLimiter(int requests, int timeout) {
         httpModule.setRateLimiter(timeout, requests);
-        socketModule.getAsyncNetworkService().getSelectorHandler().setRateLimiter(timeout, requests);
+        socketModule.setRateLimiter(timeout, requests);
+        return this;
+    }
+
+
+    /**
+     * Change the amount of socket handlers, only for those who know
+     *
+     * @param target
+     * @return
+     */
+    public FireIoServer setHandlerLimit(int target) {
+        try {
+            socketModule.setHandlerAmount(target);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         return this;
     }
 

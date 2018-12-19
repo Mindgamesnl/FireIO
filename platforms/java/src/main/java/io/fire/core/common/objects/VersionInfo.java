@@ -11,7 +11,7 @@ public class VersionInfo {
      */
 
     @Getter private Boolean release = true;   // switch between development or a production release
-    @Getter private int coreVersion  = 136;    // version of this release/build
+    @Getter private int coreVersion  = 1365;    // version of this release/build
     @Getter private int protocolVersion = 1354; // release number since last major protocol change
 
 

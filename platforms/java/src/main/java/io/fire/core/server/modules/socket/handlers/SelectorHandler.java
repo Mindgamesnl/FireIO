@@ -10,6 +10,7 @@ import lombok.Getter;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.SocketAddress;
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.channels.*;
 import java.util.Iterator;
@@ -39,19 +40,6 @@ public class SelectorHandler implements Runnable {
     public SelectorHandler(FireIoServer server, Selector selector) {
         this.server = server;
         this.selector = selector;
-    }
-
-
-    /**
-     * set or change the rate limiter settings
-     * this overwrites the current or default settings
-     *
-     * @param timeout
-     * @param attempts
-     */
-    public void setRateLimiter(int timeout, int attempts) {
-        server.getSocketModule().getRateLimiter().stop();
-        server.getSocketModule().setRateLimiter(new RateLimit(timeout, attempts));
     }
 
 
@@ -132,7 +120,6 @@ public class SelectorHandler implements Runnable {
         //check rate limiter for spamming connections
         if (server.getSocketModule().getRateLimiter().allowed(socket.getInetAddress().getHostName())) {
             SocketClientHandler handler = new SocketClientHandler<Packet>(server, socket, channel);
-
             //create and register the connection
             server.getSocketModule().getIpMap().put(remoteAddr, handler);
             //trigger the on open function in the client handler
@@ -164,6 +151,13 @@ public class SelectorHandler implements Runnable {
         //setup socket
         Socket socket = channel.socket();
 
+        //get handler
+        SocketAddress remoteAddr = socket.getRemoteSocketAddress();
+        SocketClientHandler handler = server.getSocketModule().getIpMap().get(remoteAddr);
+
+        if (handler.getIoManager().getInteractionHandler() != null && handler.getIoManager().getInteractionHandler() != id) return;
+        handler.getIoManager().setInteractionHandler(id);
+
         //create buffer with the common buffer size
         //set default to -1 (for when shit goes wrong)
         ByteBuffer buffer = ByteBuffer.allocate(1001);
@@ -174,10 +168,6 @@ public class SelectorHandler implements Runnable {
         } catch (IOException e) {
             //failed to read!
         }
-
-        //get handler
-        SocketAddress remoteAddr = socket.getRemoteSocketAddress();
-        SocketClientHandler handler = server.getSocketModule().getIpMap().get(remoteAddr);
 
         //did it fail to read?
         if (numRead == -1) {
@@ -204,7 +194,7 @@ public class SelectorHandler implements Runnable {
         //check if there may be more
         //read the byte data
         byte[] data = buffer.array();
-        fufilled = buffer.flip().limit();
+        fufilled = ((Buffer)buffer).flip().limit();
 
         //check if we may need to check for more data
         if (finalNumRead >= 1001 && (handler.getIoManager().getIoType() == ConnectionType.WEBSOCKET || handler.getIoManager().getIoType() == ConnectionType.HTTP || handler.getIoManager().getIoType() == ConnectionType.NONE)) {
