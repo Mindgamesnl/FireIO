@@ -10,6 +10,7 @@ import lombok.Getter;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.SocketAddress;
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.channels.*;
 import java.util.Iterator;
@@ -196,7 +197,7 @@ public class SelectorHandler implements Runnable {
         //check if there may be more
         //read the byte data
         byte[] data = buffer.array();
-        fufilled = buffer.flip().limit();
+        fufilled = ((Buffer)buffer).flip().limit();
 
         //check if we may need to check for more data
         if (finalNumRead >= 1001 && (references.get(remoteAddr).getIoManager().getIoType() == ConnectionType.WEBSOCKET || references.get(remoteAddr).getIoManager().getIoType() == ConnectionType.HTTP || references.get(remoteAddr).getIoManager().getIoType() == ConnectionType.NONE)) {
@@ -204,7 +205,7 @@ public class SelectorHandler implements Runnable {
             ByteBuffer nextBytes = ByteBuffer.allocate(1001);
             while (channel.read(nextBytes) != 0) {
                 byte[] oldData = data;
-                int expender = nextBytes.flip().limit();
+                int expender = ((Buffer)nextBytes).flip().limit();
                 fufilled += expender;
                 byte[] temp = new byte[oldData.length + expender];
                 System.arraycopy(oldData, 0, temp,0 , oldData.length);
