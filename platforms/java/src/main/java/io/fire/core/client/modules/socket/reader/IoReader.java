@@ -5,6 +5,7 @@ import io.fire.core.client.modules.socket.handlers.AsyncConnectionHandler;
 import io.fire.core.common.eventmanager.enums.Event;
 
 import java.io.IOException;
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 
@@ -63,14 +64,35 @@ public class IoReader implements Runnable {
                 }
 
                 int finalNumRead = numRead;
-                //read and parse byte array
-                byte[] data = new byte[finalNumRead];
-                System.arraycopy(buffer.array(), 0, data, 0, finalNumRead);
+
+                int fufilled = 0;
+
+                //check if there may be more
+                //read the byte data
+                byte[] data = buffer.array();
+                fufilled = ((Buffer)buffer).flip().limit();
+
+                //check if we may need to check for more data
+                if (finalNumRead >= 1001) {
+                    fufilled = 1001;
+                    ByteBuffer nextBytes = ByteBuffer.allocate(1001);
+                    while (channel.read(nextBytes) != 0) {
+                        byte[] oldData = data;
+                        int expender = nextBytes.flip().limit();
+                        fufilled += expender;
+                        byte[] temp = new byte[oldData.length + expender];
+                        System.arraycopy(oldData, 0, temp,0 , oldData.length);
+                        //append newly received packet content
+                        System.arraycopy(nextBytes.array(), 1, temp, oldData.length, expender - 1);
+                        data = temp;
+                        if (expender >= 1001) nextBytes = ByteBuffer.allocate(1001);
+                    }
+                }
 
                 //parse them to packets!
                 //in semi-rare cases the system stitches multiple packets in one stream to save on load
                 //this can mean that we receive multiple packets in one go!
-                asyncConnectionHandler.getIoManager().handleData(data, client, finalNumRead);
+                asyncConnectionHandler.getIoManager().handleData(data, client, fufilled);
             } catch (Exception e) {
                 //invalid buffer! oh no...
                 client.getEventHandler().triggerEvent(Event.TIMED_OUT, null, "Invalid buffer! (" + e.getMessage() + ")");
