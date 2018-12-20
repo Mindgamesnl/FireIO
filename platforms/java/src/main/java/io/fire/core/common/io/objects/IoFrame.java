@@ -4,6 +4,7 @@ import io.fire.core.common.io.enums.IoFrameType;
 import lombok.Getter;
 
 import java.io.IOException;
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 
 @Getter
@@ -28,7 +29,7 @@ public class IoFrame {
         buffer = ByteBuffer.allocate(1001);
         buffer.put(type.getContentByte());
         buffer.put(content);
-        buffer.flip();
+        ((Buffer)buffer).flip();
     }
 
 }

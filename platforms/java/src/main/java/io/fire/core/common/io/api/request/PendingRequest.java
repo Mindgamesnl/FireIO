@@ -26,7 +26,7 @@ public class PendingRequest {
     public void finish(HttpContent response) {
         try {
             socketChannel.write(response.getBuffer());
-            manager.getServer().getSocketModule().getAsyncNetworkService().getSelectorHandler().getReferences().remove(socketChannel.socket().getRemoteSocketAddress());
+            manager.getServer().getSocketModule().getIpMap().remove(socketChannel.socket().getRemoteSocketAddress());
             socketChannel.close();
         } catch (IOException e) {
             e.printStackTrace();

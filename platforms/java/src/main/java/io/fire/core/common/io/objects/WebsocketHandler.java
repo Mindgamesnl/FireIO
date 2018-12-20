@@ -3,6 +3,7 @@ package io.fire.core.common.io.objects;
 import io.fire.core.common.io.frames.FrameData;
 import lombok.NoArgsConstructor;
 
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 
 @NoArgsConstructor
@@ -37,9 +38,9 @@ public class WebsocketHandler {
             buf.put(payload);
         }
         buf.put(mes);
-        mes.flip();
+        ((Buffer)mes).flip();
         assert (buf.remaining() == 0) : buf.remaining();
-        buf.flip();
+        ((Buffer)buf).flip();
         return buf;
     }
 

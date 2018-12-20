@@ -64,6 +64,8 @@ public class IoManager {
     @Getter
     private FireIoClient client;
 
+    //Interaction Handler
+    @Getter @Setter private UUID interactionHandler = null;
 
     /**
      * Setup the IoManager instance
@@ -108,8 +110,8 @@ public class IoManager {
                 try {
                     if (side == InstanceSide.SERVER) {
                         if (server.getSocketModule().getBlockedProtocolList().contains(BlockedProtocol.FIREIO)) {
-                            server.getSocketModule().getAsyncNetworkService().getSelectorHandler().getReferences().remove(channel.socket().getRemoteSocketAddress());
-                            channel.close();
+                                server.getSocketModule().getIpMap().remove(channel.socket().getRemoteSocketAddress());
+                                channel.close();
                             return;
                         }
                     }
@@ -153,7 +155,7 @@ public class IoManager {
                         if (server.getSocketModule().getBlockedProtocolList().contains(BlockedProtocol.WEBSOCKET)) {
                             try {
                                 channel.close();
-                                server.getSocketModule().getAsyncNetworkService().getSelectorHandler().getReferences().remove(channel.socket().getRemoteSocketAddress());
+                                server.getSocketModule().getIpMap().remove(channel.socket().getRemoteSocketAddress());
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
@@ -170,7 +172,7 @@ public class IoManager {
                         if (server.getSocketModule().getBlockedProtocolList().contains(BlockedProtocol.HTTP)) {
                             try {
                                 channel.close();
-                                server.getSocketModule().getAsyncNetworkService().getSelectorHandler().getReferences().remove(channel.socket().getRemoteSocketAddress());
+                                server.getSocketModule().getIpMap().remove(channel.socket().getRemoteSocketAddress());
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
@@ -194,7 +196,7 @@ public class IoManager {
                             } catch (IOException e1) {
                                 e1.printStackTrace();
                             }
-                            server.getSocketModule().getAsyncNetworkService().getSelectorHandler().getReferences().remove(channel.socket().getRemoteSocketAddress());
+                            server.getSocketModule().getIpMap().remove(channel.socket().getRemoteSocketAddress());
                             e.printStackTrace();
                         }
                     });

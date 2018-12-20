@@ -21,7 +21,6 @@ public class AsyncNetworkService {
 
     @Getter private SelectorHandler selectorHandler;
 
-
     /**
      * Setup for the Async network service
      * and the other scheduled tasks
@@ -39,7 +38,7 @@ public class AsyncNetworkService {
         Selector selector = Selector.open();
         serverChannel.register(selector, SelectionKey.OP_ACCEPT);
 
-        selectorHandler = new SelectorHandler(server, selector);
+        SelectorHandler selectorHandler = new SelectorHandler(server, selector);
 
         Thread listenerThread = new Thread(selectorHandler);
         listenerThread.setName("FireioSelectorListener");
