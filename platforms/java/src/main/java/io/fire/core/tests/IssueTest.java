@@ -28,15 +28,13 @@ public class TestClient {
                 @Override
                 public void run() {
                     System.out.println("Requesting lorem");
-                    client.request("lorem", null, r -> {
-                        System.out.println(((RequestString) r).getString());
-                        client.send("channel", "received the first one");
-                    });
-                    System.out.println("Requesting lorem");
-                    client.request("lorem", null, r -> {
-                        System.out.println(((RequestString) r).getString());
-                        client.send("channel", "received the second one");
-                    });
+
+                    for(int i = 0; i < 8; ++i) {
+                        client.request("lorem", null, r -> {
+                            System.out.println(((RequestString) r).getString());
+                            client.send("channel", "received the first one");
+                        });
+                    }
                 }
             }, 5000);
 
