@@ -36,24 +36,33 @@ public class IoManager {
     //buffers for the websocket protocol
     private WebsocketHandler weboscketUtil = new WebsocketHandler();
     private StringBuilder wsDataStream = new StringBuilder();
-    @Setter private WebSocketStatus webSocketStatus = WebSocketStatus.IDLE_NEW;
+    @Setter
+    private WebSocketStatus webSocketStatus = WebSocketStatus.IDLE_NEW;
 
     //protocol type
-    @Getter private ConnectionType ioType = ConnectionType.NONE;
+    @Getter
+    private ConnectionType ioType = ConnectionType.NONE;
     private Boolean hasReceived = false;
 
     //handlers
-    @Setter private Consumer<Packet> packetHandler = (p) -> {};
-    @Setter private Consumer<WebSocketTransaction> webSocketHandler = (p) -> {};
+    @Setter
+    private Consumer<Packet> packetHandler = (p) -> {
+    };
+    @Setter
+    private Consumer<WebSocketTransaction> webSocketHandler = (p) -> {
+    };
 
     //packet buffers
     private Queue<ByteBuffer> queuedFrames = new ConcurrentLinkedDeque<>();
     private boolean isChannelLocked = false;
 
     //runner
-    @Getter private InstanceSide side;
-    @Getter private FireIoServer server;
-    @Getter private FireIoClient client;
+    @Getter
+    private InstanceSide side;
+    @Getter
+    private FireIoServer server;
+    @Getter
+    private FireIoClient client;
 
 
     /**
@@ -96,12 +105,11 @@ public class IoManager {
 
         switch (this.ioType) {
             case FIREIO:
-                poolHolder.getPool().run(() -> {
-                    try {
+                try {
                     if (side == InstanceSide.SERVER) {
                         if (server.getSocketModule().getBlockedProtocolList().contains(BlockedProtocol.FIREIO)) {
-                                server.getSocketModule().getAsyncNetworkService().getSelectorHandler().getReferences().remove(channel.socket().getRemoteSocketAddress());
-                                channel.close();
+                            server.getSocketModule().getAsyncNetworkService().getSelectorHandler().getReferences().remove(channel.socket().getRemoteSocketAddress());
+                            channel.close();
                             return;
                         }
                     }
@@ -120,22 +128,20 @@ public class IoManager {
                             handlePacketConfirmation();
                             return;
                         } else {
-                            forceWrite(new IoFrameSet(IoFrameType.CONFIRM_PACKET).getFrames().get(0).getBuffer(), false);
-                            //it is a normal payload, trigger it
-                            packetHandler.accept(frameSet.getPayload());
-                            //let the other side know that it may send a new packet
+                            Packet packet = frameSet.getPayload();
                             frameSet = new IoFrameSet(this);
+                            forceWrite(new IoFrameSet(IoFrameType.CONFIRM_PACKET).getFrames().get(0).getBuffer(), false);
+                            poolHolder.getPool().run(() -> packetHandler.accept(packet));
                             return;
                         }
                     }
 
                     forceWrite(new IoFrameSet(IoFrameType.CONFIRM_PACKET).getFrames().get(0).getBuffer(), false);
-                    } catch (Exception e) {
-                        System.out.println("[Fire-IO] Error, failed to load packet.");
-                        frameSet = new IoFrameSet(this);
-                        forceWrite(new IoFrameSet(IoFrameType.CONFIRM_PACKET).getFrames().get(0).getBuffer(), false);
-                    }
-                });
+                } catch (Exception e) {
+                    System.out.println("[Fire-IO] Error, failed to load packet.");
+                    frameSet = new IoFrameSet(this);
+                    forceWrite(new IoFrameSet(IoFrameType.CONFIRM_PACKET).getFrames().get(0).getBuffer(), false);
+                }
                 break;
 
             case HTTP: {

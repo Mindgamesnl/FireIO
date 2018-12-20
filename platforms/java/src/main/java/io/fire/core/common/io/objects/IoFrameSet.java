@@ -1,5 +1,6 @@
 package io.fire.core.common.io.objects;
 
+import io.fire.core.TempDebug;
 import io.fire.core.common.interfaces.Packet;
 import io.fire.core.common.io.IoManager;
 import io.fire.core.common.io.enums.InstanceSide;
@@ -110,11 +111,7 @@ public class IoFrameSet {
      * @return
      */
     private boolean isZero(byte[] in) {
-        for (byte b : in) {
-            if (b != 0) {
-                return false;
-            }
-        }
+        for (byte b : in) if (b != 0) return false;
         return true;
     }
 
@@ -134,6 +131,7 @@ public class IoFrameSet {
         IoFrameType receivedType = IoFrameType.fromBytes(packet);
 
         if (!startedReading) {
+            TempDebug.print("Starting a new frame");
             if (receivedType == IoFrameType.UNKNOWN && !isZero(packet)) throw new UnsupportedDataTypeException("Could not accept packet type of unknown value " + packet[0]);
 
             if (receivedType == IoFrameType.CONFIRM_PACKET) {
@@ -148,6 +146,8 @@ public class IoFrameSet {
                 }
                 return;
             }
+        } else {
+            TempDebug.print("Expanding a new frame");
         }
 
         startedReading = true;
