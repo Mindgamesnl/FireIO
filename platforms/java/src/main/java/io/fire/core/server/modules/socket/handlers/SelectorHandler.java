@@ -79,11 +79,11 @@ public class SelectorHandler implements Runnable {
                 //get all keys
                 Set<SelectionKey> readyKeys = selector.selectedKeys();
                 //crate an iterator for incoming keys
-                Iterator iterator = readyKeys.iterator();
+                Iterator<SelectionKey> iterator = readyKeys.iterator();
                 //loop
                 while (iterator.hasNext()) {
                     //cast a copy of a selection key
-                    SelectionKey key = (SelectionKey) iterator.next();
+                    SelectionKey key = iterator.next();
                     //remove it from the iterator
                     iterator.remove();
                     //check if the key is valid, if not, skip it
