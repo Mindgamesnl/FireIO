@@ -1,0 +1,7 @@
+jdk:
+  - openjdk8
+before_install:
+   - cd 'platforms/java/'
+install:
+   - echo "Running a custom install command"
+   - mvn clean package
