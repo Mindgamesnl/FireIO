@@ -263,6 +263,7 @@ public class SocketClientHandler<T> implements SocketEvents {
      */
     @Override
     public void onClose() {
+        server.getClientModule().removeClient(connectionId);
         //fire io's garbage collector will clean it up so this is not a memory leak!
         if (expectedClosing) {
             authenticated = false;

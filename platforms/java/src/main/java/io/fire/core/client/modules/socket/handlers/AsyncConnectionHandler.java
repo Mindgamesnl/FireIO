@@ -232,6 +232,7 @@ public class AsyncConnectionHandler implements SocketEvents, ConnectedFireioClie
         //the ioreader detected that the channel closed or dropped connection
         //stop the reader, its no longer of any use since it died
         reader.stop();
+
         //check if it was expected to close
         if (exptectedClosing) {
             //it was expected to close, either we or the server has requested it
