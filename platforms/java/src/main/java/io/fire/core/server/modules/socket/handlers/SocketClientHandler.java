@@ -267,7 +267,6 @@ public class SocketClientHandler<T> implements SocketEvents {
         this.hasClosed = true;
         open = false;
         authenticated = false;
-        connectionId = null;
         //fire io's garbage collector will clean it up so this is not a memory leak!
         if (expectedClosing) {
             server.getEventHandler().triggerEvent(Event.DISCONNECT, server.getClientModule().getClient(connectionId), "Connection got closed by request");

@@ -11,6 +11,8 @@ import io.fire.core.server.modules.socket.handlers.SocketClientHandler;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.TimerTask;
 
 public class EmitPingTask extends TimerTask {
@@ -28,6 +30,7 @@ public class EmitPingTask extends TimerTask {
      */
     @Override
     public void run() {
+        List<FireIoConnection> connectionList = new ArrayList<>();
         for (FireIoConnection connection : server.getClientModule().connectionMap.values()) {
             SocketClientHandler handler = connection.getHandler();
             if (handler != null) {
@@ -36,7 +39,11 @@ public class EmitPingTask extends TimerTask {
                 }
             } else if (handler.isHasClosed() && !handler.isOpen()) {
                 //already closed, remove as garbage collection
+                connectionList.add(connection);
             }
+        }
+        for (FireIoConnection fireIoConnection : connectionList) {
+            server.getClientModule().connectionMap.remove(fireIoConnection.getId());
         }
     }
 }
