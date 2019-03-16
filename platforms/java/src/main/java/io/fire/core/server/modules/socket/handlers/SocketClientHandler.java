@@ -41,6 +41,7 @@ public class SocketClientHandler<T> implements SocketEvents {
     private UUID connectionId;
     private boolean expectedClosing = false;
     @Getter private boolean open = true;
+    @Getter private boolean hasClosed = false;
     @Getter private Instant initiated = Instant.now();
     @Getter private ConnectionType connectionType = ConnectionType.NONE;
 
@@ -263,18 +264,17 @@ public class SocketClientHandler<T> implements SocketEvents {
      */
     @Override
     public void onClose() {
-        server.getClientModule().removeClient(connectionId);
+        this.hasClosed = true;
+        open = false;
+        authenticated = false;
+        connectionId = null;
         //fire io's garbage collector will clean it up so this is not a memory leak!
         if (expectedClosing) {
-            authenticated = false;
-            open = false;
             server.getEventHandler().triggerEvent(Event.DISCONNECT, server.getClientModule().getClient(connectionId), "Connection got closed by request");
-            connectionId = null;
         } else {
-            authenticated = false;
             if (server.getClientModule().getClient(connectionId) != null) server.getEventHandler().triggerEvent(Event.TIMED_OUT, server.getClientModule().getClient(connectionId), "Connection got terminated by an unknown reason");
-            connectionId = null;
         }
+        server.getClientModule().removeClient(connectionId);
     }
 
 

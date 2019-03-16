@@ -5,6 +5,7 @@ import io.fire.core.common.interfaces.Packet;
 import io.fire.core.common.io.enums.ConnectionType;
 import io.fire.core.common.packets.ChannelMessagePacket;
 import io.fire.core.common.packets.ChannelPacketPacket;
+import io.fire.core.common.packets.PrepareClosingConnection;
 import io.fire.core.server.FireIoServer;
 import io.fire.core.server.modules.client.superclasses.Client;
 import io.fire.core.common.eventmanager.enums.Event;

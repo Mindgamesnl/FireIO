@@ -28,13 +28,14 @@ public class EmitPingTask extends TimerTask {
      */
     @Override
     public void run() {
-        Instant now = Instant.now();
         for (FireIoConnection connection : server.getClientModule().connectionMap.values()) {
             SocketClientHandler handler = connection.getHandler();
             if (handler != null) {
                 for (IoFrame frame : new IoFrameSet(IoFrameType.PING_PACKET).getFrames()) {
                     handler.getIoManager().forceWrite(frame.getBuffer(), false);
                 }
+            } else if (handler.isHasClosed() && !handler.isOpen()) {
+                //already closed, remove as garbage collection
             }
         }
     }

@@ -13,6 +13,8 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class TestServer {
 
@@ -82,6 +84,14 @@ public class TestServer {
 
       //  server.linkLoadBalancer(new BalancerConfiguration("localhost", 80, "testpassword2"));
 
+
+        FireIoServer finalServer = server;
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                System.out.println("clients: " + finalServer.getClients().size());
+            }
+        }, 1000, 1000);
 
         server.registerEndpoint("/api/v2/getplayer/?name", ((request, settings) -> {
             String username = request.getVariable("name");
