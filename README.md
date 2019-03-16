@@ -3,7 +3,7 @@
 </p>
 
 # Fire-IO [![](https://jitpack.io/v/Mindgamesnl/FireIO.svg)](https://jitpack.io/#Mindgamesnl/FireIO) [![Build Status](https://travis-ci.org/Mindgamesnl/FireIO.svg?branch=master)](https://travis-ci.org/Mindgamesnl/FireIO) [![GitHub version](https://d25lcipzij17d.cloudfront.net/badge.svg?id=gh&type=6&v=1.3.5.3&x2=0)](https://github.com/Mindgamesnl/FireIO)
-Fire-IO is a [lightning fast](https://github.com/Mindgamesnl/FireIO/blob/master/documentation/performance.md) yet simple cross platform networking solution
+Fire-IO is a [lightning fast](https://github.com/Mindgamesnl/FireIO/blob/master/documentation/performance.md) yet simple cross platform networking solution that allows you to connect and manage data from multiple platforms with one easy to use java server. The ultimate framework for your networking needs.
 
 And all that for the sweet price of nothing.
 
