@@ -46,6 +46,7 @@ public enum HttpStatusCode {
     C_415(415, "Unsupported Media Type"),
     C_416(416, "Requested range not satisfiable"),
     C_417(417, "Expectation Failed"),
+    C_418( 418  , "I'm a teapot"),
 
     C_500(500, "Internal Server Error"),
     C_501(501, "Not Implemented"),
