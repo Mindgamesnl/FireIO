@@ -14,12 +14,12 @@ By implementing a Fire-IO load balancer, you'll reduce the chances of things lik
   ###### ^ Example diagram
 </p>
 
-You'll start by configuring your Load Balancer server.<br >
+You'll start by configuring your Load Balancer main.<br >
 To get started, please clone and compile the latest Fire-IO version (preferably from master)<br />
 `sudo java -cp <FIRE IO JAR PATH> io/fire/core/loadbalancer/startup/BalancerService`
 
-After executing this for the first time, a `server.properties` file will be created.<br />
-This will be your main config file for the server.
+After executing this for the first time, a `main.properties` file will be created.<br />
+This will be your main config file for the main.
 
 The values do the following things:
  * **port** Is the port that the load balancer will attach to, this will also be the port that your CLIENT should use to connect.
@@ -30,22 +30,22 @@ The values do the following things:
 
 It is possible to link multiple load balancers at the same time, just use different ports and repeat the steps for each of your balancers.
 
-The load balancer will automatically remove any inactive or dead Fire-IO server from the pool. This means that a client will never be send to a server that is unable to complete their request.
+The load balancer will automatically remove any inactive or dead Fire-IO main from the pool. This means that a client will never be send to a main that is unable to complete their request.
 
 It is also possible to add/remove Fire-IO servers to your pool on-the-fly, no need to restart when up/down scaling your application/service. 
 
 ## Configuring the Fire-IO servers
 In order for the Fire-IO servers to accept connections though the load balancer, they need to register.
-You can do this by adding this line to your server application.
+You can do this by adding this line to your main application.
 
 ```java
-server.linkLoadBalancer(new BalancerConfiguration("BALANCER HOST", PORT, "PRIVATE PASSWORD"));
+main.linkLoadBalancer(new BalancerConfiguration("BALANCER HOST", PORT, "PRIVATE PASSWORD"));
 ```
 
 You can register multiple load balancers at the same time.<br />
-Please note that your Fire-IO server MAY NOT run on the same port as the load balancer.
+Please note that your Fire-IO main MAY NOT run on the same port as the load balancer.
 
 ## Important notes
- * The Fire-IO load balancer is **NOT** a proxy, it will direct clients to the next available server. This means that there is no mission-critical data in the load balancer at any time.
+ * The Fire-IO load balancer is **NOT** a proxy, it will direct clients to the next available main. This means that there is no mission-critical data in the load balancer at any time.
  * You are able to add and remove load balancers in real time. The network will adjust automatically and none of your current connections will be stopped.
  

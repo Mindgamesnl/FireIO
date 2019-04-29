@@ -148,7 +148,7 @@ extends java.lang.Object</pre>
 <tr id="i0" class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../io/fire/core/client/modules/request/ClientRequestModule.html#cancel-java.util.UUID-">cancel</a></span>(java.util.UUID&nbsp;id)</code>
-<div class="block">Request canceling, it was not (correctly) handeled by the server so the client should cancel it
+<div class="block">Request canceling, it was not (correctly) handeled by the main so the client should cancel it
  to prevent memory leaks from eating up the heap</div>
 </td>
 </tr>
@@ -157,14 +157,14 @@ extends java.lang.Object</pre>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../io/fire/core/client/modules/request/ClientRequestModule.html#createRequest-java.lang.String-io.fire.core.common.interfaces.RequestBody-io.fire.core.client.modules.request.interfaces.ClientRequest-">createRequest</a></span>(java.lang.String&nbsp;channel,
              <a href="../../../../../../io/fire/core/common/interfaces/RequestBody.html" title="interface in io.fire.core.common.interfaces">RequestBody</a>&nbsp;request,
              <a href="../../../../../../io/fire/core/client/modules/request/interfaces/ClientRequest.html" title="interface in io.fire.core.client.modules.request.interfaces">ClientRequest</a>&nbsp;callback)</code>
-<div class="block">Create, a request, register it to the local cache for execution and send it to the server</div>
+<div class="block">Create, a request, register it to the local cache for execution and send it to the main</div>
 </td>
 </tr>
 <tr id="i2" class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../io/fire/core/client/modules/request/ClientRequestModule.html#handleRequestResponse-java.util.UUID-io.fire.core.common.interfaces.RequestBody-">handleRequestResponse</a></span>(java.util.UUID&nbsp;id,
                      <a href="../../../../../../io/fire/core/common/interfaces/RequestBody.html" title="interface in io.fire.core.common.interfaces">RequestBody</a>&nbsp;response)</code>
-<div class="block">The server finished the request with a response value
+<div class="block">The main finished the request with a response value
  now the client should trigger the callback with the value
  and remove it from local storage since it wont be triggered again</div>
 </td>
@@ -217,7 +217,7 @@ extends java.lang.Object</pre>
 <pre>public&nbsp;void&nbsp;createRequest(java.lang.String&nbsp;channel,
                           <a href="../../../../../../io/fire/core/common/interfaces/RequestBody.html" title="interface in io.fire.core.common.interfaces">RequestBody</a>&nbsp;request,
                           <a href="../../../../../../io/fire/core/client/modules/request/interfaces/ClientRequest.html" title="interface in io.fire.core.client.modules.request.interfaces">ClientRequest</a>&nbsp;callback)</pre>
-<div class="block">Create, a request, register it to the local cache for execution and send it to the server</div>
+<div class="block">Create, a request, register it to the local cache for execution and send it to the main</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>channel</code> - </dd>
@@ -233,7 +233,7 @@ extends java.lang.Object</pre>
 <li class="blockList">
 <h4>cancel</h4>
 <pre>public&nbsp;void&nbsp;cancel(java.util.UUID&nbsp;id)</pre>
-<div class="block">Request canceling, it was not (correctly) handeled by the server so the client should cancel it
+<div class="block">Request canceling, it was not (correctly) handeled by the main so the client should cancel it
  to prevent memory leaks from eating up the heap</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
@@ -249,7 +249,7 @@ extends java.lang.Object</pre>
 <h4>handleRequestResponse</h4>
 <pre>public&nbsp;void&nbsp;handleRequestResponse(java.util.UUID&nbsp;id,
                                   <a href="../../../../../../io/fire/core/common/interfaces/RequestBody.html" title="interface in io.fire.core.common.interfaces">RequestBody</a>&nbsp;response)</pre>
-<div class="block">The server finished the request with a response value
+<div class="block">The main finished the request with a response value
  now the client should trigger the callback with the value
  and remove it from local storage since it wont be triggered again</div>
 <dl>

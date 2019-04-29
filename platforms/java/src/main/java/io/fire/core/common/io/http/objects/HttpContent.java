@@ -17,13 +17,8 @@ public class HttpContent {
     private Map<String, String> mappedData = new HashMap<>();
     @Getter @Setter private String body = "";
 
-    //output
     @Getter private String url;
     @Getter private HttpRequestMethod method;
-
-    //rancher active proxy data
-    @Getter private RancherActiveProxyContent rancherActiveProxyContent;
-
 
     /**
      * Intepretes a string as a http packet.
@@ -50,16 +45,6 @@ public class HttpContent {
         }
         String[] segments = data.split("\r\n\r\n");
         if (segments.length == 2) body = segments[1];
-
-        //at the end, check for proxy
-        //implementation of rancher active proxy https://github.com/adi90x/rancher-active-proxy
-        if (!getHeader("X-Real-IP").equals("")) {
-            rancherActiveProxyContent = new RancherActiveProxyContent();
-            rancherActiveProxyContent.setRealIp(getHeader("X-Real-IP"));
-            rancherActiveProxyContent.setForwardedSsl(getHeader("X-Forwarded-Ssl").equals("on"));
-            rancherActiveProxyContent.setForwardedProtocol(getHeader("X-Forwarded-Proto"));
-            rancherActiveProxyContent.setForwardedPort(Integer.parseInt(getHeader("X-Forwarded-Port")));
-        }
     }
 
 
@@ -80,7 +65,9 @@ public class HttpContent {
     /**
      * Empty constructor to create a headerset of yet-unknown values
      */
-    public HttpContent() {}
+    public HttpContent() {
+        setStatusCode(HttpStatusCode.C_200);
+    }
 
 
     /**
@@ -89,9 +76,8 @@ public class HttpContent {
      * @param mimeType
      * @param statusCode
      */
-    public void setOpcode(HttpContentType mimeType, HttpStatusCode statusCode) {
+    public void setOpcode(HttpStatusCode statusCode) {
         opcode = "HTTP/1.1 " + statusCode.getCode() + " " + statusCode.getType();
-        setMimeType(mimeType);
     }
 
 
@@ -104,7 +90,7 @@ public class HttpContent {
     }
 
 
-    /**
+        /**
      * export the class as a usable http header set or packet that can be interpreted by web browsers
      * @return
      */
@@ -139,6 +125,10 @@ public class HttpContent {
         return mappedData.get(key);
     }
 
+
+    public void setStatusCode(HttpStatusCode statusCode) {
+        this.setOpcode(statusCode);
+    }
 
     /**
      * Set the allowed origin of your web endpoint

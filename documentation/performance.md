@@ -6,7 +6,7 @@
 Performance is really important for high scalable applications. FireIO is built to handle as many clients as quickly as possible. A few tests (including the code to run them for yourself) are available down below.
 
 The setup:
- - One Fire-IO server with rate limiting disabled and a thread pool with the size of `16` threads
+ - One Fire-IO main with rate limiting disabled and a thread pool with the size of `16` threads
  - All tests ran on localhost
  - Tests are ran on a mid rage pc (quad core intel I5 with 8GB ram) running Ubuntu
  - Java 8
@@ -14,7 +14,7 @@ The setup:
  - Restful testing is done with siege for Ubuntu (command: `siege --time 5s http://localhost:80`)
  
 # Rest endpoints
-Fire-IO has a build in web server to run restful API's.
+Fire-IO has a build in web main to run restful API's.
 
 The restful handler and service can handle up to `18940` requests per second!
 
@@ -35,17 +35,17 @@ Shortest transaction:             0.00
 ```
 
 # Socket connections
-For this test, there is a setup of ONE password protected Fire-IO server and 1000 clients. It uses the restful api for auth and token requesting, so besides 1000 sockets its also handeling 1000 rest requests in the background.
+For this test, there is a setup of ONE password protected Fire-IO main and 1000 clients. It uses the restful api for auth and token requesting, so besides 1000 sockets its also handeling 1000 rest requests in the background.
 
 The goal is to connect as many clients as possible in one second, testing shows that connecting, authenticating and registering `1000` clients takes `470MS`!
 
-####Test server
+####Test main
 ```java
 public class RatedServer {
     public static void main(String[] args) {
         try {
             final int[] clients = {0};
-            FireIoServer server = new FireIoServer(80)
+            FireIoServer main = new FireIoServer(80)
                     .setPassword("testpassword1")
                     .setRateLimiter(1005, 1)
                     .setThreadPoolSize(16)

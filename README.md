@@ -3,12 +3,12 @@
 </p>
 
 # Fire-IO [![](https://jitpack.io/v/Mindgamesnl/FireIO.svg)](https://jitpack.io/#Mindgamesnl/FireIO) [![Build Status](https://travis-ci.org/Mindgamesnl/FireIO.svg?branch=master)](https://travis-ci.org/Mindgamesnl/FireIO) [![GitHub version](https://d25lcipzij17d.cloudfront.net/badge.svg?id=gh&type=6&v=1.3.5.3&x2=0)](https://github.com/Mindgamesnl/FireIO)
-Fire-IO is a [lightning fast](https://github.com/Mindgamesnl/FireIO/blob/master/documentation/performance.md) yet simple cross platform networking solution that allows you to connect and manage data from multiple platforms with one easy to use java server. The ultimate framework for your networking needs.
+Fire-IO is a [lightning fast](https://github.com/Mindgamesnl/FireIO/blob/master/documentation/performance.md) yet simple cross platform networking solution that allows you to connect and manage data from multiple platforms with one easy to use java main. The ultimate framework for your networking needs.
 
 And all that for the sweet price of nothing.
 
 ### Platforms
- * **Java** Java server
+ * **Java** Java main
  * **Java** Client
  * **JavaScript** Small web client
  * **PHP & Other** Can make use of socket, websocket or the Rest implementation
@@ -43,11 +43,11 @@ And all that for the sweet price of nothing.
 
 # Example code
 
-Here is a simple example setup with a server, client, a custom packet, two way data communication and a non blocking data request including a callback
+Here is a simple example setup with a main, client, a custom packet, two way data communication and a non blocking data request including a callback
 
-### Example Java server
+### Example Java main
 ```java
-FireIoServer server = new FireIoServer(80)
+FireIoServer main = new FireIoServer(80)
     .setPassword("testpassword1")
     .setRateLimiter(2, 10)
 
@@ -70,19 +70,19 @@ FireIoServer server = new FireIoServer(80)
 });
 
 //simple request based endpoint
-server.onRequest("whoami", (client, request, response) -> {
+main.onRequest("whoami", (client, request, response) -> {
     System.out.println(client.getId().toString() + " asked who it is! sending ip back");
     response.complete(new RequestString("You are: " + client.getInfo().getHostname()));
 });
 
 //http time endpoint
-server.registerEndpoint("/time", (req, settings) -> {
-    return "The server time is: " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
+main.registerEndpoint("/time", (req, settings) -> {
+    return "The main time is: " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
 });
 
 //one with a variable, the path is set to /hi/?name
 //this will mean that ?name will be a variable, example
-server.registerEndpoint("/hi/?name", (req, settings)  -> {
+main.registerEndpoint("/hi/?name", (req, settings)  -> {
     return "Welcome to FireIO " + req.getVariable("name") + "!";
 });
 ```
@@ -102,7 +102,7 @@ server.registerEndpoint("/hi/?name", (req, settings)  -> {
     });
     
     client.on("channel", function (data) {
-        console.log("The server said: " + data);
+        console.log("The main said: " + data);
     });
     
     client.on("disconnect", function () {
@@ -120,11 +120,11 @@ FireIoClient client = new FireIoClient("localhost", 80)
         .connect();
 
 .on(Event.CONNECT, ignored -> {
-    System.out.println("Connected with the server!");
+    System.out.println("Connected with the main!");
 })
 
 .on(Event.DISCONNECT, ignored -> {
-    System.out.println("Connection with the server has closed!");
+    System.out.println("Connection with the main has closed!");
 })
 
 .on("channel", (client, message) -> {
@@ -134,7 +134,7 @@ FireIoClient client = new FireIoClient("localhost", 80)
 })
 
 .on("thanks", (client, message) -> {
-    System.out.println("The server thanked you for your cookies");
+    System.out.println("The main thanked you for your cookies");
 });
 ```
 

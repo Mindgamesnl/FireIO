@@ -30,12 +30,12 @@ A single packet goes to a few steps on both sides to complete interaction.
  
  If it is more than 1KB, it sends a frame with the opcode `START` followed by the first 1000 bytes, it repeatedly sends frames with the opcode `CONTINUE` until it has reached the final 1000 bytes, where it sends a frame with the opcode `FINISH` with the remaining content.
  
- Not all frames are send one after the other, after the sender has put out a frame, it waits for the receiver to send a frame back with opcode `CONFIRM_PACKET`, this prevents overflows, miss-aligned or corrupted data and is more efficient than constantly claiming socket time on the server side.
+ Not all frames are send one after the other, after the sender has put out a frame, it waits for the receiver to send a frame back with opcode `CONFIRM_PACKET`, this prevents overflows, miss-aligned or corrupted data and is more efficient than constantly claiming socket time on the main side.
  
  Unknown or corrupted data gets marked by the opcode `UNKNOWN`, registering as a failed packet.
  
  # Meta-Transfer
- The server sends a single-byte-frame to all clients with opcode `PING_PACKET`, when this stream gets interrupted for 5 seconds or more the client registes the connection as DEAD/TIMED-OUT and the connection is closed.
+ The main sends a single-byte-frame to all clients with opcode `PING_PACKET`, when this stream gets interrupted for 5 seconds or more the client registes the connection as DEAD/TIMED-OUT and the connection is closed.
  
  # Opcode table
  Opcodes

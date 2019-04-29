@@ -93,23 +93,23 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="../io/fire/core/common/packets/ReceivedText.html#ReceivedText--">ReceivedText()</a></span> - Constructor for class io.fire.core.common.packets.<a href="../io/fire/core/common/packets/ReceivedText.html" title="class in io.fire.core.common.packets">ReceivedText</a></dt>
 <dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="../io/fire/core/server/modules/socket/handlers/SelectorHandler.html#references">references</a></span> - Variable in class io.fire.core.server.modules.socket.handlers.<a href="../io/fire/core/server/modules/socket/handlers/SelectorHandler.html" title="class in io.fire.core.server.modules.socket.handlers">SelectorHandler</a></dt>
+<dt><span class="memberNameLink"><a href="../io/fire/core/main/modules/socket/handlers/SelectorHandler.html#references">references</a></span> - Variable in class io.fire.core.main.modules.socket.handlers.<a href="../io/fire/core/main/modules/socket/handlers/SelectorHandler.html" title="class in io.fire.core.main.modules.socket.handlers">SelectorHandler</a></dt>
 <dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="../io/fire/core/server/modules/balancingmodule/BalancingModule.html#register-io.fire.core.server.modules.balancingmodule.objects.BalancerConfiguration-io.fire.core.server.FireIoServer-">register(BalancerConfiguration, FireIoServer)</a></span> - Method in class io.fire.core.server.modules.balancingmodule.<a href="../io/fire/core/server/modules/balancingmodule/BalancingModule.html" title="class in io.fire.core.server.modules.balancingmodule">BalancingModule</a></dt>
+<dt><span class="memberNameLink"><a href="../io/fire/core/main/modules/balancingmodule/BalancingModule.html#register-io.fire.core.main.modules.balancingmodule.objects.BalancerConfiguration-io.fire.core.main.FireIoServer-">register(BalancerConfiguration, FireIoServer)</a></span> - Method in class io.fire.core.main.modules.balancingmodule.<a href="../io/fire/core/main/modules/balancingmodule/BalancingModule.html" title="class in io.fire.core.main.modules.balancingmodule">BalancingModule</a></dt>
 <dd>
 <div class="block">Register a loadbalancer</div>
 </dd>
-<dt><span class="memberNameLink"><a href="../io/fire/core/server/modules/request/RequestModule.html#register-java.lang.String-io.fire.core.server.modules.request.interfaces.RequestExecutor-">register(String, RequestExecutor)</a></span> - Method in class io.fire.core.server.modules.request.<a href="../io/fire/core/server/modules/request/RequestModule.html" title="class in io.fire.core.server.modules.request">RequestModule</a></dt>
+<dt><span class="memberNameLink"><a href="../io/fire/core/main/modules/request/RequestModule.html#register-java.lang.String-io.fire.core.main.modules.request.interfaces.RequestExecutor-">register(String, RequestExecutor)</a></span> - Method in class io.fire.core.main.modules.request.<a href="../io/fire/core/main/modules/request/RequestModule.html" title="class in io.fire.core.main.modules.request">RequestModule</a></dt>
 <dd>
 <div class="block">Register a request executor
- This makes it so the server can handle requests of this type (channel) in the future</div>
+ This makes it so the main can handle requests of this type (channel) in the future</div>
 </dd>
-<dt><span class="memberNameLink"><a href="../io/fire/core/server/modules/client/ClientModule.html#registerConnection--">registerConnection()</a></span> - Method in class io.fire.core.server.modules.client.<a href="../io/fire/core/server/modules/client/ClientModule.html" title="class in io.fire.core.server.modules.client">ClientModule</a></dt>
+<dt><span class="memberNameLink"><a href="../io/fire/core/main/modules/client/ClientModule.html#registerConnection--">registerConnection()</a></span> - Method in class io.fire.core.main.modules.client.<a href="../io/fire/core/main/modules/client/ClientModule.html" title="class in io.fire.core.main.modules.client">ClientModule</a></dt>
 <dd>
 <div class="block">Create a new empty client
  Ready to setup for new incoming connections</div>
 </dd>
-<dt><span class="memberNameLink"><a href="../io/fire/core/server/FireIoServer.html#registerEndpoint-java.lang.String-io.fire.core.common.io.api.request.HttpInteraction-">registerEndpoint(String, HttpInteraction)</a></span> - Method in class io.fire.core.server.<a href="../io/fire/core/server/FireIoServer.html" title="class in io.fire.core.server">FireIoServer</a></dt>
+<dt><span class="memberNameLink"><a href="../io/fire/core/main/FireIoServer.html#registerEndpoint-java.lang.String-io.fire.core.common.io.api.request.HttpInteraction-">registerEndpoint(String, HttpInteraction)</a></span> - Method in class io.fire.core.main.<a href="../io/fire/core/main/FireIoServer.html" title="class in io.fire.core.main">FireIoServer</a></dt>
 <dd>
 <div class="block">register HTTP api endpoints
 
@@ -119,26 +119,26 @@
 <dd>
 <div class="block">Register a endpoint with a path and a callback to fire</div>
 </dd>
-<dt><span class="memberNameLink"><a href="../io/fire/core/server/modules/client/ClientModule.html#removeClient-java.util.UUID-">removeClient(UUID)</a></span> - Method in class io.fire.core.server.modules.client.<a href="../io/fire/core/server/modules/client/ClientModule.html" title="class in io.fire.core.server.modules.client">ClientModule</a></dt>
+<dt><span class="memberNameLink"><a href="../io/fire/core/main/modules/client/ClientModule.html#removeClient-java.util.UUID-">removeClient(UUID)</a></span> - Method in class io.fire.core.main.modules.client.<a href="../io/fire/core/main/modules/client/ClientModule.html" title="class in io.fire.core.main.modules.client">ClientModule</a></dt>
 <dd>
 <div class="block">Remove a client and delete its resources
  Prevents memory leaks and unused objects hanging around</div>
 </dd>
 <dt><span class="memberNameLink"><a href="../io/fire/core/client/FireIoClient.html#request-java.lang.String-io.fire.core.common.interfaces.RequestBody-io.fire.core.client.modules.request.interfaces.ClientRequest-">request(String, RequestBody, ClientRequest)</a></span> - Method in class io.fire.core.client.<a href="../io/fire/core/client/FireIoClient.html" title="class in io.fire.core.client">FireIoClient</a></dt>
 <dd>
-<div class="block">Submit a request to the server, with a callback function for when the request is finished</div>
+<div class="block">Submit a request to the main, with a callback function for when the request is finished</div>
 </dd>
 <dt><a href="../io/fire/core/common/interfaces/RequestBody.html" title="interface in io.fire.core.common.interfaces"><span class="typeNameLink">RequestBody</span></a> - Interface in <a href="../io/fire/core/common/interfaces/package-summary.html">io.fire.core.common.interfaces</a></dt>
 <dd>&nbsp;</dd>
-<dt><a href="../io/fire/core/server/modules/request/interfaces/RequestExecutor.html" title="interface in io.fire.core.server.modules.request.interfaces"><span class="typeNameLink">RequestExecutor</span></a> - Interface in <a href="../io/fire/core/server/modules/request/interfaces/package-summary.html">io.fire.core.server.modules.request.interfaces</a></dt>
+<dt><a href="../io/fire/core/main/modules/request/interfaces/RequestExecutor.html" title="interface in io.fire.core.main.modules.request.interfaces"><span class="typeNameLink">RequestExecutor</span></a> - Interface in <a href="../io/fire/core/main/modules/request/interfaces/package-summary.html">io.fire.core.main.modules.request.interfaces</a></dt>
 <dd>&nbsp;</dd>
-<dt><a href="../io/fire/core/server/modules/request/RequestModule.html" title="class in io.fire.core.server.modules.request"><span class="typeNameLink">RequestModule</span></a> - Class in <a href="../io/fire/core/server/modules/request/package-summary.html">io.fire.core.server.modules.request</a></dt>
+<dt><a href="../io/fire/core/main/modules/request/RequestModule.html" title="class in io.fire.core.main.modules.request"><span class="typeNameLink">RequestModule</span></a> - Class in <a href="../io/fire/core/main/modules/request/package-summary.html">io.fire.core.main.modules.request</a></dt>
 <dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="../io/fire/core/server/modules/request/RequestModule.html#RequestModule--">RequestModule()</a></span> - Constructor for class io.fire.core.server.modules.request.<a href="../io/fire/core/server/modules/request/RequestModule.html" title="class in io.fire.core.server.modules.request">RequestModule</a></dt>
+<dt><span class="memberNameLink"><a href="../io/fire/core/main/modules/request/RequestModule.html#RequestModule--">RequestModule()</a></span> - Constructor for class io.fire.core.main.modules.request.<a href="../io/fire/core/main/modules/request/RequestModule.html" title="class in io.fire.core.main.modules.request">RequestModule</a></dt>
 <dd>&nbsp;</dd>
-<dt><a href="../io/fire/core/server/modules/request/objects/RequestResponse.html" title="class in io.fire.core.server.modules.request.objects"><span class="typeNameLink">RequestResponse</span></a> - Class in <a href="../io/fire/core/server/modules/request/objects/package-summary.html">io.fire.core.server.modules.request.objects</a></dt>
+<dt><a href="../io/fire/core/main/modules/request/objects/RequestResponse.html" title="class in io.fire.core.main.modules.request.objects"><span class="typeNameLink">RequestResponse</span></a> - Class in <a href="../io/fire/core/main/modules/request/objects/package-summary.html">io.fire.core.main.modules.request.objects</a></dt>
 <dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="../io/fire/core/server/modules/request/objects/RequestResponse.html#RequestResponse--">RequestResponse()</a></span> - Constructor for class io.fire.core.server.modules.request.objects.<a href="../io/fire/core/server/modules/request/objects/RequestResponse.html" title="class in io.fire.core.server.modules.request.objects">RequestResponse</a></dt>
+<dt><span class="memberNameLink"><a href="../io/fire/core/main/modules/request/objects/RequestResponse.html#RequestResponse--">RequestResponse()</a></span> - Constructor for class io.fire.core.main.modules.request.objects.<a href="../io/fire/core/main/modules/request/objects/RequestResponse.html" title="class in io.fire.core.main.modules.request.objects">RequestResponse</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="../io/fire/core/common/body/RequestString.html" title="class in io.fire.core.common.body"><span class="typeNameLink">RequestString</span></a> - Class in <a href="../io/fire/core/common/body/package-summary.html">io.fire.core.common.body</a></dt>
 <dd>&nbsp;</dd>
@@ -168,7 +168,7 @@
 </dd>
 <dt><span class="memberNameLink"><a href="../io/fire/core/client/modules/socket/task/PingCheckTask.html#run--">run()</a></span> - Method in class io.fire.core.client.modules.socket.task.<a href="../io/fire/core/client/modules/socket/task/PingCheckTask.html" title="class in io.fire.core.client.modules.socket.task">PingCheckTask</a></dt>
 <dd>
-<div class="block">Repeating task, checks the time of the last ping received to check if the server is still keeping up or if the connection died</div>
+<div class="block">Repeating task, checks the time of the last ping received to check if the main is still keeping up or if the connection died</div>
 </dd>
 <dt><span class="memberNameLink"><a href="../io/fire/core/common/objects/ThreadPool.html#run-java.lang.Runnable-">run(Runnable)</a></span> - Method in class io.fire.core.common.objects.<a href="../io/fire/core/common/objects/ThreadPool.html" title="class in io.fire.core.common.objects">ThreadPool</a></dt>
 <dd>
@@ -176,19 +176,19 @@
 </dd>
 <dt><span class="memberNameLink"><a href="../io/fire/core/common/ratelimiter/tasks/UpdateTimes.html#run--">run()</a></span> - Method in class io.fire.core.common.ratelimiter.tasks.<a href="../io/fire/core/common/ratelimiter/tasks/UpdateTimes.html" title="class in io.fire.core.common.ratelimiter.tasks">UpdateTimes</a></dt>
 <dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="../io/fire/core/server/modules/socket/handlers/SelectorHandler.html#run--">run()</a></span> - Method in class io.fire.core.server.modules.socket.handlers.<a href="../io/fire/core/server/modules/socket/handlers/SelectorHandler.html" title="class in io.fire.core.server.modules.socket.handlers">SelectorHandler</a></dt>
+<dt><span class="memberNameLink"><a href="../io/fire/core/main/modules/socket/handlers/SelectorHandler.html#run--">run()</a></span> - Method in class io.fire.core.main.modules.socket.handlers.<a href="../io/fire/core/main/modules/socket/handlers/SelectorHandler.html" title="class in io.fire.core.main.modules.socket.handlers">SelectorHandler</a></dt>
 <dd>
 <div class="block">Main loop
 
  this keeps on checking the socket in a new thread
  for new socket channel messages, when found it gets tossed over to the client handler.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="../io/fire/core/server/modules/socket/tasks/EmitPingTask.html#run--">run()</a></span> - Method in class io.fire.core.server.modules.socket.tasks.<a href="../io/fire/core/server/modules/socket/tasks/EmitPingTask.html" title="class in io.fire.core.server.modules.socket.tasks">EmitPingTask</a></dt>
+<dt><span class="memberNameLink"><a href="../io/fire/core/main/modules/socket/tasks/EmitPingTask.html#run--">run()</a></span> - Method in class io.fire.core.main.modules.socket.tasks.<a href="../io/fire/core/main/modules/socket/tasks/EmitPingTask.html" title="class in io.fire.core.main.modules.socket.tasks">EmitPingTask</a></dt>
 <dd>
 <div class="block">Emit the current UNIX time stamp to all the clients
  so that they can run health checks</div>
 </dd>
-<dt><span class="memberNameLink"><a href="../io/fire/core/server/modules/socket/tasks/IdleKick.html#run--">run()</a></span> - Method in class io.fire.core.server.modules.socket.tasks.<a href="../io/fire/core/server/modules/socket/tasks/IdleKick.html" title="class in io.fire.core.server.modules.socket.tasks">IdleKick</a></dt>
+<dt><span class="memberNameLink"><a href="../io/fire/core/main/modules/socket/tasks/IdleKick.html#run--">run()</a></span> - Method in class io.fire.core.main.modules.socket.tasks.<a href="../io/fire/core/main/modules/socket/tasks/IdleKick.html" title="class in io.fire.core.main.modules.socket.tasks">IdleKick</a></dt>
 <dd>
 <div class="block">Periodically check the health of all connected clients and kick dead/inactive ones to save on resources</div>
 </dd>

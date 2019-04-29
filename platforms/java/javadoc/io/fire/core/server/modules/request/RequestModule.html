@@ -52,7 +52,7 @@ var activeTableTab = "activeTableTab";
 <li>Next&nbsp;Class</li>
 </ul>
 <ul class="navList">
-<li><a href="../../../../../../index.html?io/fire/core/server/modules/request/RequestModule.html" target="_top">Frames</a></li>
+<li><a href="../../../../../../index.html?io/fire/core/main/modules/request/RequestModule.html" target="_top">Frames</a></li>
 <li><a href="RequestModule.html" target="_top">No&nbsp;Frames</a></li>
 </ul>
 <ul class="navList" id="allclasses_navbar_top">
@@ -91,7 +91,7 @@ var activeTableTab = "activeTableTab";
 <!-- ========= END OF TOP NAVBAR ========= -->
 <!-- ======== START OF CLASS DATA ======== -->
 <div class="header">
-<div class="subTitle">io.fire.core.server.modules.request</div>
+<div class="subTitle">io.fire.core.main.modules.request</div>
 <h2 title="Class RequestModule" class="title">Class RequestModule</h2>
 </div>
 <div class="contentContainer">
@@ -99,7 +99,7 @@ var activeTableTab = "activeTableTab";
 <li>java.lang.Object</li>
 <li>
 <ul class="inheritance">
-<li>io.fire.core.server.modules.request.RequestModule</li>
+<li>io.fire.core.main.modules.request.RequestModule</li>
 </ul>
 </li>
 </ul>
@@ -128,7 +128,7 @@ extends java.lang.Object</pre>
 <th class="colOne" scope="col">Constructor and Description</th>
 </tr>
 <tr class="altColor">
-<td class="colOne"><code><span class="memberNameLink"><a href="../../../../../../io/fire/core/server/modules/request/RequestModule.html#RequestModule--">RequestModule</a></span>()</code>&nbsp;</td>
+<td class="colOne"><code><span class="memberNameLink"><a href="../../../../../../io/fire/core/main/modules/request/RequestModule.html#RequestModule--">RequestModule</a></span>()</code>&nbsp;</td>
 </tr>
 </table>
 </li>
@@ -147,17 +147,17 @@ extends java.lang.Object</pre>
 </tr>
 <tr id="i0" class="altColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../io/fire/core/server/modules/request/RequestModule.html#register-java.lang.String-io.fire.core.server.modules.request.interfaces.RequestExecutor-">register</a></span>(java.lang.String&nbsp;channel,
-        <a href="../../../../../../io/fire/core/server/modules/request/interfaces/RequestExecutor.html" title="interface in io.fire.core.server.modules.request.interfaces">RequestExecutor</a>&nbsp;executor)</code>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../io/fire/core/main/modules/request/RequestModule.html#register-java.lang.String-io.fire.core.main.modules.request.interfaces.RequestExecutor-">register</a></span>(java.lang.String&nbsp;channel,
+        <a href="../../../../../../io/fire/core/main/modules/request/interfaces/RequestExecutor.html" title="interface in io.fire.core.main.modules.request.interfaces">RequestExecutor</a>&nbsp;executor)</code>
 <div class="block">Register a request executor
- This makes it so the server can handle requests of this type (channel) in the future</div>
+ This makes it so the main can handle requests of this type (channel) in the future</div>
 </td>
 </tr>
 <tr id="i1" class="rowColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../io/fire/core/server/modules/request/RequestModule.html#trigger-java.lang.String-io.fire.core.common.interfaces.RequestBody-io.fire.core.server.modules.client.superclasses.Client-java.util.UUID-">trigger</a></span>(java.lang.String&nbsp;channel,
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../io/fire/core/main/modules/request/RequestModule.html#trigger-java.lang.String-io.fire.core.common.interfaces.RequestBody-io.fire.core.main.modules.client.superclasses.Client-java.util.UUID-">trigger</a></span>(java.lang.String&nbsp;channel,
        <a href="../../../../../../io/fire/core/common/interfaces/RequestBody.html" title="interface in io.fire.core.common.interfaces">RequestBody</a>&nbsp;body,
-       <a href="../../../../../../io/fire/core/server/modules/client/superclasses/Client.html" title="class in io.fire.core.server.modules.client.superclasses">Client</a>&nbsp;client,
+       <a href="../../../../../../io/fire/core/main/modules/client/superclasses/Client.html" title="class in io.fire.core.main.modules.client.superclasses">Client</a>&nbsp;client,
        java.util.UUID&nbsp;uuid)</code>
 <div class="block">Trigger a received request with channel and other information.</div>
 </td>
@@ -201,7 +201,7 @@ extends java.lang.Object</pre>
 <!--   -->
 </a>
 <h3>Method Detail</h3>
-<a name="trigger-java.lang.String-io.fire.core.common.interfaces.RequestBody-io.fire.core.server.modules.client.superclasses.Client-java.util.UUID-">
+<a name="trigger-java.lang.String-io.fire.core.common.interfaces.RequestBody-io.fire.core.main.modules.client.superclasses.Client-java.util.UUID-">
 <!--   -->
 </a>
 <ul class="blockList">
@@ -209,7 +209,7 @@ extends java.lang.Object</pre>
 <h4>trigger</h4>
 <pre>public&nbsp;void&nbsp;trigger(java.lang.String&nbsp;channel,
                     <a href="../../../../../../io/fire/core/common/interfaces/RequestBody.html" title="interface in io.fire.core.common.interfaces">RequestBody</a>&nbsp;body,
-                    <a href="../../../../../../io/fire/core/server/modules/client/superclasses/Client.html" title="class in io.fire.core.server.modules.client.superclasses">Client</a>&nbsp;client,
+                    <a href="../../../../../../io/fire/core/main/modules/client/superclasses/Client.html" title="class in io.fire.core.main.modules.client.superclasses">Client</a>&nbsp;client,
                     java.util.UUID&nbsp;uuid)</pre>
 <div class="block">Trigger a received request with channel and other information.
 
@@ -225,16 +225,16 @@ extends java.lang.Object</pre>
 </dl>
 </li>
 </ul>
-<a name="register-java.lang.String-io.fire.core.server.modules.request.interfaces.RequestExecutor-">
+<a name="register-java.lang.String-io.fire.core.main.modules.request.interfaces.RequestExecutor-">
 <!--   -->
 </a>
 <ul class="blockListLast">
 <li class="blockList">
 <h4>register</h4>
 <pre>public&nbsp;void&nbsp;register(java.lang.String&nbsp;channel,
-                     <a href="../../../../../../io/fire/core/server/modules/request/interfaces/RequestExecutor.html" title="interface in io.fire.core.server.modules.request.interfaces">RequestExecutor</a>&nbsp;executor)</pre>
+                     <a href="../../../../../../io/fire/core/main/modules/request/interfaces/RequestExecutor.html" title="interface in io.fire.core.main.modules.request.interfaces">RequestExecutor</a>&nbsp;executor)</pre>
 <div class="block">Register a request executor
- This makes it so the server can handle requests of this type (channel) in the future</div>
+ This makes it so the main can handle requests of this type (channel) in the future</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>channel</code> - </dd>
@@ -273,7 +273,7 @@ extends java.lang.Object</pre>
 <li>Next&nbsp;Class</li>
 </ul>
 <ul class="navList">
-<li><a href="../../../../../../index.html?io/fire/core/server/modules/request/RequestModule.html" target="_top">Frames</a></li>
+<li><a href="../../../../../../index.html?io/fire/core/main/modules/request/RequestModule.html" target="_top">Frames</a></li>
 <li><a href="RequestModule.html" target="_top">No&nbsp;Frames</a></li>
 </ul>
 <ul class="navList" id="allclasses_navbar_bottom">

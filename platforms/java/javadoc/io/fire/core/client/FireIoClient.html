@@ -137,7 +137,7 @@ implements <a href="../../../../io/fire/core/common/interfaces/PoolHolder.html" 
             int&nbsp;port)</code>
 <div class="block">Main FireIoClient
 
- Takes the host and port of a server
+ Takes the host and port of a main
  This is where the real party starts!
  or the nightmare, depending on what you think of networking</div>
 </td>
@@ -167,7 +167,7 @@ implements <a href="../../../../io/fire/core/common/interfaces/PoolHolder.html" 
 <td class="colFirst"><code><a href="../../../../io/fire/core/client/FireIoClient.html" title="class in io.fire.core.client">FireIoClient</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../io/fire/core/client/FireIoClient.html#connect--">connect</a></span>()</code>
 <div class="block">Connect function
- this takes all default or set information about the client and attempts to connect and start a connection with the server</div>
+ this takes all default or set information about the client and attempts to connect and start a connection with the main</div>
 </td>
 </tr>
 <tr id="i2" class="altColor">
@@ -195,21 +195,21 @@ implements <a href="../../../../io/fire/core/common/interfaces/PoolHolder.html" 
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../io/fire/core/client/FireIoClient.html#request-java.lang.String-io.fire.core.common.interfaces.RequestBody-io.fire.core.client.modules.request.interfaces.ClientRequest-">request</a></span>(java.lang.String&nbsp;channel,
        <a href="../../../../io/fire/core/common/interfaces/RequestBody.html" title="interface in io.fire.core.common.interfaces">RequestBody</a>&nbsp;request,
        <a href="../../../../io/fire/core/client/modules/request/interfaces/ClientRequest.html" title="interface in io.fire.core.client.modules.request.interfaces">ClientRequest</a>&nbsp;callback)</code>
-<div class="block">Submit a request to the server, with a callback function for when the request is finished</div>
+<div class="block">Submit a request to the main, with a callback function for when the request is finished</div>
 </td>
 </tr>
 <tr id="i6" class="altColor">
 <td class="colFirst"><code><a href="../../../../io/fire/core/client/FireIoClient.html" title="class in io.fire.core.client">FireIoClient</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../io/fire/core/client/FireIoClient.html#send-java.lang.String-io.fire.core.common.interfaces.Packet-">send</a></span>(java.lang.String&nbsp;channel,
     <a href="../../../../io/fire/core/common/interfaces/Packet.html" title="class in io.fire.core.common.interfaces">Packet</a>&nbsp;packet)</code>
-<div class="block">Send a packet over a channel to the server</div>
+<div class="block">Send a packet over a channel to the main</div>
 </td>
 </tr>
 <tr id="i7" class="rowColor">
 <td class="colFirst"><code><a href="../../../../io/fire/core/client/FireIoClient.html" title="class in io.fire.core.client">FireIoClient</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../io/fire/core/client/FireIoClient.html#send-java.lang.String-java.lang.String-">send</a></span>(java.lang.String&nbsp;channel,
     java.lang.String&nbsp;message)</code>
-<div class="block">Send a message (string) over a channel to the server</div>
+<div class="block">Send a message (string) over a channel to the main</div>
 </td>
 </tr>
 <tr id="i8" class="altColor">
@@ -231,7 +231,7 @@ implements <a href="../../../../io/fire/core/common/interfaces/PoolHolder.html" 
 <tr id="i10" class="altColor">
 <td class="colFirst"><code><a href="../../../../io/fire/core/client/FireIoClient.html" title="class in io.fire.core.client">FireIoClient</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../io/fire/core/client/FireIoClient.html#setPassword-java.lang.String-">setPassword</a></span>(java.lang.String&nbsp;password)</code>
-<div class="block">Set the password to connect to the server
+<div class="block">Set the password to connect to the main
  only has effect before the connect() function is called</div>
 </td>
 </tr>
@@ -239,7 +239,7 @@ implements <a href="../../../../io/fire/core/common/interfaces/PoolHolder.html" 
 <td class="colFirst"><code><a href="../../../../io/fire/core/client/FireIoClient.html" title="class in io.fire.core.client">FireIoClient</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../io/fire/core/client/FireIoClient.html#setTag-java.lang.String-java.lang.String-">setTag</a></span>(java.lang.String&nbsp;s,
       java.lang.String&nbsp;b)</code>
-<div class="block">Set a tag, this can be used by the server API to identify clients
+<div class="block">Set a tag, this can be used by the main API to identify clients
  works like a username</div>
 </td>
 </tr>
@@ -291,7 +291,7 @@ implements <a href="../../../../io/fire/core/common/interfaces/PoolHolder.html" 
                     int&nbsp;port)</pre>
 <div class="block">Main FireIoClient
 
- Takes the host and port of a server
+ Takes the host and port of a main
  This is where the real party starts!
  or the nightmare, depending on what you think of networking</div>
 <dl>
@@ -316,7 +316,7 @@ implements <a href="../../../../io/fire/core/common/interfaces/PoolHolder.html" 
 <li class="blockList">
 <h4>setPassword</h4>
 <pre>public&nbsp;<a href="../../../../io/fire/core/client/FireIoClient.html" title="class in io.fire.core.client">FireIoClient</a>&nbsp;setPassword(java.lang.String&nbsp;password)</pre>
-<div class="block">Set the password to connect to the server
+<div class="block">Set the password to connect to the main
  only has effect before the connect() function is called</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
@@ -349,7 +349,7 @@ implements <a href="../../../../io/fire/core/common/interfaces/PoolHolder.html" 
 <h4>setTag</h4>
 <pre>public&nbsp;<a href="../../../../io/fire/core/client/FireIoClient.html" title="class in io.fire.core.client">FireIoClient</a>&nbsp;setTag(java.lang.String&nbsp;s,
                            java.lang.String&nbsp;b)</pre>
-<div class="block">Set a tag, this can be used by the server API to identify clients
+<div class="block">Set a tag, this can be used by the main API to identify clients
  works like a username</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
@@ -404,7 +404,7 @@ implements <a href="../../../../io/fire/core/common/interfaces/PoolHolder.html" 
 <h4>connect</h4>
 <pre>public&nbsp;<a href="../../../../io/fire/core/client/FireIoClient.html" title="class in io.fire.core.client">FireIoClient</a>&nbsp;connect()</pre>
 <div class="block">Connect function
- this takes all default or set information about the client and attempts to connect and start a connection with the server</div>
+ this takes all default or set information about the client and attempts to connect and start a connection with the main</div>
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
 </dl>
@@ -418,7 +418,7 @@ implements <a href="../../../../io/fire/core/common/interfaces/PoolHolder.html" 
 <h4>send</h4>
 <pre>public&nbsp;<a href="../../../../io/fire/core/client/FireIoClient.html" title="class in io.fire.core.client">FireIoClient</a>&nbsp;send(java.lang.String&nbsp;channel,
                          <a href="../../../../io/fire/core/common/interfaces/Packet.html" title="class in io.fire.core.common.interfaces">Packet</a>&nbsp;packet)</pre>
-<div class="block">Send a packet over a channel to the server</div>
+<div class="block">Send a packet over a channel to the main</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>channel</code> - </dd>
@@ -435,7 +435,7 @@ implements <a href="../../../../io/fire/core/common/interfaces/PoolHolder.html" 
 <h4>send</h4>
 <pre>public&nbsp;<a href="../../../../io/fire/core/client/FireIoClient.html" title="class in io.fire.core.client">FireIoClient</a>&nbsp;send(java.lang.String&nbsp;channel,
                          java.lang.String&nbsp;message)</pre>
-<div class="block">Send a message (string) over a channel to the server</div>
+<div class="block">Send a message (string) over a channel to the main</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>channel</code> - </dd>
@@ -466,7 +466,7 @@ implements <a href="../../../../io/fire/core/common/interfaces/PoolHolder.html" 
 <pre>public&nbsp;<a href="../../../../io/fire/core/client/FireIoClient.html" title="class in io.fire.core.client">FireIoClient</a>&nbsp;request(java.lang.String&nbsp;channel,
                             <a href="../../../../io/fire/core/common/interfaces/RequestBody.html" title="interface in io.fire.core.common.interfaces">RequestBody</a>&nbsp;request,
                             <a href="../../../../io/fire/core/client/modules/request/interfaces/ClientRequest.html" title="interface in io.fire.core.client.modules.request.interfaces">ClientRequest</a>&nbsp;callback)</pre>
-<div class="block">Submit a request to the server, with a callback function for when the request is finished</div>
+<div class="block">Submit a request to the main, with a callback function for when the request is finished</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>channel</code> - </dd>

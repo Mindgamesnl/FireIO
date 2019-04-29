@@ -48,11 +48,11 @@ var activeTableTab = "activeTableTab";
 </div>
 <div class="subNav">
 <ul class="navList">
-<li><a href="../../../../../../../io/fire/core/server/modules/socket/handlers/SelectorHandler.html" title="class in io.fire.core.server.modules.socket.handlers"><span class="typeNameLink">Prev&nbsp;Class</span></a></li>
+<li><a href="../../../../../../../io/fire/core/main/modules/socket/handlers/SelectorHandler.html" title="class in io.fire.core.main.modules.socket.handlers"><span class="typeNameLink">Prev&nbsp;Class</span></a></li>
 <li>Next&nbsp;Class</li>
 </ul>
 <ul class="navList">
-<li><a href="../../../../../../../index.html?io/fire/core/server/modules/socket/handlers/SocketClientHandler.html" target="_top">Frames</a></li>
+<li><a href="../../../../../../../index.html?io/fire/core/main/modules/socket/handlers/SocketClientHandler.html" target="_top">Frames</a></li>
 <li><a href="SocketClientHandler.html" target="_top">No&nbsp;Frames</a></li>
 </ul>
 <ul class="navList" id="allclasses_navbar_top">
@@ -91,7 +91,7 @@ var activeTableTab = "activeTableTab";
 <!-- ========= END OF TOP NAVBAR ========= -->
 <!-- ======== START OF CLASS DATA ======== -->
 <div class="header">
-<div class="subTitle">io.fire.core.server.modules.socket.handlers</div>
+<div class="subTitle">io.fire.core.main.modules.socket.handlers</div>
 <h2 title="Class SocketClientHandler" class="title">Class SocketClientHandler</h2>
 </div>
 <div class="contentContainer">
@@ -99,7 +99,7 @@ var activeTableTab = "activeTableTab";
 <li>java.lang.Object</li>
 <li>
 <ul class="inheritance">
-<li>io.fire.core.server.modules.socket.handlers.SocketClientHandler</li>
+<li>io.fire.core.main.modules.socket.handlers.SocketClientHandler</li>
 </ul>
 </li>
 </ul>
@@ -135,7 +135,7 @@ implements <a href="../../../../../../../io/fire/core/common/interfaces/SocketEv
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>boolean</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../../io/fire/core/server/modules/socket/handlers/SocketClientHandler.html#authenticated">authenticated</a></span></code>&nbsp;</td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../../io/fire/core/main/modules/socket/handlers/SocketClientHandler.html#authenticated">authenticated</a></span></code>&nbsp;</td>
 </tr>
 </table>
 </li>
@@ -154,14 +154,14 @@ implements <a href="../../../../../../../io/fire/core/common/interfaces/SocketEv
 </tr>
 <tr id="i0" class="altColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../../io/fire/core/server/modules/socket/handlers/SocketClientHandler.html#close--">close</a></span>()</code>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../../io/fire/core/main/modules/socket/handlers/SocketClientHandler.html#close--">close</a></span>()</code>
 <div class="block">Close the connection in a clean way on both sides
  when finished, clean up on both sides and remove all traces of it ever existing</div>
 </td>
 </tr>
 <tr id="i1" class="rowColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../../io/fire/core/server/modules/socket/handlers/SocketClientHandler.html#emit-io.fire.core.common.interfaces.Packet-">emit</a></span>(<a href="../../../../../../../io/fire/core/common/interfaces/Packet.html" title="class in io.fire.core.common.interfaces">Packet</a>&nbsp;p)</code>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../../io/fire/core/main/modules/socket/handlers/SocketClientHandler.html#emit-io.fire.core.common.interfaces.Packet-">emit</a></span>(<a href="../../../../../../../io/fire/core/common/interfaces/Packet.html" title="class in io.fire.core.common.interfaces">Packet</a>&nbsp;p)</code>
 <div class="block">Emit or write a packet
 
  this checks the connection type
@@ -173,13 +173,13 @@ implements <a href="../../../../../../../io/fire/core/common/interfaces/SocketEv
 </tr>
 <tr id="i2" class="altColor">
 <td class="colFirst"><code><a href="../../../../../../../io/fire/core/common/io/IoManager.html" title="class in io.fire.core.common.io">IoManager</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../../io/fire/core/server/modules/socket/handlers/SocketClientHandler.html#getIoManager--">getIoManager</a></span>()</code>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../../io/fire/core/main/modules/socket/handlers/SocketClientHandler.html#getIoManager--">getIoManager</a></span>()</code>
 <div class="block">Get the current active IoHandler</div>
 </td>
 </tr>
 <tr id="i3" class="rowColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../../io/fire/core/server/modules/socket/handlers/SocketClientHandler.html#onClose--">onClose</a></span>()</code>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../../io/fire/core/main/modules/socket/handlers/SocketClientHandler.html#onClose--">onClose</a></span>()</code>
 <div class="block">Close handler
  this checks the state in which the connection is closed and handles it appropriately
  this is where gets decided if the connection got CLOSED or that it DIED</div>
@@ -187,20 +187,20 @@ implements <a href="../../../../../../../io/fire/core/common/interfaces/SocketEv
 </tr>
 <tr id="i4" class="altColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../../io/fire/core/server/modules/socket/handlers/SocketClientHandler.html#onMessage-java.util.function.Consumer-">onMessage</a></span>(java.util.function.Consumer&lt;<a href="../../../../../../../io/fire/core/common/eventmanager/interfaces/EventPayload.html" title="interface in io.fire.core.common.eventmanager.interfaces">EventPayload</a>&gt;&nbsp;listener)</code>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../../io/fire/core/main/modules/socket/handlers/SocketClientHandler.html#onMessage-java.util.function.Consumer-">onMessage</a></span>(java.util.function.Consumer&lt;<a href="../../../../../../../io/fire/core/common/eventmanager/interfaces/EventPayload.html" title="interface in io.fire.core.common.eventmanager.interfaces">EventPayload</a>&gt;&nbsp;listener)</code>
 <div class="block">Register the on-message handler, used for internal cross overs</div>
 </td>
 </tr>
 <tr id="i5" class="rowColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../../io/fire/core/server/modules/socket/handlers/SocketClientHandler.html#onOpen--">onOpen</a></span>()</code>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../../io/fire/core/main/modules/socket/handlers/SocketClientHandler.html#onOpen--">onOpen</a></span>()</code>
 <div class="block">On open handler
  reset the expectedClosing state</div>
 </td>
 </tr>
 <tr id="i6" class="altColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../../io/fire/core/server/modules/socket/handlers/SocketClientHandler.html#onPacket-io.fire.core.common.interfaces.Packet-">onPacket</a></span>(<a href="../../../../../../../io/fire/core/common/interfaces/Packet.html" title="class in io.fire.core.common.interfaces">Packet</a>&nbsp;packet)</code>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../../io/fire/core/main/modules/socket/handlers/SocketClientHandler.html#onPacket-io.fire.core.common.interfaces.Packet-">onPacket</a></span>(<a href="../../../../../../../io/fire/core/common/interfaces/Packet.html" title="class in io.fire.core.common.interfaces">Packet</a>&nbsp;packet)</code>
 <div class="block">FIRST low level Packet handler
 
  The first thing that happens when a packet is received, this handles internal packets and triggers the API</div>
@@ -208,7 +208,7 @@ implements <a href="../../../../../../../io/fire/core/common/interfaces/SocketEv
 </tr>
 <tr id="i7" class="rowColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../../io/fire/core/server/modules/socket/handlers/SocketClientHandler.html#onWebSocketPacket-io.fire.core.common.io.objects.WebSocketTransaction-">onWebSocketPacket</a></span>(<a href="../../../../../../../io/fire/core/common/io/objects/WebSocketTransaction.html" title="class in io.fire.core.common.io.objects">WebSocketTransaction</a>&nbsp;webSocketTransaction)</code>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../../io/fire/core/main/modules/socket/handlers/SocketClientHandler.html#onWebSocketPacket-io.fire.core.common.io.objects.WebSocketTransaction-">onWebSocketPacket</a></span>(<a href="../../../../../../../io/fire/core/common/io/objects/WebSocketTransaction.html" title="class in io.fire.core.common.io.objects">WebSocketTransaction</a>&nbsp;webSocketTransaction)</code>
 <div class="block">Java implementation of the WebSocket handshake over the HTTP protocol
  (connection upgrade)</div>
 </td>
@@ -412,11 +412,11 @@ implements <a href="../../../../../../../io/fire/core/common/interfaces/SocketEv
 </div>
 <div class="subNav">
 <ul class="navList">
-<li><a href="../../../../../../../io/fire/core/server/modules/socket/handlers/SelectorHandler.html" title="class in io.fire.core.server.modules.socket.handlers"><span class="typeNameLink">Prev&nbsp;Class</span></a></li>
+<li><a href="../../../../../../../io/fire/core/main/modules/socket/handlers/SelectorHandler.html" title="class in io.fire.core.main.modules.socket.handlers"><span class="typeNameLink">Prev&nbsp;Class</span></a></li>
 <li>Next&nbsp;Class</li>
 </ul>
 <ul class="navList">
-<li><a href="../../../../../../../index.html?io/fire/core/server/modules/socket/handlers/SocketClientHandler.html" target="_top">Frames</a></li>
+<li><a href="../../../../../../../index.html?io/fire/core/main/modules/socket/handlers/SocketClientHandler.html" target="_top">Frames</a></li>
 <li><a href="SocketClientHandler.html" target="_top">No&nbsp;Frames</a></li>
 </ul>
 <ul class="navList" id="allclasses_navbar_bottom">

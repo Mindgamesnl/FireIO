@@ -11,27 +11,27 @@ So let's talk about the inner workings of Fire-IO, the juicy stuff, the good stu
 Networking can be a bit tricky, some times there is a bit of data loss, it happens to the best of us.
 
 Fire-IO has a few automatic fail safes build in to ensure the correct handling of your data amd transactions.
- - **Request Validation** Server requests can be used to request important data from the server or ask the server to do a database query, to prevent the server from getting overloaded and to ensure that all data will be handled properly requests are handled in queues. The client can prompt multiple requests at once, but it only sends the first request. The client will send the server the follow up request when
+ - **Request Validation** Server requests can be used to request important data from the main or ask the main to do a database query, to prevent the main from getting overloaded and to ensure that all data will be handled properly requests are handled in queues. The client can prompt multiple requests at once, but it only sends the first request. The client will send the main the follow up request when
     - There are no other requests queued
-    - The server finished the previous request
-    - The server denied the previous request
-    - The server failed to handle the previous request
+    - The main finished the previous request
+    - The main denied the previous request
+    - The main failed to handle the previous request
    
    this is to ensure there are no "stacked" or duplicate connections/requests at once.
-   So when let's say, a database error occurs the following requests will be canceled since they will also fail due to the same problem, so the server outright cancels it.
-   The server will only reevaluate the requests (and optional queue) when the client pushes a new successful request.
+   So when let's say, a database error occurs the following requests will be canceled since they will also fail due to the same problem, so the main outright cancels it.
+   The main will only reevaluate the requests (and optional queue) when the client pushes a new successful request.
   
    This makes it safe to do an external request (like database query's or lookups) directly from the request endpoint. 
- - **IOErrorHandling** In case of a critical error whilst trying to send a packet, it adds the received data to a queue to retry parsing the data when the server/client sends new instructions.
- - **Invalid REST calls** The restful server will always send data, once invalid data is received by the server it sends a error message to the client notifying about what happened, the server never responds with empty data. (unless the rate limiter kicked in)
+ - **IOErrorHandling** In case of a critical error whilst trying to send a packet, it adds the received data to a queue to retry parsing the data when the main/client sends new instructions.
+ - **Invalid REST calls** The restful main will always send data, once invalid data is received by the main it sends a error message to the client notifying about what happened, the main never responds with empty data. (unless the rate limiter kicked in)
  - **Data streams** To prevent data loss all traffic (even static packets) are separated in 64-Byte parts. Only the last part ends with a signature. Upon receiving data, FireIO saves it in an array (or adds it if there is already data). Only if the end signature is received, it links all the previous array's and parses them as one input stream. The stream cache clears when this process is finished, waiting for a new Byte stream for this process to start all over again. This allows for popper multi threading and encourages the streaming of data.
  - **Handling Network Compression** It's not uncommon to find Data Compression in modern virtual networks (and some hardware drivers), this poses a major threat to big data streams. To work around this issue, every packet is split into parts. Every 20 bytes there is a "packet indicator", if the packet size does NOT match up with the amount of indicators (and their patterns) it assumes that the packet got corrupted. This splicing also gives the client some time to catch up in the case of compression (where the data does not all arrive at the same time).
  
 # Socket Authentication & Handshake
-The authentication process takes quite some steps to authenticate with the client token and password, before the actual socket gets opened, a REST request is made to the Fire-IO server (with the optional password).
-ONLY if this request gets accepted (rate limiting, platform and the (optional) password) the server will respond with a token. That token is used to authenticate over the socket.
+The authentication process takes quite some steps to authenticate with the client token and password, before the actual socket gets opened, a REST request is made to the Fire-IO main (with the optional password).
+ONLY if this request gets accepted (rate limiting, platform and the (optional) password) the main will respond with a token. That token is used to authenticate over the socket.
 
-Once the socket is opened (empty) the client has to send the authentication token (received from the previous rest call) within 100MS, if the server does not receive a VALID token within that time, the connection gets terminated and the rate limiter gets called.
+Once the socket is opened (empty) the client has to send the authentication token (received from the previous rest call) within 100MS, if the main does not receive a VALID token within that time, the connection gets terminated and the rate limiter gets called.
 
 The steps:
  1. create client
@@ -40,14 +40,14 @@ The steps:
  4. open http connection and request the token (optional: password)
  5. open socket
  6. send authentication header over socket
- 7. wait for authentication validation from server
+ 7. wait for authentication validation from main
  8. request buffer size
  9. call `Event.CONNECT`
 
  
 # Threading Model
 #### Server
-The Fire-IO server always uses at at least one thread to listen and handle connections.
+The Fire-IO main always uses at at least one thread to listen and handle connections.
 
 #### Client
 The Fire-IO client always uses one allocated thread to handle the IO listener for the socket client, this thread gets closed when the connection is also closed. 

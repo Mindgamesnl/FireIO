@@ -52,7 +52,7 @@ var activeTableTab = "activeTableTab";
 <li>Next&nbsp;Class</li>
 </ul>
 <ul class="navList">
-<li><a href="../../../../../../index.html?io/fire/core/server/modules/client/ClientModule.html" target="_top">Frames</a></li>
+<li><a href="../../../../../../index.html?io/fire/core/main/modules/client/ClientModule.html" target="_top">Frames</a></li>
 <li><a href="ClientModule.html" target="_top">No&nbsp;Frames</a></li>
 </ul>
 <ul class="navList" id="allclasses_navbar_top">
@@ -91,7 +91,7 @@ var activeTableTab = "activeTableTab";
 <!-- ========= END OF TOP NAVBAR ========= -->
 <!-- ======== START OF CLASS DATA ======== -->
 <div class="header">
-<div class="subTitle">io.fire.core.server.modules.client</div>
+<div class="subTitle">io.fire.core.main.modules.client</div>
 <h2 title="Class ClientModule" class="title">Class ClientModule</h2>
 </div>
 <div class="contentContainer">
@@ -99,7 +99,7 @@ var activeTableTab = "activeTableTab";
 <li>java.lang.Object</li>
 <li>
 <ul class="inheritance">
-<li>io.fire.core.server.modules.client.ClientModule</li>
+<li>io.fire.core.main.modules.client.ClientModule</li>
 </ul>
 </li>
 </ul>
@@ -129,8 +129,8 @@ extends java.lang.Object</pre>
 <th class="colLast" scope="col">Field and Description</th>
 </tr>
 <tr class="altColor">
-<td class="colFirst"><code>java.util.Map&lt;java.util.UUID,<a href="../../../../../../io/fire/core/server/modules/client/objects/FireIoConnection.html" title="class in io.fire.core.server.modules.client.objects">FireIoConnection</a>&gt;</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../io/fire/core/server/modules/client/ClientModule.html#connectionMap">connectionMap</a></span></code>&nbsp;</td>
+<td class="colFirst"><code>java.util.Map&lt;java.util.UUID,<a href="../../../../../../io/fire/core/main/modules/client/objects/FireIoConnection.html" title="class in io.fire.core.main.modules.client.objects">FireIoConnection</a>&gt;</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../io/fire/core/main/modules/client/ClientModule.html#connectionMap">connectionMap</a></span></code>&nbsp;</td>
 </tr>
 </table>
 </li>
@@ -147,7 +147,7 @@ extends java.lang.Object</pre>
 <th class="colOne" scope="col">Constructor and Description</th>
 </tr>
 <tr class="altColor">
-<td class="colOne"><code><span class="memberNameLink"><a href="../../../../../../io/fire/core/server/modules/client/ClientModule.html#ClientModule-io.fire.core.server.FireIoServer-">ClientModule</a></span>(<a href="../../../../../../io/fire/core/server/FireIoServer.html" title="class in io.fire.core.server">FireIoServer</a>&nbsp;s)</code>&nbsp;</td>
+<td class="colOne"><code><span class="memberNameLink"><a href="../../../../../../io/fire/core/main/modules/client/ClientModule.html#ClientModule-io.fire.core.main.FireIoServer-">ClientModule</a></span>(<a href="../../../../../../io/fire/core/main/FireIoServer.html" title="class in io.fire.core.main">FireIoServer</a>&nbsp;s)</code>&nbsp;</td>
 </tr>
 </table>
 </li>
@@ -165,28 +165,28 @@ extends java.lang.Object</pre>
 <th class="colLast" scope="col">Method and Description</th>
 </tr>
 <tr id="i0" class="altColor">
-<td class="colFirst"><code>java.util.Collection&lt;<a href="../../../../../../io/fire/core/server/modules/client/objects/FireIoConnection.html" title="class in io.fire.core.server.modules.client.objects">FireIoConnection</a>&gt;</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../io/fire/core/server/modules/client/ClientModule.html#getAll--">getAll</a></span>()</code>
+<td class="colFirst"><code>java.util.Collection&lt;<a href="../../../../../../io/fire/core/main/modules/client/objects/FireIoConnection.html" title="class in io.fire.core.main.modules.client.objects">FireIoConnection</a>&gt;</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../io/fire/core/main/modules/client/ClientModule.html#getAll--">getAll</a></span>()</code>
 <div class="block">Get all connected clients</div>
 </td>
 </tr>
 <tr id="i1" class="rowColor">
-<td class="colFirst"><code><a href="../../../../../../io/fire/core/server/modules/client/objects/FireIoConnection.html" title="class in io.fire.core.server.modules.client.objects">FireIoConnection</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../io/fire/core/server/modules/client/ClientModule.html#getClient-java.util.UUID-">getClient</a></span>(java.util.UUID&nbsp;connectionId)</code>
+<td class="colFirst"><code><a href="../../../../../../io/fire/core/main/modules/client/objects/FireIoConnection.html" title="class in io.fire.core.main.modules.client.objects">FireIoConnection</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../io/fire/core/main/modules/client/ClientModule.html#getClient-java.util.UUID-">getClient</a></span>(java.util.UUID&nbsp;connectionId)</code>
 <div class="block">Get a client by ID
  returns NULL if the id is not valid</div>
 </td>
 </tr>
 <tr id="i2" class="altColor">
-<td class="colFirst"><code><a href="../../../../../../io/fire/core/server/modules/client/objects/FireIoConnection.html" title="class in io.fire.core.server.modules.client.objects">FireIoConnection</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../io/fire/core/server/modules/client/ClientModule.html#registerConnection--">registerConnection</a></span>()</code>
+<td class="colFirst"><code><a href="../../../../../../io/fire/core/main/modules/client/objects/FireIoConnection.html" title="class in io.fire.core.main.modules.client.objects">FireIoConnection</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../io/fire/core/main/modules/client/ClientModule.html#registerConnection--">registerConnection</a></span>()</code>
 <div class="block">Create a new empty client
  Ready to setup for new incoming connections</div>
 </td>
 </tr>
 <tr id="i3" class="rowColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../io/fire/core/server/modules/client/ClientModule.html#removeClient-java.util.UUID-">removeClient</a></span>(java.util.UUID&nbsp;c)</code>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../io/fire/core/main/modules/client/ClientModule.html#removeClient-java.util.UUID-">removeClient</a></span>(java.util.UUID&nbsp;c)</code>
 <div class="block">Remove a client and delete its resources
  Prevents memory leaks and unused objects hanging around</div>
 </td>
@@ -219,7 +219,7 @@ extends java.lang.Object</pre>
 <ul class="blockListLast">
 <li class="blockList">
 <h4>connectionMap</h4>
-<pre>public&nbsp;java.util.Map&lt;java.util.UUID,<a href="../../../../../../io/fire/core/server/modules/client/objects/FireIoConnection.html" title="class in io.fire.core.server.modules.client.objects">FireIoConnection</a>&gt; connectionMap</pre>
+<pre>public&nbsp;java.util.Map&lt;java.util.UUID,<a href="../../../../../../io/fire/core/main/modules/client/objects/FireIoConnection.html" title="class in io.fire.core.main.modules.client.objects">FireIoConnection</a>&gt; connectionMap</pre>
 </li>
 </ul>
 </li>
@@ -230,13 +230,13 @@ extends java.lang.Object</pre>
 <!--   -->
 </a>
 <h3>Constructor Detail</h3>
-<a name="ClientModule-io.fire.core.server.FireIoServer-">
+<a name="ClientModule-io.fire.core.main.FireIoServer-">
 <!--   -->
 </a>
 <ul class="blockListLast">
 <li class="blockList">
 <h4>ClientModule</h4>
-<pre>public&nbsp;ClientModule(<a href="../../../../../../io/fire/core/server/FireIoServer.html" title="class in io.fire.core.server">FireIoServer</a>&nbsp;s)</pre>
+<pre>public&nbsp;ClientModule(<a href="../../../../../../io/fire/core/main/FireIoServer.html" title="class in io.fire.core.main">FireIoServer</a>&nbsp;s)</pre>
 </li>
 </ul>
 </li>
@@ -253,7 +253,7 @@ extends java.lang.Object</pre>
 <ul class="blockList">
 <li class="blockList">
 <h4>getClient</h4>
-<pre>public&nbsp;<a href="../../../../../../io/fire/core/server/modules/client/objects/FireIoConnection.html" title="class in io.fire.core.server.modules.client.objects">FireIoConnection</a>&nbsp;getClient(java.util.UUID&nbsp;connectionId)</pre>
+<pre>public&nbsp;<a href="../../../../../../io/fire/core/main/modules/client/objects/FireIoConnection.html" title="class in io.fire.core.main.modules.client.objects">FireIoConnection</a>&nbsp;getClient(java.util.UUID&nbsp;connectionId)</pre>
 <div class="block">Get a client by ID
  returns NULL if the id is not valid</div>
 <dl>
@@ -284,7 +284,7 @@ extends java.lang.Object</pre>
 <ul class="blockList">
 <li class="blockList">
 <h4>registerConnection</h4>
-<pre>public&nbsp;<a href="../../../../../../io/fire/core/server/modules/client/objects/FireIoConnection.html" title="class in io.fire.core.server.modules.client.objects">FireIoConnection</a>&nbsp;registerConnection()</pre>
+<pre>public&nbsp;<a href="../../../../../../io/fire/core/main/modules/client/objects/FireIoConnection.html" title="class in io.fire.core.main.modules.client.objects">FireIoConnection</a>&nbsp;registerConnection()</pre>
 <div class="block">Create a new empty client
  Ready to setup for new incoming connections</div>
 <dl>
@@ -298,7 +298,7 @@ extends java.lang.Object</pre>
 <ul class="blockListLast">
 <li class="blockList">
 <h4>getAll</h4>
-<pre>public&nbsp;java.util.Collection&lt;<a href="../../../../../../io/fire/core/server/modules/client/objects/FireIoConnection.html" title="class in io.fire.core.server.modules.client.objects">FireIoConnection</a>&gt;&nbsp;getAll()</pre>
+<pre>public&nbsp;java.util.Collection&lt;<a href="../../../../../../io/fire/core/main/modules/client/objects/FireIoConnection.html" title="class in io.fire.core.main.modules.client.objects">FireIoConnection</a>&gt;&nbsp;getAll()</pre>
 <div class="block">Get all connected clients</div>
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
@@ -336,7 +336,7 @@ extends java.lang.Object</pre>
 <li>Next&nbsp;Class</li>
 </ul>
 <ul class="navList">
-<li><a href="../../../../../../index.html?io/fire/core/server/modules/client/ClientModule.html" target="_top">Frames</a></li>
+<li><a href="../../../../../../index.html?io/fire/core/main/modules/client/ClientModule.html" target="_top">Frames</a></li>
 <li><a href="ClientModule.html" target="_top">No&nbsp;Frames</a></li>
 </ul>
 <ul class="navList" id="allclasses_navbar_bottom">

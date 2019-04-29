@@ -129,7 +129,7 @@ extends java.lang.Object</pre>
 </tr>
 <tr class="altColor">
 <td class="colOne"><code><span class="memberNameLink"><a href="../../../../../io/fire/core/loadbalancer/servermanager/ServerManager.html#ServerManager-io.fire.core.loadbalancer.FireIoBalancer-">ServerManager</a></span>(<a href="../../../../../io/fire/core/loadbalancer/FireIoBalancer.html" title="class in io.fire.core.loadbalancer">FireIoBalancer</a>&nbsp;balancer)</code>
-<div class="block">Setup the server manager and a task scheduler to check the health of all the nodes</div>
+<div class="block">Setup the main manager and a task scheduler to check the health of all the nodes</div>
 </td>
 </tr>
 </table>
@@ -156,18 +156,18 @@ extends java.lang.Object</pre>
 <tr id="i1" class="rowColor">
 <td class="colFirst"><code><a href="../../../../../io/fire/core/loadbalancer/servermanager/objects/FireIoNode.html" title="class in io.fire.core.loadbalancer.servermanager.objects">FireIoNode</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../io/fire/core/loadbalancer/servermanager/ServerManager.html#getAvailableEndpoint--">getAvailableEndpoint</a></span>()</code>
-<div class="block">Get a server with the least amount of http tasks in the last few seconds</div>
+<div class="block">Get a main with the least amount of http tasks in the last few seconds</div>
 </td>
 </tr>
 <tr id="i2" class="altColor">
 <td class="colFirst"><code><a href="../../../../../io/fire/core/loadbalancer/servermanager/objects/FireIoNode.html" title="class in io.fire.core.loadbalancer.servermanager.objects">FireIoNode</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../io/fire/core/loadbalancer/servermanager/ServerManager.html#getAvailableServer--">getAvailableServer</a></span>()</code>
-<div class="block">Get best available server with the least connected and concurrent clients</div>
+<div class="block">Get best available main with the least connected and concurrent clients</div>
 </td>
 </tr>
 <tr id="i3" class="rowColor">
 <td class="colFirst"><code><a href="../../../../../io/fire/core/loadbalancer/servermanager/objects/FireIoNode.html" title="class in io.fire.core.loadbalancer.servermanager.objects">FireIoNode</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../io/fire/core/loadbalancer/servermanager/ServerManager.html#getNode-io.fire.core.server.modules.client.superclasses.Client-">getNode</a></span>(<a href="../../../../../io/fire/core/server/modules/client/superclasses/Client.html" title="class in io.fire.core.server.modules.client.superclasses">Client</a>&nbsp;client)</code>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../io/fire/core/loadbalancer/servermanager/ServerManager.html#getNode-io.fire.core.main.modules.client.superclasses.Client-">getNode</a></span>(<a href="../../../../../io/fire/core/main/modules/client/superclasses/Client.html" title="class in io.fire.core.main.modules.client.superclasses">Client</a>&nbsp;client)</code>
 <div class="block">Get a node by ID</div>
 </td>
 </tr>
@@ -200,7 +200,7 @@ extends java.lang.Object</pre>
 <li class="blockList">
 <h4>ServerManager</h4>
 <pre>public&nbsp;ServerManager(<a href="../../../../../io/fire/core/loadbalancer/FireIoBalancer.html" title="class in io.fire.core.loadbalancer">FireIoBalancer</a>&nbsp;balancer)</pre>
-<div class="block">Setup the server manager and a task scheduler to check the health of all the nodes</div>
+<div class="block">Setup the main manager and a task scheduler to check the health of all the nodes</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>balancer</code> - </dd>
@@ -222,7 +222,7 @@ extends java.lang.Object</pre>
 <li class="blockList">
 <h4>getAvailableServer</h4>
 <pre>public&nbsp;<a href="../../../../../io/fire/core/loadbalancer/servermanager/objects/FireIoNode.html" title="class in io.fire.core.loadbalancer.servermanager.objects">FireIoNode</a>&nbsp;getAvailableServer()</pre>
-<div class="block">Get best available server with the least connected and concurrent clients</div>
+<div class="block">Get best available main with the least connected and concurrent clients</div>
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
 </dl>
@@ -235,7 +235,7 @@ extends java.lang.Object</pre>
 <li class="blockList">
 <h4>getAvailableEndpoint</h4>
 <pre>public&nbsp;<a href="../../../../../io/fire/core/loadbalancer/servermanager/objects/FireIoNode.html" title="class in io.fire.core.loadbalancer.servermanager.objects">FireIoNode</a>&nbsp;getAvailableEndpoint()</pre>
-<div class="block">Get a server with the least amount of http tasks in the last few seconds</div>
+<div class="block">Get a main with the least amount of http tasks in the last few seconds</div>
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
 </dl>
@@ -256,13 +256,13 @@ extends java.lang.Object</pre>
 </dl>
 </li>
 </ul>
-<a name="getNode-io.fire.core.server.modules.client.superclasses.Client-">
+<a name="getNode-io.fire.core.main.modules.client.superclasses.Client-">
 <!--   -->
 </a>
 <ul class="blockListLast">
 <li class="blockList">
 <h4>getNode</h4>
-<pre>public&nbsp;<a href="../../../../../io/fire/core/loadbalancer/servermanager/objects/FireIoNode.html" title="class in io.fire.core.loadbalancer.servermanager.objects">FireIoNode</a>&nbsp;getNode(<a href="../../../../../io/fire/core/server/modules/client/superclasses/Client.html" title="class in io.fire.core.server.modules.client.superclasses">Client</a>&nbsp;client)</pre>
+<pre>public&nbsp;<a href="../../../../../io/fire/core/loadbalancer/servermanager/objects/FireIoNode.html" title="class in io.fire.core.loadbalancer.servermanager.objects">FireIoNode</a>&nbsp;getNode(<a href="../../../../../io/fire/core/main/modules/client/superclasses/Client.html" title="class in io.fire.core.main.modules.client.superclasses">Client</a>&nbsp;client)</pre>
 <div class="block">Get a node by ID</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
