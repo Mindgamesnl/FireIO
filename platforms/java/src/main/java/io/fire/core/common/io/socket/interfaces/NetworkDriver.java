@@ -1,4 +1,4 @@
-package io.fire.core.server.modules.socket.interfaces;
+package io.fire.core.common.io.socket.interfaces;
 
 public interface NetworkDriver {
 
