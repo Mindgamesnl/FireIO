@@ -19,7 +19,7 @@ public class Request {
     }
 
     public String getBody() {
-        return httpContent.getBody();
+        return httpContent.getBodyAsString();
     }
 
     public String getHeader(String key) {

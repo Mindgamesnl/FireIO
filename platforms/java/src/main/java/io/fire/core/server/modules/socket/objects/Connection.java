@@ -2,7 +2,7 @@ package io.fire.core.server.modules.socket.objects;
 
 import io.fire.core.server.FireIoServer;
 import io.fire.core.server.modules.socket.driver.HandshakeDriver;
-import io.fire.core.server.modules.socket.interfaces.NetworkDriver;
+import io.fire.core.common.io.socket.interfaces.NetworkDriver;
 
 import lombok.Getter;
 import lombok.Setter;

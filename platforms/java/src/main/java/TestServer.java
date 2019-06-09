@@ -2,7 +2,7 @@ import io.fire.core.server.FireIoServer;
 
 import java.io.IOException;
 
-public class test {
+public class TestServer {
 
     public static void main(String[] args) {
         try {

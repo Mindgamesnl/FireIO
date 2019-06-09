@@ -1,12 +1,23 @@
 package io.fire.core.client.modules.socket.handlers;
 
 import io.fire.core.client.FireIoClient;
+import io.fire.core.client.modules.socket.drivers.ClientDriver;
 import io.fire.core.common.events.enums.Event;
+import io.fire.core.common.io.http.objects.HttpContent;
+import io.fire.core.common.io.socket.interfaces.Packager;
+import io.fire.core.common.io.socket.packets.EmptyPacket;
+import io.fire.core.server.modules.socket.objects.Connection;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.net.Socket;
 import java.nio.ByteBuffer;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.Selector;
+import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.util.Iterator;
+import java.util.Set;
 
 public class OutgoingConnection implements Runnable {
 
@@ -14,15 +25,22 @@ public class OutgoingConnection implements Runnable {
 
     private Boolean isConnected;
     private SocketChannel socketChannel;
+    private ClientDriver clientDriver;
     private Thread socketListener;
+    private Selector selector;
 
     public OutgoingConnection(FireIoClient client) throws IOException {
         this.client = client;
-        socketChannel = SocketChannel.open(new InetSocketAddress(client.getHost(), client.getPort()));
-        socketChannel.configureBlocking(true);
+        socketChannel = SocketChannel.open(new InetSocketAddress(client.getHost().getHost(), client.getHost().getPort()));
+        socketChannel.configureBlocking(false);
+        selector = Selector.open();
+        socketChannel.register(this.selector, SelectionKey.OP_READ);
         socketListener = new Thread(this);
         socketListener.start();
         isConnected = true;
+
+        this.clientDriver = new ClientDriver(client, socketChannel.socket());
+        this.clientDriver.onOpen();
     }
 
     public void shutdown(Event event, String cause) {
@@ -33,36 +51,75 @@ public class OutgoingConnection implements Runnable {
             //ignored
         }
         socketListener.stop();
-        client.getEventHandler().triggerEvent(event, null, cause);
+        client.getEventHandler().triggerEvent(event, cause);
     }
 
     @Override
     public void run() {
         while (true) {
             try {
-                ByteBuffer buffer = ByteBuffer.allocate(1001);
-                int numRead = -1;
-                try {
-                    numRead = socketChannel.read(buffer);
-                } catch (IOException e) {
-                    shutdown(Event.TIMED_OUT, "Connection timed out! (server unreachable)");
+                int readyCount = selector.select();
+                if (readyCount == 0) {
+                    continue;
                 }
 
-                if (numRead == -1) {
-                    shutdown(Event.TIMED_OUT, "Connection timed out! (invalid data)");
-                    channel.close();
-                    return;
+                Set<SelectionKey> readyKeys = selector.selectedKeys();
+                Iterator<SelectionKey> iterator = readyKeys.iterator();
+
+                while (iterator.hasNext()) {
+                    SelectionKey key = iterator.next();
+                    iterator.remove();
+                    if (!key.isValid()) {
+                        continue;
+                    }
+
+                    if (key.isReadable()) {
+                        read(key);
+                    }
                 }
-
-                int finalNumRead = numRead;
-                byte[] data = new byte[finalNumRead];
-                System.arraycopy(buffer.array(), 0, data, 0, finalNumRead);
-
-                asyncConnectionHandler.getIoManager().handleData(data, client, finalNumRead);
             } catch (Exception e) {
-                shutdown(Event.TIMED_OUT, "Invalid buffer! (" + e.getMessage() + ")");
                 e.printStackTrace();
             }
+        }
+    }
+
+    private void read(SelectionKey key) throws IOException {
+        SocketChannel channel = (SocketChannel) key.channel();
+        ByteBuffer buffer = ByteBuffer.allocate(1001);
+        int numRead = -1;
+        try {
+            numRead = channel.read(buffer);
+        } catch (IOException e) {
+            //failed to read!
+        }
+
+        if (numRead == -1) {
+            this.clientDriver.onError();
+            this.clientDriver.onClose();
+
+            channel.close();
+            key.cancel();
+            return;
+        }
+
+        byte[] data = buffer.array();
+        int fufilled = 1001;
+        ByteBuffer nextBytes = ByteBuffer.allocate(1001);
+        while (channel.read(nextBytes) != 0) {
+            byte[] oldData = data;
+            int expender = nextBytes.flip().limit();
+            fufilled += expender;
+            byte[] temp = new byte[oldData.length + expender];
+            System.arraycopy(oldData, 0, temp, 0, oldData.length);
+            System.arraycopy(nextBytes.array(), 1, temp, oldData.length, expender - 1);
+            data = temp;
+            if (expender >= 1001) nextBytes = ByteBuffer.allocate(1001);
+        }
+
+        try {
+            this.clientDriver.onData(data, fufilled);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }

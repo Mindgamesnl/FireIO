@@ -31,7 +31,7 @@ public class SocketServer {
         Selector selector = Selector.open();
         serverChannel.register(selector, SelectionKey.OP_ACCEPT);
 
-        Thread executorThread = new SocketHandler(main, selector, this);
+        Thread executorThread = new SocketHandler(selector, this);
         executorThread.start();
     }
 

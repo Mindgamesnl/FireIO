@@ -6,7 +6,7 @@ import io.fire.core.server.FireIoServer;
 import io.fire.core.server.modules.http.interfaces.Middleware;
 import io.fire.core.server.modules.http.objects.*;
 import io.fire.core.server.modules.http.routes.FileStatusRoute;
-import io.fire.core.server.modules.socket.interfaces.NetworkDriver;
+import io.fire.core.common.io.socket.interfaces.NetworkDriver;
 import io.fire.core.server.modules.socket.objects.Connection;
 
 import java.io.IOException;

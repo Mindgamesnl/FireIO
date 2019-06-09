@@ -1,0 +1,1 @@
+sudo java -cp target/FireIO-Core-1.3.6.jar TestServer

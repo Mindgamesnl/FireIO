@@ -16,6 +16,7 @@ public enum  HttpRequestMethod {
     TRACE("TRACE"),
     OPTIONS("OPTIONS"),
     CONNECT("CONNECT"),
+    EMIT("EMIT"), // OUT-OF-SPEC! NOT FOR USE WITH HTTP BUT FIREIO
     PATCH("PATCH");
 
     @Getter private String method;
@@ -33,6 +34,7 @@ public enum  HttpRequestMethod {
     public static Boolean isHttp(String content) {
         for (HttpRequestMethod value : values()) {
             if (content.startsWith(value.toString())) {
+                if (value == EMIT) return false;
                 return true;
             }
         }

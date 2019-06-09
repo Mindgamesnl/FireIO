@@ -40,6 +40,10 @@ public class EventHandler {
                 .forEach(eventExecutor -> eventExecutor.run(client, string));
     }
 
+    public void triggerTextChannel(String channel, String string) {
+        triggerTextChannel(null, channel, string);
+    }
+
     public void triggerPacket(GenericClient client, Packet packet, String channel) {
         if (!executorMap.containsKey(packet.getClass().getName())) return;
         executorMap.get(packet.getClass().getName())
@@ -48,6 +52,10 @@ public class EventHandler {
                 .sorted(Comparator.comparing(eventExecutor -> eventExecutor.getEventPriority().getLevel()))
                 .collect(Collectors.toList())
                 .forEach(eventExecutor -> eventExecutor.run(client, packet));
+    }
+
+    public void triggerPacket(Packet packet, String channel) {
+        triggerPacket(null, packet, channel);
     }
 
     public EventExecutor<String> registerEvent(Event event) {
@@ -65,6 +73,10 @@ public class EventHandler {
                 .sorted(Comparator.comparing((EventExecutor eventExecutor) -> eventExecutor.getEventPriority().getLevel()))
                 .collect(Collectors.toList())
                 .forEach(eventExecutor -> eventExecutor.run(client, string));
+    }
+
+    public void triggerEvent(Event event, String string) {
+        triggerEvent(event, null, string);
     }
 
 }

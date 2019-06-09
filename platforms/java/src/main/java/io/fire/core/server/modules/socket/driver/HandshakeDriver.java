@@ -2,7 +2,7 @@ package io.fire.core.server.modules.socket.driver;
 
 import io.fire.core.common.io.http.enums.HttpRequestMethod;
 import io.fire.core.server.FireIoServer;
-import io.fire.core.server.modules.socket.interfaces.NetworkDriver;
+import io.fire.core.common.io.socket.interfaces.NetworkDriver;
 import io.fire.core.server.modules.socket.objects.Connection;
 
 import java.net.Socket;
@@ -37,7 +37,13 @@ public class HandshakeDriver implements NetworkDriver {
     @Override
     public void onData(byte[] data, Integer length) {
         String dataAsString = new String(data);
-        this.connection.setDriver(HttpRequestMethod.isHttp(dataAsString) ? new HttpDriver(socket, main, this.connection) : new SocketDriver());
+        this.connection.setDriver(HttpRequestMethod.isHttp(dataAsString)
+                ?
+                new HttpDriver(socket, main, this.connection)
+                :
+                new SocketDriver(socket, main, this.connection)
+        );
+        this.connection.onOpen();
         this.connection.getDriver().onData(data, length);
     }
 }

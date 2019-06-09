@@ -3,9 +3,11 @@ package io.fire.core.common.io.http.objects;
 import io.fire.core.common.io.http.enums.HttpContentType;
 import io.fire.core.common.io.http.enums.HttpRequestMethod;
 import io.fire.core.common.io.http.enums.HttpStatusCode;
+import io.fire.core.common.io.socket.interfaces.Packet;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.io.*;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -15,7 +17,8 @@ public class HttpContent {
 
     private String opcode = null;
     private Map<String, String> mappedData = new HashMap<>();
-    @Getter @Setter private String body = "";
+    private String body = "";
+    @Setter private Boolean isResponse = true;
 
     @Getter private String url;
     @Getter private HttpRequestMethod method;
@@ -47,7 +50,6 @@ public class HttpContent {
         if (segments.length == 2) body = segments[1];
     }
 
-
     /**
      * Creation constructor to setup a new HTTP header set by known values
      *
@@ -55,8 +57,8 @@ public class HttpContent {
      * @param statusCode
      */
     public HttpContent(HttpContentType mimeType, HttpStatusCode statusCode) {
-        opcode = "HTTP/1.1 " + statusCode.getCode() + " " + statusCode.getType();
         setMimeType(mimeType);
+        setOpcode(statusCode);
         setOrigin("");
         mappedData.put("Server", "Fire-IO by Mindgamesnl");
     }
@@ -73,11 +75,14 @@ public class HttpContent {
     /**
      * Set or change the OPCODE of a http interaction
      *
-     * @param mimeType
      * @param statusCode
      */
     public void setOpcode(HttpStatusCode statusCode) {
-        opcode = "HTTP/1.1 " + statusCode.getCode() + " " + statusCode.getType();
+        if (isResponse) {
+            opcode = "HTTP/1.1 " + statusCode.getCode() + " " + statusCode.getType();
+        } else {
+            opcode = "EMIT /socket HTTP/1.1";
+        }
     }
 
 
@@ -141,12 +146,65 @@ public class HttpContent {
 
 
     /**
+     * Write a object into the body
+     *
+     * @param packet packet
+     * @return instance
+     * @throws IOException
+     */
+    public HttpContent setBody(Object packet) throws IOException {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        ObjectOutputStream oos = new ObjectOutputStream(bos);
+        oos.writeObject(packet);
+        oos.flush();
+        setBody(bos.toString());
+        return this;
+    }
+
+    /**
+     * write a string into the body
+     *
+     * @param body bod
+     * @return
+     */
+    public HttpContent setBody(String body) {
+        this.body = body;
+        return this;
+    }
+
+    /**
+     * get the body as a string
+     *
+     * @return
+     */
+    public String getBodyAsString() {
+        return this.body;
+    }
+
+    /**
+     * read the body as a object
+     *
+     * @return object
+     * @throws IOException
+     * @throws ClassNotFoundException
+     */
+    public Object getBodyAsObject() throws IOException, ClassNotFoundException {
+        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(this.body.getBytes());
+        ObjectInputStream is = new ObjectInputStream(byteArrayInputStream);
+        return is.readObject();
+    }
+
+    /**
      * Generate the packet and allocate a ByteBuffer with the contents
      *
      * @return
      */
     public ByteBuffer getBuffer() {
         return ByteBuffer.wrap(toString().getBytes());
+    }
+
+    public byte[] getBytes() {
+        return toString().getBytes();
     }
 
 
