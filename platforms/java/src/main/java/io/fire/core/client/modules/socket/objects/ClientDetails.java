@@ -1,5 +1,6 @@
 package io.fire.core.client.modules.socket.objects;
 
+import io.fire.core.common.io.socket.interfaces.Packet;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -9,7 +10,7 @@ import java.util.UUID;
 
 @Data
 @NoArgsConstructor
-public class ClientDetails {
+public class ClientDetails extends Packet {
 
     private UUID uuid = null;
     private String password = null;

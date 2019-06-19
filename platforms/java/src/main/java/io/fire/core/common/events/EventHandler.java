@@ -44,7 +44,7 @@ public class EventHandler {
         triggerTextChannel(null, channel, string);
     }
 
-    public void triggerPacket(GenericClient client, Packet packet, String channel) {
+    public void triggerPacket(GenericClient client, String channel, Packet packet) {
         if (!executorMap.containsKey(packet.getClass().getName())) return;
         executorMap.get(packet.getClass().getName())
                 .stream()
@@ -55,7 +55,7 @@ public class EventHandler {
     }
 
     public void triggerPacket(Packet packet, String channel) {
-        triggerPacket(null, packet, channel);
+        triggerPacket(null, channel, packet);
     }
 
     public EventExecutor<String> registerEvent(Event event) {

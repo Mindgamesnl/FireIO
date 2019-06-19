@@ -6,7 +6,9 @@ import java.io.IOException;
 public class TestClient {
 
     public static void main(String[] args) {
-        FireIoClient server = new FireIoClient("localhost", 80);
+        FireIoClient client = new FireIoClient("localhost", 80);
+        client.setPassword("welkom01");
+        client.connect();
     }
 
 }

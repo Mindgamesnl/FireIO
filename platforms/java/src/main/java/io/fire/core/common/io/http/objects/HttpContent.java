@@ -30,6 +30,7 @@ public class HttpContent {
      * @param data
      */
     public HttpContent(String data) {
+        System.out.println(data);
         //now, the real part, parsing incoming packets
         String[] lines = data.split("\r\n");
         if (lines.length == 0) throw new Error("Invalid http headers (length = 0");
@@ -153,11 +154,15 @@ public class HttpContent {
      * @throws IOException
      */
     public HttpContent setBody(Object packet) throws IOException {
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        ObjectOutputStream oos = new ObjectOutputStream(bos);
-        oos.writeObject(packet);
-        oos.flush();
-        setBody(bos.toString());
+        try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
+            ObjectOutput out = new ObjectOutputStream(bos);
+            out.writeObject(packet);
+            out.flush();
+            setBody(new String(bos.toByteArray()));
+        } catch (IOException e) {
+            System.err.println("Failed to serialize packet.");
+            e.printStackTrace();
+        }
         return this;
     }
 
@@ -189,9 +194,18 @@ public class HttpContent {
      * @throws ClassNotFoundException
      */
     public Object getBodyAsObject() throws IOException, ClassNotFoundException {
-        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(this.body.getBytes());
-        ObjectInputStream is = new ObjectInputStream(byteArrayInputStream);
-        return is.readObject();
+        System.out.println("body is");
+        System.out.println(this.body);
+        System.out.println("Of gaat het hier al fout?");
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(this.body.getBytes());
+        try (ObjectInput in = new ObjectInputStream(inputStream)) {
+            System.out.println("en wat vind de reader er van?");
+            System.out.println(in.readUTF());
+            return in.readUTF();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new IOException("Error decoding packet");
+        }
     }
 
     /**

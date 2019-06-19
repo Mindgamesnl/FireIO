@@ -3,18 +3,12 @@ package io.fire.core.client.modules.socket.handlers;
 import io.fire.core.client.FireIoClient;
 import io.fire.core.client.modules.socket.drivers.ClientDriver;
 import io.fire.core.common.events.enums.Event;
-import io.fire.core.common.io.http.objects.HttpContent;
-import io.fire.core.common.io.socket.interfaces.Packager;
-import io.fire.core.common.io.socket.packets.EmptyPacket;
-import io.fire.core.server.modules.socket.objects.Connection;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
-import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.Iterator;
 import java.util.Set;

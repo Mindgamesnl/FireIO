@@ -17,4 +17,14 @@ public class FireIoClient {
         this.socketModule = new SocketModule(this);
     }
 
+    public FireIoClient setPassword(String password) {
+        socketModule.getClientDetails().setPassword(password);
+        return this;
+    }
+
+    public FireIoClient connect() {
+        socketModule.startConnection();
+        return this;
+    }
+
 }

@@ -15,7 +15,6 @@ public class SocketModule {
 
     public SocketModule(FireIoClient client) {
         this.client = client;
-        startConnection();
     }
 
     public void startConnection() {
