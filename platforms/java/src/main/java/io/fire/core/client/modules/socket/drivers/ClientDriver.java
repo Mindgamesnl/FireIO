@@ -66,7 +66,6 @@ public class ClientDriver implements NetworkDriver {
                 // check if packet marks op_allow_write
                 if (packager.getOpHandle() == OpHandle.HANDLED_PACKET) {
                     ClusterPacket clusterPacket = (ClusterPacket) packager.getPayloadAsObject();
-                    System.out.println(packager);
                     for (Packager missed : clusterPacket.getCluster()) {
                         handle(missed, -1);
                     }
@@ -122,7 +121,6 @@ public class ClientDriver implements NetworkDriver {
 
     public void send(Packager packager) throws IOException {
         if (isHandlingAPacket) {
-            System.out.println("Canceled since i am handling a packet!");
             clusterQueue.add(packager);
             return;
         }
@@ -130,10 +128,8 @@ public class ClientDriver implements NetworkDriver {
         if (packetQueue.size() == 0 && packetsWithoutConfirmation == 0) {
             packetsWithoutConfirmation++;
             this.socket.getChannel().write(packager.getBuffer());
-            System.out.println("Sending packet");
         } else {
             this.packetQueue.add(packager);
-            System.out.println("Queuing packet");
         }
     }
 

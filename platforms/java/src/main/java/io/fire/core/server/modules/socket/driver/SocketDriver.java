@@ -67,7 +67,6 @@ public class SocketDriver implements NetworkDriver {
                     // howmany did we miss?
                     ClusterPacket clusterPacket = (ClusterPacket) packager.getPayloadAsObject();
                     for (Packager missed : clusterPacket.getCluster()) {
-                        System.out.println("it has a missed packet, lets handle it");
                         handle(missed, -1);
                     }
 
@@ -128,7 +127,6 @@ public class SocketDriver implements NetworkDriver {
 
     public void send(Packager packager) throws IOException {
         if (isHandlingAPacket) {
-            System.out.println("Canceled since i am handling a packet!");
             clusterQueue.add(packager);
             return;
         }

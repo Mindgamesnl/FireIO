@@ -3,6 +3,8 @@ import io.fire.core.common.events.enums.EventPriority;
 import io.fire.core.server.FireIoServer;
 
 import java.io.IOException;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class TestServer {
 
@@ -32,6 +34,13 @@ public class TestServer {
             server.getEventHandler().registerTextChannel("pong", EventPriority.HIGH).onExecute(message -> {
                 System.out.println("Event pong: " + message);
             });
+
+            new Timer().schedule(new TimerTask() {
+                @Override
+                public void run() {
+
+                }
+            }, 1000);
         } catch (IOException e) {
             e.printStackTrace();
         }
