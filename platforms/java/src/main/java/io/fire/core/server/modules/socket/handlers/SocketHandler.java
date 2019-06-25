@@ -88,11 +88,12 @@ public class SocketHandler extends Thread {
 
         Connection connection = socketServer.getOrCreateConnection(channel.socket());
 
+
         int fufilled = 1001;
         ByteBuffer nextBytes = ByteBuffer.allocate(1001);
         while (channel.read(nextBytes) != 0) {
             byte[] oldData = data;
-            int expender = nextBytes.flip().limit();
+            int expender = nextBytes.limit();
             fufilled += expender;
             byte[] temp = new byte[oldData.length + expender];
             System.arraycopy(oldData, 0, temp, 0, oldData.length);
@@ -109,4 +110,5 @@ public class SocketHandler extends Thread {
             e.printStackTrace();
         }
     }
+
 }

@@ -21,7 +21,7 @@ public class HandshakeDriver implements NetworkDriver {
 
     @Override
     public void onError() {
-
+        this.connection.getDriver().onError();
     }
 
     @Override

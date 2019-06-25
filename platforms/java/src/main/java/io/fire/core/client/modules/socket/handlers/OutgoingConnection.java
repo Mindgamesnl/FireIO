@@ -101,7 +101,7 @@ public class OutgoingConnection implements Runnable {
         ByteBuffer nextBytes = ByteBuffer.allocate(1001);
         while (channel.read(nextBytes) != 0) {
             byte[] oldData = data;
-            int expender = nextBytes.flip().limit();
+            int expender = nextBytes.limit();
             fufilled += expender;
             byte[] temp = new byte[oldData.length + expender];
             System.arraycopy(oldData, 0, temp, 0, oldData.length);

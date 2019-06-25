@@ -40,6 +40,15 @@ public class Packager extends HttpContent {
         setBody(packet);
     }
 
+    public Packager() throws IOException {
+        super(HttpContentType.EMIT, HttpStatusCode.C_100);
+        setIsResponse(false);
+        setOpcode(HttpStatusCode.C_100);
+        setHeader("f-has-packet", "no");
+        setHeader("f-is-internal", "yes");
+        setHeader("f-has-string", "no");
+    }
+
     public Packager(String fromPacket) {
         super(fromPacket);
     }

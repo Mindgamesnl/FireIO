@@ -45,7 +45,6 @@ public class SocketServer {
     }
 
     public void removeConnection(SocketAddress host) {
-        System.out.println("remove");
         connectionMap.remove(host.toString());
     }
 
