@@ -3,6 +3,7 @@ package io.fire.core.server.modules.socket;
 import io.fire.core.server.FireIoServer;
 import io.fire.core.server.modules.socket.handlers.SocketHandler;
 import io.fire.core.server.modules.socket.objects.Connection;
+import lombok.Setter;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -17,6 +18,7 @@ import java.util.Map;
 public class SocketServer {
 
     private Map<String, Connection> connectionMap = new HashMap<>();
+    @Setter private String password = null;
 
     private FireIoServer main;
 
@@ -46,6 +48,11 @@ public class SocketServer {
 
     public void removeConnection(SocketAddress host) {
         connectionMap.remove(host.toString());
+    }
+
+    public Boolean validatePassword(String check) {
+        if (this.password == null) return true;
+        return this.password.equals(check);
     }
 
 }

@@ -3,6 +3,7 @@ package io.fire.core.client.modules.socket.handlers;
 import io.fire.core.client.FireIoClient;
 import io.fire.core.client.modules.socket.drivers.ClientDriver;
 import io.fire.core.common.events.enums.Event;
+import lombok.Getter;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -19,7 +20,7 @@ public class OutgoingConnection implements Runnable {
 
     private Boolean isConnected;
     private SocketChannel socketChannel;
-    private ClientDriver clientDriver;
+    @Getter private ClientDriver clientDriver;
     private Thread socketListener;
     private Selector selector;
 

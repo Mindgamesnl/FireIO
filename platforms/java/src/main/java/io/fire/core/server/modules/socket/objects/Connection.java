@@ -21,17 +21,14 @@ public class Connection {
     }
 
     public void onOpen() {
-        System.out.println("open");
         driver.onOpen();
     }
 
     public void onClose() {
-        System.out.println("Closed");
         driver.onClose();
     }
 
     public void onError() {
-        System.out.println("error");
         driver.onError();
     }
 

@@ -3,7 +3,6 @@ package io.fire.core.common.io.http.objects;
 import io.fire.core.common.io.http.enums.HttpContentType;
 import io.fire.core.common.io.http.enums.HttpRequestMethod;
 import io.fire.core.common.io.http.enums.HttpStatusCode;
-import io.fire.core.common.io.socket.interfaces.Packet;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -48,7 +47,11 @@ public class HttpContent {
             if (plot.length == 2) mappedData.put(plot[0], plot[1].replaceFirst(" ",""));
         }
         String[] segments = data.split("\r\n\r\n");
-        if (segments.length == 2) body = segments[1];
+        if (segments.length == 2) {
+            body = segments[1];
+        } else {
+            body = data.replace(segments[0] + "\r\n\r\n", "");
+        }
 
     }
 
@@ -101,8 +104,7 @@ public class HttpContent {
      * export the class as a usable http header set or packet that can be interpreted by web browsers
      * @return
      */
-    @Override
-    public String toString() {
+    public String toStringStream() {
         StringBuilder out = new StringBuilder();
         if (opcode != null) out.append(opcode).append("\r\n");
         mappedData.forEach((k, v) -> out.append(k).append(": ").append(v).append("\r\n"));
@@ -199,11 +201,11 @@ public class HttpContent {
      * @return
      */
     public ByteBuffer getBuffer() {
-        return ByteBuffer.wrap(toString().getBytes());
+        return ByteBuffer.wrap(toStringStream().getBytes());
     }
 
     public byte[] getBytes() {
-        return toString().getBytes();
+        return toStringStream().getBytes();
     }
 
 

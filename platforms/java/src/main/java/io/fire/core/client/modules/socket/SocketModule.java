@@ -11,7 +11,7 @@ public class SocketModule {
 
     private FireIoClient client;
     @Getter private ClientDetails clientDetails = new ClientDetails();
-    private OutgoingConnection connection;
+    @Getter private OutgoingConnection connection;
 
     public SocketModule(FireIoClient client) {
         this.client = client;

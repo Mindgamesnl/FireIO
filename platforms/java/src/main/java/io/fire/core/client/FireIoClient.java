@@ -5,6 +5,8 @@ import io.fire.core.client.modules.socket.objects.Host;
 import io.fire.core.common.events.EventHandler;
 import lombok.Getter;
 
+import java.io.IOException;
+
 public class FireIoClient {
 
     @Getter private Host host;
@@ -24,6 +26,11 @@ public class FireIoClient {
 
     public FireIoClient connect() {
         socketModule.startConnection();
+        return this;
+    }
+
+    public FireIoClient send(String channel, String message) throws IOException {
+        socketModule.getConnection().getClientDriver().send(channel, message);
         return this;
     }
 

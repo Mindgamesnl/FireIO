@@ -31,6 +31,6 @@ public class Client implements GenericClient {
     @Override
     public UUID getId() {
         //TODO: implement
-        return null;
+        return socketDriver.getClientDetails().getUuid();
     }
 }

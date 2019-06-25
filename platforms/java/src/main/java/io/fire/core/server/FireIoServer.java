@@ -21,4 +21,9 @@ public class FireIoServer {
         this.socketServer = new SocketServer(this, port);
         System.out.println("[Fire-IO] Attaching to port " + port);
     }
+
+    public FireIoServer setPassword(String password) {
+        this.socketServer.setPassword(password);
+        return this;
+    }
 }
