@@ -8,12 +8,10 @@ import io.fire.core.common.io.socket.interfaces.Packager;
 import io.fire.core.common.io.socket.interfaces.Packet;
 
 import io.fire.core.common.io.socket.packets.ClusterPacket;
-import lombok.AllArgsConstructor;
 
 import java.io.IOException;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -24,7 +22,6 @@ public class ClientDriver implements NetworkDriver {
     private Socket socket;
     private Queue<Packager> packetQueue = new ConcurrentLinkedQueue<>();
     private int packetsWithoutConfirmation = 0;
-    private Boolean isReady = false;
     private Boolean isHandlingAPacket = false;
     private List<Packager> clusterQueue = new ArrayList<>();
 
@@ -33,11 +30,19 @@ public class ClientDriver implements NetworkDriver {
         this.socket = socket;
     }
 
+    /**
+     * on error method
+     * gets called when a internal error occurs with the networking
+     */
     @Override
     public void onError() {
 
     }
 
+    /**
+     * on channel open method
+     * gets called when the socket is imitated and open
+     */
     @Override
     public void onOpen() {
         // send authentication packet
@@ -48,17 +53,30 @@ public class ClientDriver implements NetworkDriver {
         }
     }
 
+    /**
+     * on channel close
+     * gets called when the pipeline gets closed, no matter from what end
+     */
     @Override
     public void onClose() {
         fireIoClient.getEventHandler().triggerEvent(Event.DISCONNECT, "Connection closed");
     }
 
+    /**
+     * on data method
+     * gets called when binary data gets received over the pipe
+     * @param data payload in bytes
+     */
     @Override
-    public void onData(byte[] data, Integer length) {
-        handle(new Packager(new String(data)), length);
+    public void onData(byte[] data) {
+        handle(new Packager(new String(data)));
     }
 
-    private void handle(Packager packager, Integer length) {
+    /**
+     * handle decoded packet from a to z
+     * @param packager decoded packet
+     */
+    private void handle(Packager packager) {
         try {
             // decide what packet type and what to do with it
             if (packager.isInternal()) {
@@ -67,7 +85,7 @@ public class ClientDriver implements NetworkDriver {
                 if (packager.getOpHandle() == OpHandle.HANDLED_PACKET) {
                     ClusterPacket clusterPacket = (ClusterPacket) packager.getPayloadAsObject();
                     for (Packager missed : clusterPacket.getCluster()) {
-                        handle(missed, -1);
+                        handle(missed);
                     }
 
                     if (packetsWithoutConfirmation != 0) packetsWithoutConfirmation--;
@@ -83,7 +101,7 @@ public class ClientDriver implements NetworkDriver {
                     this.packetQueue.clear();
                     fireIoClient.getEventHandler().triggerEvent(Event.CONNECT, "Open and ready");
                     this.socket.getChannel().write(new Packager(OpHandle.HANDLED_PACKET).setHeader("f-has-packet", "yes").setBody(new ClusterPacket(clusterQueue)).getBuffer());
-                    isReady = true;
+                    Boolean isReady = true;
                     return;
                 }
 
@@ -119,7 +137,13 @@ public class ClientDriver implements NetworkDriver {
         }
     }
 
-    public void send(Packager packager) throws IOException {
+    /**
+     * Propose a packet to be send.
+     * May not be send instantly since it can be queued
+     * @param packager the content that is requested to send
+     * @throws IOException pipe failure
+     */
+    private void send(Packager packager) throws IOException {
         if (isHandlingAPacket) {
             clusterQueue.add(packager);
             return;
@@ -133,11 +157,25 @@ public class ClientDriver implements NetworkDriver {
         }
     }
 
+    /**
+     * Propose a packet to be send to a channel event.
+     * May not be triggered instantly since it can be queued
+     * @param channel channel name
+     * @param packet packet payload
+     * @throws IOException pipe error
+     */
     public void send(String channel, Packet packet) throws IOException {
         send(new Packager(channel, packet));
     }
 
-    public void send(String channel, String packet) throws IOException {
-        send(new Packager(channel, packet));
+    /**
+     * Propose a message to be send to a channel event.
+     * May not be triggered instantly since it can be queued
+     * @param channel channel name
+     * @param message the text message
+     * @throws IOException pipe error
+     */
+    public void send(String channel, String message) throws IOException {
+        send(new Packager(channel, message));
     }
 }

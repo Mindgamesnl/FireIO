@@ -23,7 +23,7 @@ public class SocketDriver implements NetworkDriver {
     private Socket socket;
     private FireIoServer main;
     private Connection connection;
-    private GenericClient genericClient;
+    @Getter private GenericClient genericClient;
     @Getter private ClientDetails clientDetails;
     private Queue<Packager> packetQueue = new ConcurrentLinkedQueue<>();
     private int packetsWithoutConfirmation = 0;
@@ -50,6 +50,7 @@ public class SocketDriver implements NetworkDriver {
     @Override
     public void onClose() {
         main.getEventHandler().triggerEvent(Event.DISCONNECT, genericClient, "Client disconnected");
+        main.getSocketServer().getClientManager().unlink(this);
     }
 
     @Override
@@ -92,6 +93,9 @@ public class SocketDriver implements NetworkDriver {
                         isReady = true;
                         this.clientDetails.setUuid(UUID.randomUUID());
                         this.genericClient = new Client(this);
+
+                        main.getSocketServer().getClientManager().register(this);
+
                         //TODO : this is probably the problem
                         this.socket.getChannel().write(new Packager(OpHandle.READY).getBuffer());
                         main.getEventHandler().triggerEvent(Event.CONNECT, genericClient, "Authenticated and connected");

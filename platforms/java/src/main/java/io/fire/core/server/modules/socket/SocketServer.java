@@ -2,7 +2,9 @@ package io.fire.core.server.modules.socket;
 
 import io.fire.core.server.FireIoServer;
 import io.fire.core.server.modules.socket.handlers.SocketHandler;
+import io.fire.core.server.modules.socket.objects.ClientManager;
 import io.fire.core.server.modules.socket.objects.Connection;
+import lombok.Getter;
 import lombok.Setter;
 
 import java.io.IOException;
@@ -18,6 +20,7 @@ import java.util.Map;
 public class SocketServer {
 
     private Map<String, Connection> connectionMap = new HashMap<>();
+    @Getter private ClientManager clientManager = new ClientManager();
     @Setter private String password = null;
 
     private FireIoServer main;

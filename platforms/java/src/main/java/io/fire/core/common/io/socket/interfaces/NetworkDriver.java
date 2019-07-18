@@ -5,6 +5,6 @@ public interface NetworkDriver {
     void onError();
     void onOpen();
     void onClose();
-    void onData(byte[] data, Integer length);
+    void onData(byte[] data);
 
 }
